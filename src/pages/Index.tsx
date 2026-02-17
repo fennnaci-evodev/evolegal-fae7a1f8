@@ -1,32 +1,36 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Scale, PlayCircle, BookOpen, MessageCircle, Shield, Zap, Globe, ArrowRight, Check } from "lucide-react";
+import { Navbar } from "@/components/Navbar";
+import { Footer } from "@/components/Footer";
+import { ParticleBackground } from "@/components/ParticleBackground";
 import { DisclaimerModal } from "@/components/DisclaimerModal";
+import { EvoLogo } from "@/components/EvoLogo";
+import { ArrowRight, PlayCircle, BookOpen, MessageCircle, Shield, Zap, Globe, Check, ChevronRight } from "lucide-react";
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 30 },
-  visible: (i: number) => ({
-    opacity: 1, y: 0,
-    transition: { delay: i * 0.1, duration: 0.6 }
-  }),
-};
-
+import { fadeUp } from "@/lib/animations";
 const offerings = [
-  { icon: PlayCircle, title: "Video Lectures", desc: "Pre-recorded explanations on US & UK legal topics by subject matter experts." },
-  { icon: BookOpen, title: "Guides & Templates", desc: "Step-by-step guides and generic templates with full disclaimers." },
-  { icon: MessageCircle, title: "Expert Consultations", desc: "General Q&A with our Expert Managers for informational guidance." },
+  { icon: PlayCircle, title: "Video Lectures", desc: "Expert-led explanations on key US & UK legal topics, broken down for real understanding." },
+  { icon: BookOpen, title: "Guides & Resources", desc: "Step-by-step guides, generic templates, and preparation toolkits with full context." },
+  { icon: MessageCircle, title: "Expert Consultations", desc: "General Q&A with our Expert Managers — fast, affordable, informational support." },
 ];
 
 const whyUs = [
-  { icon: Zap, title: "Instant Access", desc: "No waiting. Get resources immediately." },
-  { icon: Shield, title: "Transparent Pricing", desc: "No hidden fees, no surprise charges." },
-  { icon: Globe, title: "US & UK Coverage", desc: "Dual-jurisdiction general info — NY focus + English law." },
+  { icon: Zap, title: "Instant Access", desc: "No waiting rooms. Get resources the moment you need them." },
+  { icon: Shield, title: "Fully Transparent", desc: "Clear pricing, no hidden fees, easy cancel anytime." },
+  { icon: Globe, title: "US & UK Focus", desc: "Unique dual-jurisdiction coverage — perfect for NY users navigating UK matters." },
 ];
 
 const topics = [
-  "Tenant-Landlord (NY)", "Family Law Basics (NY)", "Tenant Rights (UK)", "Family Proceedings (UK)",
-  "Lease Agreements", "Eviction Processes", "Child Custody Overview", "Divorce Procedures",
+  "Tenant Rights (NY)", "Landlord Obligations (NY)", "UK Tenancy Law", "Family Court (NY)",
+  "UK Divorce Process", "Lease Agreements", "Child Custody Overview", "Eviction Procedures",
+  "Security Deposits", "Mediation Basics",
+];
+
+const sampleContent = [
+  { title: "5 Key Differences: NY vs UK Tenant Rights", type: "Article", duration: "4 min read", free: true },
+  { title: "What Happens in a NY Family Court Hearing?", type: "Video", duration: "12 min", free: true },
+  { title: "Understanding Your UK Tenancy Agreement", type: "Guide", duration: "6 min read", free: true },
 ];
 
 const plans = [
@@ -34,147 +38,128 @@ const plans = [
     name: "Free",
     price: "$0",
     period: "",
-    features: ["Limited video access", "Basic guides", "Community resources"],
-    cta: "Get Started",
+    desc: "Explore the basics",
+    features: ["Unlimited articles", "3 videos/month", "1 short chat session/month", "Community resources"],
+    cta: "Start Free",
     highlight: false,
   },
   {
     name: "Basic",
     price: "$24",
     period: "/mo",
-    features: ["All videos & guides", "AI Expert Manager chat", "Topic bookmarks", "Email support"],
-    cta: "Subscribe Now",
+    desc: "Essential access",
+    features: ["Unlimited videos & articles", "3 request submissions/month", "Basic Client Portal", "Email support", "Generic templates"],
+    cta: "Choose Basic",
     highlight: true,
   },
   {
     name: "Pro",
     price: "$59",
     period: "/mo",
-    features: ["Everything in Basic", "Unlimited access", "Human Expert consultations", "Priority scheduling", "Downloadable resources"],
+    desc: "Full power",
+    features: ["Everything in Basic", "Unlimited submissions", "Priority 24h turnaround", "Deep-dive exclusive content", "Full Case File portal", "Human Expert consultations"],
     cta: "Go Pro",
     highlight: false,
+    annual: "$499/year (save 20%)",
   },
 ];
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-background overflow-x-hidden">
+    <div className="min-h-screen bg-background overflow-x-hidden relative">
+      <ParticleBackground />
       <DisclaimerModal />
-
-      {/* Nav */}
-      <nav className="fixed top-0 left-0 right-0 z-40 glass-strong border-b border-border/30">
-        <div className="container mx-auto flex items-center justify-between py-4 px-6">
-          <Link to="/" className="flex items-center gap-2">
-            <Scale className="h-6 w-6 text-primary" />
-            <span className="text-xl font-bold text-gradient">EvoLegal</span>
-          </Link>
-          <div className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
-            <a href="#offerings" className="hover:text-foreground transition-colors">Offerings</a>
-            <a href="#topics" className="hover:text-foreground transition-colors">Topics</a>
-            <a href="#pricing" className="hover:text-foreground transition-colors">Pricing</a>
-          </div>
-          <div className="flex items-center gap-3">
-            <Link to="/auth">
-              <Button variant="ghost" size="sm">Sign In</Button>
-            </Link>
-            <Link to="/auth">
-              <Button size="sm">Get Started</Button>
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <Navbar />
 
       {/* Hero */}
-      <section className="relative pt-32 pb-24 px-6">
-        {/* Background effects */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-20 left-1/4 w-96 h-96 rounded-full bg-primary/5 blur-3xl" />
-          <div className="absolute bottom-20 right-1/4 w-80 h-80 rounded-full bg-accent/5 blur-3xl" />
-        </div>
-
+      <section className="relative pt-28 pb-20 md:pt-36 md:pb-28 px-6">
         <div className="container mx-auto text-center relative z-10 max-w-4xl">
-          <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
-            <span className="inline-block px-4 py-1.5 rounded-full text-xs font-medium border border-primary/30 text-primary mb-6 glass">
-              General Information Only — Not Legal Advice
-            </span>
+          <motion.div
+            className="relative mb-8"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1 }}
+          >
+            <EvoLogo size="hero" animate showText={false} />
           </motion.div>
 
           <motion.h1
-            className="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight mb-6"
+            className="text-3xl md:text-5xl lg:text-6xl font-display font-bold leading-tight mb-5"
             initial="hidden" animate="visible" variants={fadeUp} custom={1}
           >
-            <span className="text-gradient">EvoLegal</span>
-            <br />
-            <span className="text-foreground">Clear Insights on</span>
-            <br />
-            <span className="text-foreground">US & English Law</span>
+            Clear Insights on{" "}
+            <span className="text-gradient">US & English Law</span>
           </motion.h1>
 
           <motion.p
-            className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 font-body"
+            className="text-base md:text-lg text-muted-foreground max-w-xl mx-auto mb-8 leading-relaxed"
             initial="hidden" animate="visible" variants={fadeUp} custom={2}
           >
-            General explanations, video lectures & exam prep resources.
-            <br className="hidden md:block" />
-            Affordable, transparent, and instantly accessible.
+            General education, video lectures & preparation resources — accessible, transparent, and built for real understanding.
           </motion.p>
 
           <motion.div
-            className="flex flex-col sm:flex-row gap-4 justify-center"
+            className="flex flex-col sm:flex-row gap-3 justify-center mb-6"
             initial="hidden" animate="visible" variants={fadeUp} custom={3}
           >
             <Link to="/auth">
-              <Button size="lg" className="glow-cyan text-base px-8">
-                Start Learning <ArrowRight className="ml-2 h-4 w-4" />
+              <Button variant="hero" size="xl">
+                Get Started Free <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
-            <a href="#pricing">
-              <Button variant="outline" size="lg" className="text-base px-8">
-                View Pricing
+            <Link to="/how-it-works">
+              <Button variant="glass" size="xl">
+                See How It Works
               </Button>
-            </a>
+            </Link>
           </motion.div>
+
+          <motion.p
+            className="text-xs text-muted-foreground/40"
+            initial="hidden" animate="visible" variants={fadeUp} custom={4}
+          >
+            General informational resources only — not legal advice.
+          </motion.p>
         </div>
       </section>
 
-      <div className="neon-line container mx-auto" />
+      <div className="neon-line container mx-auto relative z-10" />
 
-      {/* Offerings */}
-      <section id="offerings" className="py-24 px-6">
+      {/* What We Offer */}
+      <section id="offerings" className="py-20 md:py-28 px-6 relative z-10">
         <div className="container mx-auto max-w-6xl">
-          <motion.div className="text-center mb-16" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">What You Get</h2>
-            <p className="text-muted-foreground max-w-xl mx-auto font-body">Educational resources to help you understand legal processes and terminology.</p>
+          <motion.div className="text-center mb-14" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
+            <h2 className="text-3xl md:text-4xl font-display font-bold mb-3">What We Offer</h2>
+            <p className="text-muted-foreground max-w-md mx-auto">Resources to help you understand legal processes, terminology, and your options.</p>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-3 gap-5">
             {offerings.map((item, i) => (
               <motion.div
                 key={item.title}
-                className="glass rounded-xl p-8 hover:border-primary/30 transition-all group"
+                className="glass-card p-8"
                 initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i + 1}
               >
-                <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center mb-5 group-hover:glow-cyan transition-all">
+                <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center mb-5">
                   <item.icon className="h-6 w-6 text-primary" />
                 </div>
-                <h3 className="text-lg font-semibold mb-3">{item.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed font-body">{item.desc}</p>
+                <h3 className="text-lg font-display font-semibold mb-3">{item.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Why Us */}
-      <section className="py-24 px-6 relative">
-        <div className="absolute inset-0 bg-muted/30" />
-        <div className="container mx-auto max-w-6xl relative z-10">
-          <motion.div className="text-center mb-16" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Why EvoLegal</h2>
-            <p className="text-muted-foreground max-w-xl mx-auto font-body">Simpler, faster, and more affordable than traditional platforms.</p>
+      {/* Why EvoLegal */}
+      <section className="py-20 md:py-28 px-6 relative z-10">
+        <div className="container mx-auto max-w-6xl">
+          <motion.div className="text-center mb-14" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
+            <h2 className="text-3xl md:text-4xl font-display font-bold mb-3">Why EvoLegal</h2>
+            <p className="text-muted-foreground max-w-md mx-auto">Simpler, faster, and more affordable than traditional platforms.</p>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-3 gap-5">
             {whyUs.map((item, i) => (
               <motion.div
                 key={item.title}
@@ -184,8 +169,8 @@ const Index = () => {
                 <div className="h-14 w-14 rounded-2xl bg-accent/10 flex items-center justify-center mx-auto mb-5">
                   <item.icon className="h-7 w-7 text-accent" />
                 </div>
-                <h3 className="text-lg font-semibold mb-3">{item.title}</h3>
-                <p className="text-sm text-muted-foreground font-body">{item.desc}</p>
+                <h3 className="text-lg font-display font-semibold mb-2">{item.title}</h3>
+                <p className="text-sm text-muted-foreground">{item.desc}</p>
               </motion.div>
             ))}
           </div>
@@ -193,19 +178,19 @@ const Index = () => {
       </section>
 
       {/* Topics */}
-      <section id="topics" className="py-24 px-6">
+      <section className="py-20 px-6 relative z-10">
         <div className="container mx-auto max-w-4xl">
-          <motion.div className="text-center mb-12" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Topics Covered</h2>
-            <p className="text-muted-foreground font-body">Starting with tenant-landlord and family law — expanding soon.</p>
+          <motion.div className="text-center mb-10" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
+            <h2 className="text-3xl md:text-4xl font-display font-bold mb-3">Topics We Cover</h2>
+            <p className="text-muted-foreground">Starting with Tenant-Landlord & Family Law — expanding to Insurance, Injury & more.</p>
           </motion.div>
 
           <motion.div
-            className="flex flex-wrap justify-center gap-3"
+            className="flex flex-wrap justify-center gap-2.5"
             initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={1}
           >
             {topics.map((topic) => (
-              <span key={topic} className="glass rounded-full px-5 py-2.5 text-sm font-medium text-foreground hover:border-primary/40 transition-colors cursor-default">
+              <span key={topic} className="glass rounded-full px-4 py-2 text-sm text-foreground/80 cursor-default hover:border-primary/20 transition-all duration-300">
                 {topic}
               </span>
             ))}
@@ -213,25 +198,52 @@ const Index = () => {
         </div>
       </section>
 
-      <div className="neon-line container mx-auto" />
-
-      {/* Pricing */}
-      <section id="pricing" className="py-24 px-6">
-        <div className="container mx-auto max-w-5xl">
-          <motion.div className="text-center mb-16" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Transparent Pricing</h2>
-            <p className="text-muted-foreground font-body">No hidden fees. Cancel anytime. Upgrade or downgrade freely.</p>
+      {/* Sample Content */}
+      <section className="py-20 px-6 relative z-10">
+        <div className="container mx-auto max-w-4xl">
+          <motion.div className="text-center mb-10" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
+            <h2 className="text-3xl md:text-4xl font-display font-bold mb-3">Free Samples</h2>
+            <p className="text-muted-foreground">Try before you commit. Explore our free content.</p>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="space-y-3">
+            {sampleContent.map((item, i) => (
+              <motion.div
+                key={item.title}
+                className="glass-card p-5 flex items-center justify-between cursor-pointer"
+                initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i + 1}
+              >
+                <div className="flex items-center gap-4">
+                  <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                    {item.type === "Video" ? <PlayCircle className="h-5 w-5 text-primary" /> : <BookOpen className="h-5 w-5 text-primary" />}
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-medium">{item.title}</h3>
+                    <p className="text-xs text-muted-foreground">{item.type} · {item.duration}</p>
+                  </div>
+                </div>
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <div className="neon-line container mx-auto relative z-10" />
+
+      {/* Pricing */}
+      <section id="pricing" className="py-20 md:py-28 px-6 relative z-10">
+        <div className="container mx-auto max-w-5xl">
+          <motion.div className="text-center mb-14" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
+            <h2 className="text-3xl md:text-4xl font-display font-bold mb-3">Transparent Pricing</h2>
+            <p className="text-muted-foreground">No hidden fees. Cancel anytime. Upgrade or downgrade freely.</p>
+          </motion.div>
+
+          <div className="grid md:grid-cols-3 gap-5">
             {plans.map((plan, i) => (
               <motion.div
                 key={plan.name}
-                className={`rounded-xl p-8 flex flex-col ${
-                  plan.highlight
-                    ? "glass-strong border-primary/40 glow-cyan relative"
-                    : "glass"
-                }`}
+                className={`glass-card p-7 flex flex-col relative ${plan.highlight ? "gradient-border glow-cyan" : ""}`}
                 initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i + 1}
               >
                 {plan.highlight && (
@@ -239,25 +251,24 @@ const Index = () => {
                     Most Popular
                   </span>
                 )}
-                <h3 className="text-xl font-bold mb-2">{plan.name}</h3>
-                <div className="mb-6">
-                  <span className="text-4xl font-bold">{plan.price}</span>
+                <h3 className="text-lg font-display font-bold mb-1">{plan.name}</h3>
+                <p className="text-xs text-muted-foreground mb-4">{plan.desc}</p>
+                <div className="mb-1">
+                  <span className="text-4xl font-display font-bold">{plan.price}</span>
                   <span className="text-muted-foreground text-sm">{plan.period}</span>
                 </div>
-                <ul className="space-y-3 flex-1 mb-8">
+                {plan.annual && <p className="text-xs text-primary mb-4">{plan.annual}</p>}
+                {!plan.annual && <div className="mb-4" />}
+                <ul className="space-y-2.5 flex-1 mb-6">
                   {plan.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2 text-sm font-body">
+                    <li key={f} className="flex items-start gap-2 text-sm">
                       <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
                       <span className="text-muted-foreground">{f}</span>
                     </li>
                   ))}
                 </ul>
                 <Link to="/auth">
-                  <Button
-                    className="w-full"
-                    variant={plan.highlight ? "default" : "outline"}
-                    size="lg"
-                  >
+                  <Button className="w-full" variant={plan.highlight ? "hero" : "outline"} size="lg">
                     {plan.cta}
                   </Button>
                 </Link>
@@ -267,21 +278,22 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-border/30 py-12 px-6">
-        <div className="container mx-auto max-w-6xl">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-2">
-              <Scale className="h-5 w-5 text-primary" />
-              <span className="font-bold text-gradient">EvoLegal</span>
-            </div>
-            <p className="text-xs text-muted-foreground text-center max-w-md font-body">
-              EvoLegal provides general informational and educational resources only. Not legal advice, representation, or a law firm. Always consult a licensed professional.
-            </p>
-            <p className="text-xs text-muted-foreground">© 2026 EvoLegal</p>
-          </div>
+      {/* CTA */}
+      <section className="py-20 px-6 relative z-10">
+        <div className="container mx-auto max-w-2xl text-center">
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
+            <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">Ready to Understand Your Rights?</h2>
+            <p className="text-muted-foreground mb-8">Join thousands gaining clarity on legal processes — start free today.</p>
+            <Link to="/auth">
+              <Button variant="hero" size="xl">
+                Get Started Free <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </Link>
+          </motion.div>
         </div>
-      </footer>
+      </section>
+
+      <Footer />
     </div>
   );
 };

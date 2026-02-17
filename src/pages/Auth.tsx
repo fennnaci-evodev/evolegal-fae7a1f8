@@ -4,14 +4,14 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Scale, Mail, Lock, User } from "lucide-react";
+import { EvoLogo } from "@/components/EvoLogo";
+import { Mail, Lock, User } from "lucide-react";
 
 const Auth = () => {
   const [isSignUp, setIsSignUp] = useState(false);
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 relative">
-      {/* Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/3 w-96 h-96 rounded-full bg-primary/5 blur-3xl" />
         <div className="absolute bottom-1/4 right-1/3 w-80 h-80 rounded-full bg-accent/5 blur-3xl" />
@@ -20,17 +20,16 @@ const Auth = () => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="glass-strong rounded-2xl p-8 w-full max-w-md relative z-10"
+        className="glass-strong w-full max-w-md p-8 relative z-10"
       >
         <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center gap-2 mb-6">
-            <Scale className="h-7 w-7 text-primary" />
-            <span className="text-2xl font-bold text-gradient">EvoLegal</span>
+          <Link to="/" className="inline-block mb-6">
+            <EvoLogo size="sm" animate={false} showText />
           </Link>
-          <h1 className="text-xl font-semibold">
+          <h1 className="text-xl font-display font-semibold">
             {isSignUp ? "Create your account" : "Welcome back"}
           </h1>
-          <p className="text-sm text-muted-foreground mt-1 font-body">
+          <p className="text-sm text-muted-foreground mt-1">
             {isSignUp ? "Start accessing legal education resources" : "Sign in to continue learning"}
           </p>
         </div>
@@ -41,7 +40,7 @@ const Auth = () => {
               <Label htmlFor="name" className="text-sm">Full Name</Label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input id="name" placeholder="Your name" className="pl-10 bg-muted/50 border-border/50" />
+                <Input id="name" placeholder="Your name" className="pl-10 bg-muted/30 border-border/50" />
               </div>
             </div>
           )}
@@ -50,7 +49,7 @@ const Auth = () => {
             <Label htmlFor="email" className="text-sm">Email</Label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input id="email" type="email" placeholder="you@example.com" className="pl-10 bg-muted/50 border-border/50" />
+              <Input id="email" type="email" placeholder="you@example.com" className="pl-10 bg-muted/30 border-border/50" />
             </div>
           </div>
 
@@ -58,12 +57,12 @@ const Auth = () => {
             <Label htmlFor="password" className="text-sm">Password</Label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input id="password" type="password" placeholder="••••••••" className="pl-10 bg-muted/50 border-border/50" />
+              <Input id="password" type="password" placeholder="••••••••" className="pl-10 bg-muted/30 border-border/50" />
             </div>
           </div>
 
           <Link to="/dashboard">
-            <Button className="w-full glow-cyan" size="lg">
+            <Button className="w-full" variant="hero" size="lg">
               {isSignUp ? "Create Account" : "Sign In"}
             </Button>
           </Link>
@@ -84,14 +83,14 @@ const Auth = () => {
           </Button>
         </form>
 
-        <p className="text-center text-sm text-muted-foreground mt-6 font-body">
+        <p className="text-center text-sm text-muted-foreground mt-6">
           {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
           <button onClick={() => setIsSignUp(!isSignUp)} className="text-primary hover:underline font-medium">
             {isSignUp ? "Sign In" : "Sign Up"}
           </button>
         </p>
 
-        <p className="text-[10px] text-muted-foreground/50 text-center mt-4 font-body">
+        <p className="text-[10px] text-muted-foreground/40 text-center mt-4">
           General informational resources only. Not legal advice.
         </p>
       </motion.div>

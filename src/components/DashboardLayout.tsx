@@ -1,12 +1,14 @@
 import { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Home, PlayCircle, MessageCircle, BookOpen, Settings, Scale, LogOut } from "lucide-react";
+import { Home, PlayCircle, MessageCircle, FileText, BookOpen, Settings, LogOut } from "lucide-react";
 import { motion } from "framer-motion";
+import { EvoLogo } from "./EvoLogo";
 
 const navItems = [
   { title: "Home", url: "/dashboard", icon: Home },
   { title: "Videos & Lectures", url: "/dashboard/library", icon: PlayCircle },
   { title: "Ask Expert Manager", url: "/dashboard/chat", icon: MessageCircle },
+  { title: "Submit Request", url: "/dashboard/submit", icon: FileText },
   { title: "My Library", url: "/dashboard/saved", icon: BookOpen },
   { title: "Settings", url: "/dashboard/settings", icon: Settings },
 ];
@@ -17,10 +19,9 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen w-full">
       {/* Sidebar */}
-      <aside className="hidden md:flex w-64 flex-col glass-strong border-r border-border/50 p-4">
-        <Link to="/" className="flex items-center gap-2 px-3 py-4 mb-6">
-          <Scale className="h-6 w-6 text-primary" />
-          <span className="text-lg font-bold text-gradient">EvoLegal</span>
+      <aside className="hidden md:flex w-64 flex-col glass-strong border-r border-border/30 p-4" style={{ borderRadius: 0 }}>
+        <Link to="/" className="px-3 py-4 mb-6">
+          <EvoLogo size="sm" animate={false} showText />
         </Link>
 
         <nav className="flex-1 space-y-1">
@@ -31,15 +32,14 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
                 key={item.url}
                 to={item.url}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all relative ${
-                  isActive
-                    ? "text-primary bg-primary/10"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                  isActive ? "text-primary" : "text-muted-foreground hover:text-foreground hover:bg-muted/30"
                 }`}
               >
                 {isActive && (
                   <motion.div
                     layoutId="sidebar-active"
-                    className="absolute inset-0 bg-primary/10 rounded-lg"
+                    className="absolute inset-0 bg-primary/8 rounded-lg"
+                    style={{ background: "hsla(186, 100%, 50%, 0.08)" }}
                     transition={{ type: "spring", duration: 0.4 }}
                   />
                 )}
@@ -50,13 +50,13 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
           })}
         </nav>
 
-        <div className="border-t border-border/50 pt-4 mt-4">
-          <div className="px-3 py-2 text-xs text-muted-foreground/60 leading-relaxed">
+        <div className="border-t border-border/30 pt-4 mt-4">
+          <p className="px-3 py-2 text-[10px] text-muted-foreground/40 leading-relaxed">
             General information only. Not legal advice.
-          </div>
+          </p>
           <Link
             to="/"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-muted/30 transition-all"
           >
             <LogOut className="h-4 w-4" />
             <span>Sign Out</span>
@@ -65,12 +65,11 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
       </aside>
 
       {/* Mobile header */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-40 glass-strong border-b border-border/50 px-4 py-3 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2">
-          <Scale className="h-5 w-5 text-primary" />
-          <span className="font-bold text-gradient">EvoLegal</span>
+      <div className="md:hidden fixed top-0 left-0 right-0 z-40 glass-strong border-b border-border/30 px-4 py-3 flex items-center justify-between" style={{ borderRadius: 0 }}>
+        <Link to="/">
+          <EvoLogo size="sm" animate={false} showText={false} />
         </Link>
-        <div className="flex gap-2">
+        <div className="flex gap-1">
           {navItems.slice(0, 4).map((item) => (
             <Link
               key={item.url}
