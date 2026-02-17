@@ -22,38 +22,32 @@ export function DisclaimerModal() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-md"
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+          style={{ background: "hsla(240, 20%, 4%, 0.85)", backdropFilter: "blur(8px)" }}
         >
           <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
+            initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.9, opacity: 0 }}
-            className="glass-strong rounded-xl max-w-lg w-full p-8 space-y-6"
+            exit={{ scale: 0.95, opacity: 0 }}
+            className="glass-strong max-w-md w-full p-8 space-y-5"
           >
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                <span className="text-primary text-xl">⚖</span>
+              <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
+                <span className="text-primary text-lg">⚖</span>
               </div>
-              <h2 className="text-xl font-bold text-foreground">Important Disclaimer</h2>
+              <h2 className="text-lg font-display font-semibold text-foreground">Before You Begin</h2>
             </div>
 
-            <div className="space-y-4 text-sm text-muted-foreground leading-relaxed">
-              <p>
-                <strong className="text-foreground">EvoLegal</strong> provides{" "}
-                <strong className="text-primary">GENERAL INFORMATIONAL & EDUCATIONAL RESOURCES ONLY</strong>.
-              </p>
-              <ul className="space-y-2 list-disc pl-5">
-                <li>This is <strong className="text-foreground">NOT</strong> legal advice, representation, or a law firm.</li>
-                <li>We and our Experts are <strong className="text-foreground">NOT</strong> licensed attorneys.</li>
-                <li>No attorney-client relationship is created.</li>
-                <li>Always consult a licensed professional for your specific situation.</li>
-              </ul>
-            </div>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              EvoLegal provides <span className="text-foreground font-medium">general informational and educational resources</span>. Our team consists of experienced consultants, not licensed attorneys. No attorney-client relationship is formed through this platform.
+            </p>
 
-            <div className="neon-line w-full" />
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              For matters requiring legal representation, we always recommend consulting a licensed professional.
+            </p>
 
-            <Button onClick={handleAccept} className="w-full" size="lg">
-              I Understand & Accept
+            <Button onClick={handleAccept} className="w-full" variant="hero" size="lg">
+              I Understand — Let's Go
             </Button>
           </motion.div>
         </motion.div>

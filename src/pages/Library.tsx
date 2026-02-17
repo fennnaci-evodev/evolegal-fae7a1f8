@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { PlayCircle, FileText, Download, Clock, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { fadeUp } from "@/lib/animations";
 
 const videos = [
   { title: "Understanding NY Tenant Rights", duration: "12:34", topic: "Tenant-Landlord", free: true },
@@ -25,30 +26,27 @@ const Library = () => {
   return (
     <DashboardLayout>
       <div className="max-w-5xl mx-auto space-y-8">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-          <h1 className="text-2xl md:text-3xl font-bold mb-2">Content Library</h1>
-          <p className="text-muted-foreground font-body">Educational videos, guides, and templates.</p>
+        <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
+          <h1 className="text-2xl md:text-3xl font-display font-bold mb-2">Content Library</h1>
+          <p className="text-muted-foreground">Educational videos, guides, and templates.</p>
         </motion.div>
 
         {/* Videos */}
         <div>
-          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <h2 className="text-lg font-display font-semibold mb-4 flex items-center gap-2">
             <PlayCircle className="h-5 w-5 text-primary" /> Video Lectures
           </h2>
           <div className="grid sm:grid-cols-2 gap-4">
             {videos.map((v, i) => (
               <motion.div
                 key={v.title}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.05 }}
-                className="glass rounded-xl overflow-hidden group hover:border-primary/30 transition-all cursor-pointer"
+                initial="hidden" animate="visible" variants={fadeUp} custom={i * 0.5 + 1}
+                className="glass-card overflow-hidden cursor-pointer group"
               >
-                {/* Video placeholder */}
-                <div className="aspect-video bg-muted/50 flex items-center justify-center relative">
-                  <PlayCircle className="h-12 w-12 text-primary/40 group-hover:text-primary/80 transition-colors" />
+                <div className="aspect-video bg-muted/30 flex items-center justify-center relative">
+                  <PlayCircle className="h-12 w-12 text-primary/30 group-hover:text-primary/70 transition-colors" />
                   {!v.free && (
-                    <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-1 rounded-full bg-background/80 text-xs text-muted-foreground">
+                    <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-1 rounded-full bg-background/60 backdrop-blur-sm text-xs text-muted-foreground">
                       <Lock className="h-3 w-3" /> Pro
                     </div>
                   )}
@@ -56,7 +54,7 @@ const Library = () => {
                 <div className="p-4">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">{v.topic}</span>
-                    <span className="text-xs text-muted-foreground flex items-center gap-1 font-body">
+                    <span className="text-xs text-muted-foreground flex items-center gap-1">
                       <Clock className="h-3 w-3" /> {v.duration}
                     </span>
                   </div>
@@ -69,17 +67,15 @@ const Library = () => {
 
         {/* Guides */}
         <div>
-          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <h2 className="text-lg font-display font-semibold mb-4 flex items-center gap-2">
             <FileText className="h-5 w-5 text-accent" /> Guides & Templates
           </h2>
-          <div className="grid sm:grid-cols-2 gap-4">
+          <div className="grid sm:grid-cols-2 gap-3">
             {guides.map((g, i) => (
               <motion.div
                 key={g.title}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 + i * 0.05 }}
-                className="glass rounded-xl p-5 flex items-start justify-between hover:border-primary/30 transition-all"
+                initial="hidden" animate="visible" variants={fadeUp} custom={i * 0.5 + 5}
+                className="glass-card p-5 flex items-start justify-between"
               >
                 <div className="flex items-start gap-3">
                   <div className="h-10 w-10 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
@@ -87,7 +83,7 @@ const Library = () => {
                   </div>
                   <div>
                     <h3 className="text-sm font-medium mb-1">{g.title}</h3>
-                    <p className="text-xs text-muted-foreground font-body">{g.pages} pages · {g.topic}</p>
+                    <p className="text-xs text-muted-foreground">{g.pages} pages · {g.topic}</p>
                   </div>
                 </div>
                 <Button variant="ghost" size="icon" className="shrink-0" disabled={!g.free}>
@@ -98,10 +94,9 @@ const Library = () => {
           </div>
         </div>
 
-        {/* Disclaimer */}
-        <div className="glass rounded-xl p-4 border-primary/20">
-          <p className="text-xs text-muted-foreground text-center font-body">
-            ⚖ All content is for general informational and educational purposes only. Not legal advice. Always consult a licensed professional. All downloadable materials contain full disclaimers.
+        <div className="glass-card p-4">
+          <p className="text-xs text-muted-foreground/60 text-center">
+            ⚖ All content is for general informational purposes only. Downloadable materials contain full disclaimers. Always consult a licensed professional.
           </p>
         </div>
       </div>
