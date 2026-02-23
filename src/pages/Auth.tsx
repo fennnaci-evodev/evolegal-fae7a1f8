@@ -5,10 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { EvoLogo } from "@/components/EvoLogo";
-import { Mail, Lock, User } from "lucide-react";
+import { Mail, Lock, User, Phone, Eye, EyeOff } from "lucide-react";
 
 const Auth = () => {
   const [isSignUp, setIsSignUp] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 relative">
@@ -36,13 +37,28 @@ const Auth = () => {
 
         <form onSubmit={(e) => e.preventDefault()} className="space-y-4">
           {isSignUp && (
-            <div className="space-y-2">
-              <Label htmlFor="name" className="text-sm">Full Name</Label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input id="name" placeholder="Your name" className="pl-10 bg-muted/30 border-border/50" />
+            <>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label htmlFor="firstName" className="text-sm">First Name</Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input id="firstName" placeholder="First" className="pl-10 bg-muted/30 border-border/50" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="lastName" className="text-sm">Last Name</Label>
+                  <Input id="lastName" placeholder="Last" className="bg-muted/30 border-border/50" />
+                </div>
               </div>
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="phone" className="text-sm">Phone <span className="text-muted-foreground text-xs">(optional)</span></Label>
+                <div className="relative">
+                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input id="phone" type="tel" placeholder="+1 (555) 000-0000" className="pl-10 bg-muted/30 border-border/50" />
+                </div>
+              </div>
+            </>
           )}
 
           <div className="space-y-2">
@@ -57,9 +73,34 @@ const Auth = () => {
             <Label htmlFor="password" className="text-sm">Password</Label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input id="password" type="password" placeholder="••••••••" className="pl-10 bg-muted/30 border-border/50" />
+              <Input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                placeholder="••••••••"
+                className="pl-10 pr-10 bg-muted/30 border-border/50"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
             </div>
+            {isSignUp && (
+              <p className="text-[10px] text-muted-foreground/60">Minimum 8 characters with at least one number</p>
+            )}
           </div>
+
+          {isSignUp && (
+            <div className="flex items-start gap-2">
+              <input type="checkbox" id="terms" className="mt-1 accent-primary" required />
+              <label htmlFor="terms" className="text-xs text-muted-foreground leading-relaxed">
+                I understand that EvoLegal provides general informational resources only and agree to the{" "}
+                <span className="text-primary cursor-pointer hover:underline">Terms of Service</span>.
+              </label>
+            </div>
+          )}
 
           <Link to="/dashboard">
             <Button className="w-full" variant="hero" size="lg">

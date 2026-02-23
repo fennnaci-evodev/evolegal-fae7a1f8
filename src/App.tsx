@@ -15,6 +15,7 @@ import Pricing from "./pages/Pricing";
 import FAQ from "./pages/FAQ";
 import Blog from "./pages/Blog";
 import Contact from "./pages/Contact";
+import ArticleTenantLandlord from "./pages/ArticleTenantLandlord";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,7 @@ const App = () => (
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/faq" element={<FAQ />} />
           <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/tenant-landlord-basics" element={<ArticleTenantLandlord />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/dashboard/chat" element={<ExpertChat />} />

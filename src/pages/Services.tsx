@@ -11,13 +11,13 @@ const services = [
   {
     icon: MessageCircle,
     title: "General Q&A Chat",
-    desc: "Unlimited general questions answered by our AI Expert Manager, reviewed for accuracy. Get clarity on processes, terms, and concepts.",
+    desc: "Unlimited general questions answered by our AI Expert Manager, reviewed for accuracy. Get clarity on processes, terms, and concepts — for US residents anywhere.",
     features: ["Instant responses", "General information only", "Chat history saved", "Escalate to human Expert"],
   },
   {
     icon: PlayCircle,
     title: "Video Lectures & Explainers",
-    desc: "Pre-recorded deep-dive video lectures covering key US and UK legal topics. From tenant rights to family court procedures.",
+    desc: "Pre-recorded deep-dive video lectures covering key US and UK legal topics. From tenant rights to personal injury processes.",
     features: ["Expert-led content", "US & UK coverage", "Free teasers available", "New content monthly"],
   },
   {
@@ -47,7 +47,7 @@ const Services = () => {
               Our <span className="text-gradient">Services</span>
             </h1>
             <p className="text-lg text-muted-foreground max-w-lg mx-auto">
-              General informational resources to help you understand legal processes and prepare with confidence.
+              General informational resources for US residents anywhere — understand legal processes and prepare with confidence.
             </p>
           </motion.div>
 
@@ -80,9 +80,9 @@ const Services = () => {
             className="glass-card p-8 mt-8 text-center"
             initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={5}
           >
-            <h3 className="text-xl font-display font-semibold mb-3">Our Niche: NY Users + UK Matters</h3>
+            <h3 className="text-xl font-display font-semibold mb-3">For US Residents Anywhere</h3>
             <p className="text-muted-foreground max-w-lg mx-auto mb-6">
-              Uniquely positioned for New York residents dealing with English law topics — whether it's UK tenancy, family proceedings, or cross-border considerations.
+              Whether you're in New York, California, Texas, or anywhere in between — get general insights on US legal topics and comparative overviews with UK processes. Perfect for Americans dealing with UK matters or seeking broader legal education.
             </p>
             <Link to="/auth">
               <Button variant="hero" size="lg">
