@@ -8,36 +8,32 @@ import { ChevronDown } from "lucide-react";
 import { fadeUp } from "@/lib/animations";
 const faqs = [
   {
-    q: "Is EvoLegal a law firm?",
-    a: "No. EvoLegal provides general informational and educational resources only. We are not a law firm, and our Experts are not licensed attorneys. No attorney-client relationship is formed.",
+    q: "What is EvoLegal?",
+    a: "EvoLegal is a platform where our Experts — led by Hugo, your Expert Manager — provide structured, well-researched insights on US and English (UK) legal topics. We draw from a vast base of cases and legislation to help you understand your options clearly.",
+  },
+  {
+    q: "Who is Hugo?",
+    a: "Hugo is your Expert Manager — the first point of contact when you have a question. Hugo works hard to deliver detailed, objective, and helpful responses on legal topics. For more complex needs, one of our Legal Experts is always ready to assist.",
   },
   {
     q: "What kind of help can I get?",
-    a: "We provide general explanations of legal processes, video lectures, guides, templates, and informational Q&A. For matters requiring legal representation, we recommend consulting a licensed professional in your jurisdiction.",
+    a: "We provide structured insights on legal processes, video lectures, guides, templates, and expert Q&A. Hugo and our team cover tenant-landlord, family, personal injury, insurance, employment, and contract topics across both US and UK law.",
   },
   {
     q: "Does this cover all US states?",
-    a: "Yes — we provide general information applicable across all 50 states and DC. However, laws vary significantly by state (and sometimes by city or county). Our content provides general overviews only. Always consult a licensed professional in your specific jurisdiction for your situation.",
+    a: "Yes — our insights cover general legal frameworks applicable nationwide. Since laws vary by state, we always note where variations exist. For jurisdiction-specific matters, our team can point you in the right direction.",
   },
   {
-    q: "Can you give me advice about my specific case?",
-    a: "We provide general information only — not advice tailored to your personal situation. For complex or personal matters, professional legal representation in your jurisdiction is recommended. We can help you prepare and understand the landscape.",
-  },
-  {
-    q: "How does the AI Expert Manager work?",
-    a: "Our Expert Manager uses AI to provide general educational information on legal topics. Responses focus on processes, terms, risks, and comparisons — always depersonalized. A human Expert reviews flagged or complex queries for accuracy before delivery.",
+    q: "How fast will I get a response?",
+    a: "Typical turnaround: 4 hours for Pro, 8 hours for Basic. Hugo handles many questions instantly, and our Legal Experts review complex submissions promptly.",
   },
   {
     q: "Can I cancel my subscription?",
-    a: "Absolutely. You can cancel at any time from your account settings. No hidden fees, no lock-in contracts.",
+    a: "Absolutely. Cancel at any time from your account settings — no hidden fees, no lock-in contracts. We believe in earning your trust every month.",
   },
   {
     q: "Do you cover UK law?",
-    a: "Yes! We uniquely cover both general US law topics and English (UK) law — particularly useful for US residents dealing with UK matters related to tenancy or family proceedings.",
-  },
-  {
-    q: "What topics do you cover?",
-    a: "We currently focus on Tenant-Landlord, Family Law, Personal Injury, Insurance, Employment Basics, and Contract Disputes for both US and England (UK). We're continually expanding to additional topics.",
+    a: "Yes! We uniquely cover both US and English (UK) law — particularly helpful for Americans dealing with UK tenancy or family matters, or anyone wanting comparative insights.",
   },
   {
     q: "How is my data protected?",
