@@ -18,19 +18,21 @@ const offerings = [
 const whyUs = [
   { icon: Zap, title: "Instant Access", desc: "No waiting rooms. Get resources the moment you need them." },
   { icon: Shield, title: "Fully Transparent", desc: "Clear pricing, no hidden fees, easy cancel anytime." },
-  { icon: Globe, title: "US & UK Focus", desc: "Unique dual-jurisdiction coverage — perfect for NY users navigating UK matters." },
+  { icon: Globe, title: "US & UK Focus", desc: "Unique dual-jurisdiction coverage — for US residents anywhere dealing with UK matters or general US topics." },
 ];
 
 const topics = [
-  "Tenant Rights (NY)", "Landlord Obligations (NY)", "UK Tenancy Law", "Family Court (NY)",
+  "Tenant Rights (US)", "Landlord Obligations (US)", "UK Tenancy Law", "Family Court (US)",
   "UK Divorce Process", "Lease Agreements", "Child Custody Overview", "Eviction Procedures",
-  "Security Deposits", "Mediation Basics",
+  "Security Deposits", "Mediation Basics", "Personal Injury (US)", "Insurance Claims",
+  "Employment Basics", "Contract Disputes",
 ];
 
 const sampleContent = [
-  { title: "5 Key Differences: NY vs UK Tenant Rights", type: "Article", duration: "4 min read", free: true },
-  { title: "What Happens in a NY Family Court Hearing?", type: "Video", duration: "12 min", free: true },
-  { title: "Understanding Your UK Tenancy Agreement", type: "Guide", duration: "6 min read", free: true },
+  { title: "The Basics of Tenant-Landlord Law in the US", type: "Article", duration: "18 min read", free: true, to: "/blog/tenant-landlord-basics" },
+  { title: "5 Key Differences: NY vs UK Tenant Rights", type: "Article", duration: "5 min read", free: true, to: "/blog" },
+  { title: "What Happens in a NY Family Court Hearing?", type: "Video", duration: "12 min", free: true, to: "/blog" },
+  { title: "Understanding Your UK Tenancy Agreement", type: "Guide", duration: "6 min read", free: true, to: "/blog" },
 ];
 
 const plans = [
@@ -72,10 +74,10 @@ const Index = () => {
       <Navbar />
 
       {/* Hero */}
-      <section className="relative pt-28 pb-20 md:pt-36 md:pb-28 px-6">
+      <section className="relative pt-28 pb-20 md:pt-40 md:pb-32 px-6">
         <div className="container mx-auto text-center relative z-10 max-w-4xl">
           <motion.div
-            className="relative mb-8"
+            className="relative mb-10"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1 }}
@@ -88,14 +90,14 @@ const Index = () => {
             initial="hidden" animate="visible" variants={fadeUp} custom={1}
           >
             Clear Insights on{" "}
-            <span className="text-gradient">US & English Law</span>
+            <span className="text-gradient">English (UK) Law & US Legal Concepts</span>
           </motion.h1>
 
           <motion.p
-            className="text-base md:text-lg text-muted-foreground max-w-xl mx-auto mb-8 leading-relaxed"
+            className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed"
             initial="hidden" animate="visible" variants={fadeUp} custom={2}
           >
-            General education, video lectures & preparation resources — accessible, transparent, and built for real understanding.
+            General education, video lectures & preparation resources for Americans nationwide — accessible, transparent, and built for real understanding.
           </motion.p>
 
           <motion.div
@@ -104,12 +106,12 @@ const Index = () => {
           >
             <Link to="/auth">
               <Button variant="hero" size="xl">
-                Get Started Free <ArrowRight className="ml-2 h-5 w-5" />
+                Start Free <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
-            <Link to="/how-it-works">
+            <Link to="/blog/tenant-landlord-basics">
               <Button variant="glass" size="xl">
-                See How It Works
+                See Samples
               </Button>
             </Link>
           </motion.div>
@@ -156,7 +158,7 @@ const Index = () => {
         <div className="container mx-auto max-w-6xl">
           <motion.div className="text-center mb-14" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
             <h2 className="text-3xl md:text-4xl font-display font-bold mb-3">Why EvoLegal</h2>
-            <p className="text-muted-foreground max-w-md mx-auto">Simpler, faster, and more affordable than traditional platforms.</p>
+            <p className="text-muted-foreground max-w-md mx-auto">Simpler, faster, and more affordable than traditional platforms — for US residents anywhere.</p>
           </motion.div>
 
           <div className="grid md:grid-cols-3 gap-5">
@@ -182,7 +184,7 @@ const Index = () => {
         <div className="container mx-auto max-w-4xl">
           <motion.div className="text-center mb-10" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
             <h2 className="text-3xl md:text-4xl font-display font-bold mb-3">Topics We Cover</h2>
-            <p className="text-muted-foreground">Starting with Tenant-Landlord & Family Law — expanding to Insurance, Injury & more.</p>
+            <p className="text-muted-foreground">Tenant-Landlord, Family, Personal Injury, Insurance, Employment, Contracts & more.</p>
           </motion.div>
 
           <motion.div
@@ -208,22 +210,23 @@ const Index = () => {
 
           <div className="space-y-3">
             {sampleContent.map((item, i) => (
-              <motion.div
-                key={item.title}
-                className="glass-card p-5 flex items-center justify-between cursor-pointer"
-                initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i + 1}
-              >
-                <div className="flex items-center gap-4">
-                  <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                    {item.type === "Video" ? <PlayCircle className="h-5 w-5 text-primary" /> : <BookOpen className="h-5 w-5 text-primary" />}
+              <Link to={item.to} key={item.title}>
+                <motion.div
+                  className="glass-card p-5 flex items-center justify-between cursor-pointer"
+                  initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i + 1}
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                      {item.type === "Video" ? <PlayCircle className="h-5 w-5 text-primary" /> : <BookOpen className="h-5 w-5 text-primary" />}
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-medium">{item.title}</h3>
+                      <p className="text-xs text-muted-foreground">{item.type} · {item.duration}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-sm font-medium">{item.title}</h3>
-                    <p className="text-xs text-muted-foreground">{item.type} · {item.duration}</p>
-                  </div>
-                </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground" />
-              </motion.div>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                </motion.div>
+              </Link>
             ))}
           </div>
         </div>

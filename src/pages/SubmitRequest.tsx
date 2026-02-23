@@ -5,19 +5,55 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Upload, Send, FileText } from "lucide-react";
+import { Upload, Send, FileText, Info, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import { fadeUp } from "@/lib/animations";
 
+const US_STATES = [
+  "Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut","Delaware",
+  "District of Columbia","Florida","Georgia","Hawaii","Idaho","Illinois","Indiana","Iowa",
+  "Kansas","Kentucky","Louisiana","Maine","Maryland","Massachusetts","Michigan","Minnesota",
+  "Mississippi","Missouri","Montana","Nebraska","Nevada","New Hampshire","New Jersey",
+  "New Mexico","New York","North Carolina","North Dakota","Ohio","Oklahoma","Oregon",
+  "Pennsylvania","Rhode Island","South Carolina","South Dakota","Tennessee","Texas","Utah",
+  "Vermont","Virginia","Washington","West Virginia","Wisconsin","Wyoming"
+];
+
+const topicOptions = [
+  { value: "tenant-us", label: "Tenant-Landlord (US)" },
+  { value: "tenant-uk", label: "Tenant-Landlord (UK)" },
+  { value: "family-us", label: "Family Law (US)" },
+  { value: "family-uk", label: "Family Law (UK)" },
+  { value: "injury-us", label: "Personal Injury (US)" },
+  { value: "insurance-us", label: "Insurance Claims (US)" },
+  { value: "employment-us", label: "Employment Basics (US)" },
+  { value: "contracts-us", label: "Contract Disputes (US)" },
+  { value: "other", label: "Other" },
+];
+
 const SubmitRequest = () => {
   const [submitting, setSubmitting] = useState(false);
+  const [topic, setTopic] = useState("");
+  const [state, setState] = useState("");
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [keyFacts, setKeyFacts] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!topic || !description.trim()) {
+      toast.error("Please select a topic and describe your question.");
+      return;
+    }
     setSubmitting(true);
     setTimeout(() => {
       setSubmitting(false);
       toast.success("Request submitted! You'll receive a response within 24 hours.");
+      setTopic("");
+      setState("");
+      setTitle("");
+      setDescription("");
+      setKeyFacts("");
     }, 2000);
   };
 
@@ -29,26 +65,71 @@ const SubmitRequest = () => {
           <p className="text-muted-foreground">Describe your topic and we'll prepare a detailed, general informational response.</p>
         </motion.div>
 
+        {/* Info banner */}
+        <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0.5} className="glass rounded-xl px-5 py-3 flex items-start gap-3">
+          <Info className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            Our AI drafts general insights, then a human Expert reviews for accuracy before delivery. Typical turnaround: 24 hours for Pro, 48 hours for Basic.
+          </p>
+        </motion.div>
+
         <motion.form
           onSubmit={handleSubmit}
           className="glass-card p-8 space-y-5"
           initial="hidden" animate="visible" variants={fadeUp} custom={1}
         >
-          <div className="space-y-2">
-            <Label className="text-sm font-display">Topic Area</Label>
-            <select className="w-full h-10 px-3 rounded-lg bg-muted/30 border border-border/50 text-sm text-foreground">
-              <option value="">Select a topic...</option>
-              <option value="tenant-ny">Tenant-Landlord (NY)</option>
-              <option value="tenant-uk">Tenant-Landlord (UK)</option>
-              <option value="family-ny">Family Law (NY)</option>
-              <option value="family-uk">Family Law (UK)</option>
-              <option value="other">Other</option>
-            </select>
+          {/* Topic + State row */}
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label className="text-sm font-display">Topic Area <span className="text-destructive">*</span></Label>
+              <select
+                value={topic}
+                onChange={(e) => setTopic(e.target.value)}
+                className="w-full h-10 px-3 rounded-lg bg-muted/30 border border-border/50 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
+                required
+              >
+                <option value="">Select a topic...</option>
+                {topicOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-sm font-display flex items-center gap-1.5">
+                <MapPin className="h-3 w-3 text-muted-foreground" /> State <span className="text-muted-foreground text-xs">(optional)</span>
+              </Label>
+              <select
+                value={state}
+                onChange={(e) => setState(e.target.value)}
+                className="w-full h-10 px-3 rounded-lg bg-muted/30 border border-border/50 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
+              >
+                <option value="">Any / Not applicable</option>
+                {US_STATES.map((s) => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+              <p className="text-[10px] text-muted-foreground/50">For context only — responses remain general.</p>
+            </div>
           </div>
 
+          {/* Request title */}
           <div className="space-y-2">
-            <Label className="text-sm font-display">Describe Your Topic</Label>
+            <Label className="text-sm font-display">Request Title</Label>
+            <Input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Brief summary of your question (e.g., 'Security deposit return timeline')"
+              className="bg-muted/30 border-border/50"
+            />
+          </div>
+
+          {/* Description */}
+          <div className="space-y-2">
+            <Label className="text-sm font-display">Describe Your Topic <span className="text-destructive">*</span></Label>
             <Textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
               placeholder="Describe what you'd like general information about. Include any relevant context or specific terms you'd like explained..."
               rows={5}
               className="bg-muted/30 border-border/50 resize-none"
@@ -56,19 +137,23 @@ const SubmitRequest = () => {
             />
           </div>
 
+          {/* Key Facts */}
           <div className="space-y-2">
-            <Label className="text-sm font-display">Key Facts (Optional)</Label>
+            <Label className="text-sm font-display">Key Facts <span className="text-muted-foreground text-xs">(optional)</span></Label>
             <Textarea
-              placeholder="List any relevant facts, such as jurisdiction, dates, or specific terminology..."
+              value={keyFacts}
+              onChange={(e) => setKeyFacts(e.target.value)}
+              placeholder="List any relevant facts, such as dates, specific terminology, or details that help us research the general topic..."
               rows={3}
               className="bg-muted/30 border-border/50 resize-none"
             />
           </div>
 
+          {/* Upload */}
           <div className="space-y-2">
-            <Label className="text-sm font-display">Upload Documents (Optional)</Label>
-            <div className="glass rounded-xl p-6 text-center cursor-pointer hover:border-primary/20 transition-colors">
-              <Upload className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+            <Label className="text-sm font-display">Upload Documents <span className="text-muted-foreground text-xs">(optional)</span></Label>
+            <div className="glass rounded-xl p-6 text-center cursor-pointer hover:border-primary/20 transition-colors group">
+              <Upload className="h-8 w-8 text-muted-foreground mx-auto mb-2 group-hover:text-primary transition-colors" />
               <p className="text-sm text-muted-foreground">Drag & drop files here, or click to browse</p>
               <p className="text-xs text-muted-foreground/50 mt-1">PDF, DOC, TXT — Max 10MB</p>
             </div>
@@ -79,7 +164,7 @@ const SubmitRequest = () => {
           </Button>
 
           <p className="text-xs text-muted-foreground/50 text-center">
-            Responses provide general information only. For your specific circumstances, please consult a licensed professional.
+            Responses provide general information only. State laws differ — professional legal representation in your jurisdiction is recommended for personal matters.
           </p>
         </motion.form>
       </div>

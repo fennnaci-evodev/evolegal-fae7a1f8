@@ -28,7 +28,7 @@ export function Footer() {
           <div className="md:col-span-2">
             <EvoLogo size="sm" animate={false} showText />
             <p className="text-sm text-muted-foreground mt-4 max-w-sm leading-relaxed">
-              Clear insights on US & English law topics. General education, preparation resources, and informational support.
+              Clear insights on English (UK) law & US legal concepts. General education, preparation resources, and informational support for Americans nationwide.
             </p>
           </div>
           {footerLinks.map((group) => (
@@ -51,8 +51,8 @@ export function Footer() {
 
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-xs text-muted-foreground/60">© 2026 EvoLegal. All rights reserved.</p>
-          <p className="text-xs text-muted-foreground/50 text-center max-w-lg">
-            EvoLegal provides general informational and educational resources only. This is not legal advice or representation. Always consult a licensed professional for your specific situation.
+          <p className="text-xs text-muted-foreground/50 text-center max-w-xl">
+            EvoLegal provides general informational and educational resources only. This is not legal advice, representation, or a law firm. Laws vary significantly by state and jurisdiction. For your specific situation, consult a licensed professional in your state.
           </p>
         </div>
       </div>

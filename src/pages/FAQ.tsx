@@ -13,15 +13,19 @@ const faqs = [
   },
   {
     q: "What kind of help can I get?",
-    a: "We provide general explanations of legal processes, video lectures, guides, templates, and informational Q&A. For matters requiring legal representation, we recommend consulting a licensed professional.",
+    a: "We provide general explanations of legal processes, video lectures, guides, templates, and informational Q&A. For matters requiring legal representation, we recommend consulting a licensed professional in your jurisdiction.",
+  },
+  {
+    q: "Does this cover all US states?",
+    a: "Yes — we provide general information applicable across all 50 states and DC. However, laws vary significantly by state (and sometimes by city or county). Our content provides general overviews only. Always consult a licensed professional in your specific jurisdiction for your situation.",
   },
   {
     q: "Can you give me advice about my specific case?",
-    a: "We provide general information only — not advice tailored to your personal situation. For complex or personal matters, professional legal representation may be recommended. We can help you prepare and understand the landscape.",
+    a: "We provide general information only — not advice tailored to your personal situation. For complex or personal matters, professional legal representation in your jurisdiction is recommended. We can help you prepare and understand the landscape.",
   },
   {
     q: "How does the AI Expert Manager work?",
-    a: "Our Expert Manager uses AI to provide general educational information on legal topics. Responses focus on processes, terms, risks, and comparisons — always depersonalized. A human Expert reviews flagged or complex queries.",
+    a: "Our Expert Manager uses AI to provide general educational information on legal topics. Responses focus on processes, terms, risks, and comparisons — always depersonalized. A human Expert reviews flagged or complex queries for accuracy before delivery.",
   },
   {
     q: "Can I cancel my subscription?",
@@ -29,11 +33,11 @@ const faqs = [
   },
   {
     q: "Do you cover UK law?",
-    a: "Yes! We uniquely cover both US law (NY-focused) and English (UK) law — particularly useful for NY residents dealing with UK matters related to tenancy or family proceedings.",
+    a: "Yes! We uniquely cover both general US law topics and English (UK) law — particularly useful for US residents dealing with UK matters related to tenancy or family proceedings.",
   },
   {
     q: "What topics do you cover?",
-    a: "We currently focus on Tenant-Landlord and Family Law for both NY (US) and England (UK). We're expanding to Insurance, Injury Law, and additional topics.",
+    a: "We currently focus on Tenant-Landlord, Family Law, Personal Injury, Insurance, Employment Basics, and Contract Disputes for both US and England (UK). We're continually expanding to additional topics.",
   },
   {
     q: "How is my data protected?",

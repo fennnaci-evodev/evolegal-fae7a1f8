@@ -12,19 +12,19 @@ const steps = [
     icon: FileText,
     number: "01",
     title: "Submit Your Request",
-    desc: "Describe your topic, share key facts, and upload relevant documents. Our system organizes everything securely.",
+    desc: "Describe your topic, share key facts, and upload relevant documents. Available for US residents anywhere — optionally select your state for context.",
   },
   {
     icon: Bot,
     number: "02",
     title: "AI Drafts General Insights",
-    desc: "Our AI analyzes public legal frameworks and drafts a comprehensive, depersonalized overview covering processes, terms, risks, and options.",
+    desc: "Our AI analyzes public legal frameworks and drafts a comprehensive, depersonalized overview covering processes, terms, risks, and options — drawing from federal, state, and UK sources as relevant.",
   },
   {
     icon: UserCheck,
     number: "03",
     title: "Human Review & Delivery",
-    desc: "An EvoLegal Expert reviews every response for accuracy, removes any tailored advice, and delivers clear, general information to your portal.",
+    desc: "An EvoLegal Expert reviews every response for accuracy, removes any tailored advice, ensures compliance, and delivers clear, general information to your portal.",
   },
 ];
 
@@ -41,7 +41,7 @@ const HowItWorks = () => {
               How <span className="text-gradient">EvoLegal</span> Works
             </h1>
             <p className="text-lg text-muted-foreground max-w-lg mx-auto">
-              Three simple steps from question to clarity. AI-powered research, human-verified quality.
+              Three simple steps from question to clarity. AI-powered research, human-verified quality — for Americans nationwide.
             </p>
           </motion.div>
 
@@ -67,11 +67,6 @@ const HowItWorks = () => {
                   <h3 className="text-xl font-display font-semibold mb-2">{step.title}</h3>
                   <p className="text-muted-foreground leading-relaxed">{step.desc}</p>
                 </div>
-                {i < steps.length - 1 && (
-                  <div className="hidden md:block absolute -bottom-4 left-1/2 -translate-x-1/2">
-                    <div className="w-px h-8 bg-gradient-to-b from-primary/30 to-transparent" />
-                  </div>
-                )}
               </motion.div>
             ))}
           </div>
@@ -83,7 +78,7 @@ const HowItWorks = () => {
           >
             <h3 className="text-xl font-display font-semibold mb-3">Quality You Can Trust</h3>
             <p className="text-muted-foreground max-w-lg mx-auto mb-6">
-              Every response goes through our human review checklist: no absolutes, no tailored advice, structured with Options → Risks → Steps → Resources → When to consult a lawyer.
+              Every response goes through our human review checklist: no absolutes, no tailored advice, structured with Options → Risks → Steps → Resources → When to consult a lawyer. State-specific redirects included when applicable.
             </p>
             <Link to="/auth">
               <Button variant="hero" size="lg">
