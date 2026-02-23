@@ -52,7 +52,7 @@ export function Footer() {
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-xs text-muted-foreground/60">© 2026 EvoLegal. All rights reserved.</p>
           <p className="text-xs text-muted-foreground/50 text-center max-w-xl">
-            EvoLegal provides general informational and educational resources only. This is not legal advice, representation, or a law firm. Laws vary significantly by state and jurisdiction. For your specific situation, consult a licensed professional in your state.
+            At EvoLegal, our Experts — led by Hugo — work hard on every request. We draw from a vast base of cases and legislation to deliver objective, relevant, and accurate insights. We deeply care about your legal security. For complex personal matters, professional representation may be recommended.
           </p>
         </div>
       </div>

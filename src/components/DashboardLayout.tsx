@@ -7,7 +7,7 @@ import { EvoLogo } from "./EvoLogo";
 const navItems = [
   { title: "Home", url: "/dashboard", icon: Home },
   { title: "Videos & Lectures", url: "/dashboard/library", icon: PlayCircle },
-  { title: "Ask Expert Manager", url: "/dashboard/chat", icon: MessageCircle },
+  { title: "Ask Hugo", url: "/dashboard/chat", icon: MessageCircle },
   { title: "Submit Request", url: "/dashboard/submit", icon: FileText },
   { title: "My Library", url: "/dashboard/saved", icon: BookOpen },
   { title: "Settings", url: "/dashboard/settings", icon: Settings },
@@ -52,7 +52,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
 
         <div className="border-t border-border/30 pt-4 mt-4">
           <p className="px-3 py-2 text-[10px] text-muted-foreground/40 leading-relaxed">
-            General information only. Not legal advice.
+            Hugo & our Experts are here to help.
           </p>
           <Link
             to="/"

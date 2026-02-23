@@ -7,24 +7,24 @@ interface EvoLogoProps {
 }
 
 const sizes = {
-  sm: { svg: 32, text: "text-sm", gap: "gap-1", glow: 8 },
-  md: { svg: 52, text: "text-lg", gap: "gap-2", glow: 16 },
-  lg: { svg: 80, text: "text-2xl", gap: "gap-3", glow: 24 },
-  hero: { svg: 160, text: "text-3xl md:text-4xl", gap: "gap-4", glow: 40 },
+  sm: { svg: 32, text: "text-sm", gap: "gap-1", blur: 3, glow: 6 },
+  md: { svg: 52, text: "text-lg", gap: "gap-2", blur: 5, glow: 10 },
+  lg: { svg: 80, text: "text-2xl", gap: "gap-3", blur: 8, glow: 16 },
+  hero: { svg: 160, text: "text-3xl md:text-4xl", gap: "gap-4", blur: 14, glow: 28 },
 };
 
 export function EvoLogo({ size = "md", animate = true, showText = true }: EvoLogoProps) {
   const s = sizes[size];
   const isHero = size === "hero";
+  const uid = `evo-${size}`;
 
   return (
     <div className={`flex flex-col items-center ${s.gap}`}>
-      {/* SVG E with 33° slant */}
       <motion.div
         className="relative"
-        initial={animate ? { rotate: 0, opacity: 0, scale: 0.9 } : false}
+        initial={animate ? { rotate: 0, opacity: 0, scale: 0.92 } : false}
         animate={animate ? { rotate: -33, opacity: 1, scale: 1 } : false}
-        transition={{ duration: 1.4, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ duration: 1.6, ease: [0.22, 1, 0.36, 1] }}
         style={{ rotate: animate ? undefined : -33 }}
       >
         <svg
@@ -36,82 +36,66 @@ export function EvoLogo({ size = "md", animate = true, showText = true }: EvoLog
           className="relative z-10"
         >
           <defs>
-            <linearGradient id={`eGrad-${size}`} x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="hsl(186 100% 55%)" />
-              <stop offset="60%" stopColor="hsl(186 100% 50%)" />
-              <stop offset="100%" stopColor="hsl(200 100% 60%)" />
+            {/* Main gradient — rich cyan */}
+            <linearGradient id={`${uid}-main`} x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="hsl(186 100% 58%)" />
+              <stop offset="50%" stopColor="hsl(186 100% 50%)" />
+              <stop offset="100%" stopColor="hsl(195 100% 55%)" />
             </linearGradient>
-            <linearGradient id={`eRim-${size}`} x1="100%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="hsla(270, 80%, 75%, 0.4)" />
-              <stop offset="100%" stopColor="hsla(270, 80%, 75%, 0)" />
+            {/* Purple rim — subtle depth */}
+            <linearGradient id={`${uid}-rim`} x1="100%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="hsla(270 80% 75% / 0.35)" />
+              <stop offset="100%" stopColor="hsla(270 80% 75% / 0)" />
             </linearGradient>
-            <filter id={`eGlow-${size}`} x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur in="SourceGraphic" stdDeviation={s.glow} result="blur" />
+            {/* Soft bloom glow — no hard edges */}
+            <filter id={`${uid}-bloom`} x="-60%" y="-60%" width="220%" height="220%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation={s.blur} result="soft" />
+              <feColorMatrix in="soft" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.6 0" result="dimmed" />
               <feMerge>
-                <feMergeNode in="blur" />
+                <feMergeNode in="dimmed" />
                 <feMergeNode in="SourceGraphic" />
               </feMerge>
             </filter>
           </defs>
-          {/* Main E shape — bold geometric */}
+
+          {/* E shape — refined proportions: thicker horizontals for sophistication */}
           <path
-            d="M20 12 L80 12 L80 24 L36 24 L36 43 L72 43 L72 55 L36 55 L36 76 L80 76 L80 88 L20 88 Z"
-            fill={`url(#eGrad-${size})`}
-            filter={`url(#eGlow-${size})`}
+            d="M22 10 L78 10 L78 23 L38 23 L38 43 L70 43 L70 56 L38 56 L38 77 L78 77 L78 90 L22 90 Z"
+            fill={`url(#${uid}-main)`}
+            filter={`url(#${uid}-bloom)`}
           />
-          {/* Purple rim light overlay */}
+          {/* Purple rim overlay */}
           <path
-            d="M20 12 L80 12 L80 24 L36 24 L36 43 L72 43 L72 55 L36 55 L36 76 L80 76 L80 88 L20 88 Z"
-            fill={`url(#eRim-${size})`}
-          />
-          {/* Edge highlight — sharp right side */}
-          <path
-            d="M78 12 L80 12 L80 88 L78 88 L78 76 L80 76 L80 55 L72 55 L72 43 L80 43 L80 24 L78 24 Z"
-            fill="hsla(186, 100%, 70%, 0.3)"
+            d="M22 10 L78 10 L78 23 L38 23 L38 43 L70 43 L70 56 L38 56 L38 77 L78 77 L78 90 L22 90 Z"
+            fill={`url(#${uid}-rim)`}
           />
         </svg>
 
-        {/* Radiating glow behind */}
+        {/* Ambient radial glow behind — hero only */}
         {isHero && (
           <motion.div
             className="absolute inset-0 pointer-events-none"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.6, duration: 1.2 }}
+            transition={{ delay: 0.5, duration: 1.4 }}
             style={{
-              background: "radial-gradient(circle, hsla(186, 100%, 50%, 0.2) 0%, hsla(186, 100%, 50%, 0.05) 40%, transparent 70%)",
-              transform: "scale(3)",
+              background: "radial-gradient(circle, hsla(186 100% 50% / 0.15) 0%, hsla(186 100% 50% / 0.03) 45%, transparent 70%)",
+              transform: "scale(3.5)",
             }}
           />
         )}
       </motion.div>
 
-      {/* Text */}
       {showText && (
         <motion.div
-          initial={animate ? { opacity: 0, y: 10 } : false}
+          initial={animate ? { opacity: 0, y: 8 } : false}
           animate={animate ? { opacity: 1, y: 0 } : false}
-          transition={{ delay: 0.6, duration: 0.8 }}
+          transition={{ delay: 0.5, duration: 0.8 }}
           className={`${s.text} font-display font-semibold tracking-wide`}
         >
           <span className="text-gradient">Evo</span>
           <span className="text-gradient" style={{ backgroundImage: "linear-gradient(135deg, hsl(210 40% 85%), hsl(270 80% 75%))" }}>Legal</span>
         </motion.div>
-      )}
-
-      {/* Radial glow behind hero */}
-      {isHero && (
-        <div
-          className="absolute pointer-events-none"
-          style={{
-            width: "600px",
-            height: "600px",
-            background: "radial-gradient(circle, hsla(186, 100%, 50%, 0.06) 0%, transparent 60%)",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-          }}
-        />
       )}
     </div>
   );

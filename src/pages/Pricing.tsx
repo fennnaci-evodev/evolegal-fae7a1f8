@@ -1,44 +1,36 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ParticleBackground } from "@/components/ParticleBackground";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Check, ArrowRight } from "lucide-react";
-
+import { Check, Minus, ArrowRight } from "lucide-react";
 import { fadeUp } from "@/lib/animations";
-const plans = [
-  {
-    name: "Free",
-    price: "$0",
-    period: "",
-    desc: "Explore the basics",
-    features: ["Unlimited articles", "3 videos/month", "1 short chat session/month", "Community resources"],
-    cta: "Start Free",
-    highlight: false,
-  },
-  {
-    name: "Basic",
-    price: "$24",
-    period: "/mo",
-    desc: "Essential access",
-    features: ["Unlimited videos & articles", "3 request submissions/month", "Basic Client Portal", "Email support", "Generic templates"],
-    cta: "Choose Basic",
-    highlight: true,
-  },
-  {
-    name: "Pro",
-    price: "$59",
-    period: "/mo",
-    desc: "Full power",
-    features: ["Everything in Basic", "Unlimited submissions", "Priority 24h turnaround", "Deep-dive exclusive content", "Full Case File portal", "Human Expert consultations"],
-    cta: "Go Pro",
-    highlight: false,
-    annual: "$499/year — save 20%",
-  },
+
+const features = [
+  { label: "Articles & guides", free: "Unlimited", basic: "Unlimited", pro: "Unlimited" },
+  { label: "Video lectures", free: "3 / month", basic: "Unlimited", pro: "Unlimited" },
+  { label: "Chat sessions with Hugo", free: "1 short / month", basic: "Unlimited", pro: "Unlimited" },
+  { label: "Request submissions", free: false, basic: "3 / month", pro: "Unlimited" },
+  { label: "Turnaround time", free: false, basic: "~8 hours", pro: "~4 hours (priority)" },
+  { label: "Client Portal", free: false, basic: "Basic", pro: "Full (Case File)" },
+  { label: "File uploads & history", free: false, basic: true, pro: true },
+  { label: "Generic templates", free: false, basic: true, pro: true },
+  { label: "Deep-dive exclusive content", free: false, basic: false, pro: true },
+  { label: "Expert consultations", free: false, basic: false, pro: true },
+  { label: "Priority support", free: false, basic: false, pro: true },
 ];
 
+function CellValue({ value }: { value: string | boolean }) {
+  if (value === true) return <Check className="h-4 w-4 text-primary mx-auto" />;
+  if (value === false) return <Minus className="h-4 w-4 text-muted-foreground/30 mx-auto" />;
+  return <span className="text-sm text-foreground/80">{value}</span>;
+}
+
 const Pricing = () => {
+  const [annual, setAnnual] = useState(false);
+
   return (
     <div className="min-h-screen bg-background overflow-x-hidden relative">
       <ParticleBackground />
@@ -46,56 +38,111 @@ const Pricing = () => {
 
       <section className="pt-28 pb-20 md:pt-36 px-6 relative z-10">
         <div className="container mx-auto max-w-5xl">
-          <motion.div className="text-center mb-14" initial="hidden" animate="visible" variants={fadeUp} custom={0}>
+          <motion.div className="text-center mb-10" initial="hidden" animate="visible" variants={fadeUp} custom={0}>
             <h1 className="text-4xl md:text-5xl font-display font-bold mb-4">
               Transparent <span className="text-gradient">Pricing</span>
             </h1>
-            <p className="text-lg text-muted-foreground max-w-md mx-auto">
+            <p className="text-lg text-muted-foreground max-w-md mx-auto mb-6">
               No hidden fees. Cancel anytime. Upgrade or downgrade freely.
             </p>
+            {/* Monthly / Annual toggle */}
+            <div className="inline-flex items-center gap-3 glass rounded-full px-1.5 py-1.5">
+              <button
+                onClick={() => setAnnual(false)}
+                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${!annual ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+              >
+                Monthly
+              </button>
+              <button
+                onClick={() => setAnnual(true)}
+                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${annual ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+              >
+                Annual <span className="text-xs opacity-75">save 20%</span>
+              </button>
+            </div>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-5">
-            {plans.map((plan, i) => (
-              <motion.div
+          <div className="overflow-x-auto -mx-6 px-6">
+            <div className="min-w-[600px]">
+          {/* Plan headers */}
+          <motion.div
+            className="grid grid-cols-4 gap-0 mb-0"
+            initial="hidden" animate="visible" variants={fadeUp} custom={1}
+          >
+            <div /> {/* empty corner */}
+            {[
+              { name: "Free", price: "$0", period: "", desc: "Explore the basics", highlight: false },
+              { name: "Basic", price: annual ? "$19" : "$24", period: "/mo", desc: "Essential access", highlight: false },
+              { name: "Pro", price: annual ? "$41" : "$59", period: "/mo", desc: "Full power", highlight: true },
+            ].map((plan) => (
+              <div
                 key={plan.name}
-                className={`glass-card p-7 flex flex-col relative ${plan.highlight ? "gradient-border glow-cyan" : ""}`}
-                initial="hidden" animate="visible" variants={fadeUp} custom={i + 1}
+                className={`text-center p-5 rounded-t-2xl relative ${plan.highlight ? "glass-card glow-cyan" : "glass-card"}`}
               >
                 {plan.highlight && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-primary text-primary-foreground text-xs font-semibold z-10">
-                    Most Popular
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-primary text-primary-foreground text-[10px] font-semibold z-10 whitespace-nowrap">
+                    Recommended
                   </span>
                 )}
-                <h3 className="text-lg font-display font-bold mb-1">{plan.name}</h3>
-                <p className="text-xs text-muted-foreground mb-4">{plan.desc}</p>
-                <div className="mb-1">
-                  <span className="text-4xl font-display font-bold">{plan.price}</span>
+                <h3 className="text-lg font-display font-bold">{plan.name}</h3>
+                <p className="text-xs text-muted-foreground mb-2">{plan.desc}</p>
+                <div>
+                  <span className="text-3xl font-display font-bold">{plan.price}</span>
                   <span className="text-muted-foreground text-sm">{plan.period}</span>
                 </div>
-                {plan.annual ? <p className="text-xs text-primary mb-4">{plan.annual}</p> : <div className="mb-4" />}
-                <ul className="space-y-2.5 flex-1 mb-6">
-                  {plan.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2 text-sm">
-                      <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                      <span className="text-muted-foreground">{f}</span>
-                    </li>
-                  ))}
-                </ul>
+                {plan.name === "Pro" && annual && (
+                  <p className="text-[10px] text-primary mt-1">$499/year billed annually</p>
+                )}
+              </div>
+            ))}
+          </motion.div>
+
+          {/* Feature comparison rows */}
+          <motion.div
+            className="glass-card rounded-t-none overflow-hidden"
+            initial="hidden" animate="visible" variants={fadeUp} custom={2}
+          >
+            {features.map((f, i) => (
+              <div
+                key={f.label}
+                className={`grid grid-cols-4 items-center py-3.5 px-4 text-center ${i % 2 === 0 ? "bg-white/[0.02]" : ""} ${i < features.length - 1 ? "border-b border-border/20" : ""}`}
+              >
+                <span className="text-sm text-foreground/70 text-left">{f.label}</span>
+                <CellValue value={f.free} />
+                <CellValue value={f.basic} />
+                <CellValue value={f.pro} />
+              </div>
+            ))}
+          </motion.div>
+
+          {/* CTA buttons row */}
+          <motion.div
+            className="grid grid-cols-4 gap-0 mt-0"
+            initial="hidden" animate="visible" variants={fadeUp} custom={3}
+          >
+            <div />
+            {[
+              { cta: "Start Free", variant: "outline" as const },
+              { cta: "Choose Basic", variant: "outline" as const },
+              { cta: "Go Pro", variant: "hero" as const },
+            ].map((plan) => (
+              <div key={plan.cta} className="p-4 text-center">
                 <Link to="/auth">
-                  <Button className="w-full" variant={plan.highlight ? "hero" : "outline"} size="lg">
-                    {plan.cta}
+                  <Button variant={plan.variant} size="lg" className="w-full">
+                    {plan.cta} {plan.variant === "hero" && <ArrowRight className="ml-1 h-4 w-4" />}
                   </Button>
                 </Link>
-              </motion.div>
+              </div>
             ))}
+          </motion.div>
+            </div>
           </div>
 
           <motion.p
             className="text-center text-xs text-muted-foreground/50 mt-8"
             initial="hidden" animate="visible" variants={fadeUp} custom={4}
           >
-            All plans provide general informational resources only. Prices in USD.
+            All plans include access to general informational resources. Prices in USD. Cancel anytime — no hidden fees.
           </motion.p>
         </div>
       </section>

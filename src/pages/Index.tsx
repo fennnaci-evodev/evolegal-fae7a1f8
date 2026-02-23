@@ -12,7 +12,7 @@ import { fadeUp } from "@/lib/animations";
 const offerings = [
   { icon: PlayCircle, title: "Video Lectures", desc: "Expert-led explanations on key US & UK legal topics, broken down for real understanding." },
   { icon: BookOpen, title: "Guides & Resources", desc: "Step-by-step guides, generic templates, and preparation toolkits with full context." },
-  { icon: MessageCircle, title: "Expert Consultations", desc: "General Q&A with our Expert Managers — fast, affordable, informational support." },
+  { icon: MessageCircle, title: "Expert Consultations", desc: "Talk to Hugo and our team — fast, affordable, and always here to help." },
 ];
 
 const whyUs = [
@@ -89,15 +89,15 @@ const Index = () => {
             className="text-3xl md:text-5xl lg:text-6xl font-display font-bold leading-tight mb-5"
             initial="hidden" animate="visible" variants={fadeUp} custom={1}
           >
-            Clear Insights on{" "}
-            <span className="text-gradient">English (UK) Law & US Legal Concepts</span>
+            Talk to Hugo —{" "}
+            <span className="text-gradient">Your Expert Manager for Clear Insights on US & English Law</span>
           </motion.h1>
 
           <motion.p
             className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed"
             initial="hidden" animate="visible" variants={fadeUp} custom={2}
           >
-            General education, video lectures & preparation resources for Americans nationwide — accessible, transparent, and built for real understanding.
+            We're here to help you understand your options clearly — video lectures, guides & expert support for Americans nationwide.
           </motion.p>
 
           <motion.div
@@ -120,7 +120,7 @@ const Index = () => {
             className="text-xs text-muted-foreground/40"
             initial="hidden" animate="visible" variants={fadeUp} custom={4}
           >
-            General informational resources only — not legal advice.
+            Hugo & our Experts provide general informational resources and support.
           </motion.p>
         </div>
       </section>
