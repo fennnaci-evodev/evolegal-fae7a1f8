@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 
 export function ScalesOfJustice({ animating = false }: { animating?: boolean }) {
   return (
-    <div className="relative w-32 h-32 mx-auto">
+    <div className="relative w-32 h-32 mx-auto will-animate">
       <svg viewBox="0 0 120 120" className="w-full h-full">
         {/* Base pillar */}
         <motion.line

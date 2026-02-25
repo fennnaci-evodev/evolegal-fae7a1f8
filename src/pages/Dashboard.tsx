@@ -7,7 +7,7 @@ import { fadeUp } from "@/lib/animations";
 
 const quickActions = [
   { icon: PlayCircle, title: "Video Lectures", desc: "Watch expert explanations", to: "/dashboard/library" },
-  { icon: MessageCircle, title: "Ask Expert Manager", desc: "Get general information", to: "/dashboard/chat" },
+  { icon: MessageCircle, title: "Ask Hugo", desc: "Get detailed insights", to: "/dashboard/chat" },
   { icon: FileText, title: "Submit Request", desc: "Get a detailed response", to: "/dashboard/submit" },
 ];
 
@@ -101,7 +101,7 @@ const Dashboard = () => {
 
         <div className="glass-card p-4">
           <p className="text-xs text-muted-foreground/60 text-center">
-            ⚖ All content is for general informational and educational purposes only. Always consult a licensed professional.
+            Hugo & our Experts are here to help. For complex personal matters, professional representation may be recommended.
           </p>
         </div>
       </div>

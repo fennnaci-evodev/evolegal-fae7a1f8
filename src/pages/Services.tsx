@@ -11,7 +11,7 @@ const services = [
   {
     icon: MessageCircle,
     title: "General Q&A Chat",
-    desc: "Unlimited general questions answered by our AI Expert Manager, reviewed for accuracy. Get clarity on processes, terms, and concepts — for US residents anywhere.",
+    desc: "Unlimited questions answered by Hugo and our Expert team. Get clarity on processes, terms, and concepts — for US residents anywhere.",
     features: ["Instant responses", "General information only", "Chat history saved", "Escalate to human Expert"],
   },
   {
