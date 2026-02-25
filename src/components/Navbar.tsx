@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { EvoLogo } from "./EvoLogo";
+import { useAuth } from "@/hooks/useAuth";
 
 const links = [
   { label: "How It Works", to: "/how-it-works" },
@@ -17,6 +18,7 @@ const links = [
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
+  const { user, loading } = useAuth();
 
   return (
     <>
@@ -42,12 +44,20 @@ export function Navbar() {
           </div>
 
           <div className="flex items-center gap-3">
-            <Link to="/auth" className="hidden sm:block">
-              <Button variant="ghost" size="sm">Sign In</Button>
-            </Link>
-            <Link to="/auth">
-              <Button size="sm" variant="hero">Get Started</Button>
-            </Link>
+            {!loading && user ? (
+              <Link to="/dashboard">
+                <Button size="sm" variant="hero">Dashboard</Button>
+              </Link>
+            ) : (
+              <>
+                <Link to="/auth" className="hidden sm:block">
+                  <Button variant="ghost" size="sm">Sign In</Button>
+                </Link>
+                <Link to="/auth">
+                  <Button size="sm" variant="hero">Get Started</Button>
+                </Link>
+              </>
+            )}
             <button
               className="lg:hidden p-2 text-muted-foreground hover:text-foreground transition-colors"
               onClick={() => setMobileOpen(!mobileOpen)}
@@ -83,9 +93,15 @@ export function Navbar() {
                   {l.label}
                 </Link>
               ))}
-              <Link to="/auth" onClick={() => setMobileOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start" size="sm">Sign In</Button>
-              </Link>
+              {!loading && user ? (
+                <Link to="/dashboard" onClick={() => setMobileOpen(false)}>
+                  <Button variant="hero" className="w-full" size="sm">Dashboard</Button>
+                </Link>
+              ) : (
+                <Link to="/auth" onClick={() => setMobileOpen(false)}>
+                  <Button variant="ghost" className="w-full justify-start" size="sm">Sign In</Button>
+                </Link>
+              )}
             </div>
           </motion.div>
         )}
