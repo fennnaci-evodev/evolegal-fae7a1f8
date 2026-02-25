@@ -17,6 +17,7 @@ import FAQ from "./pages/FAQ";
 import Blog from "./pages/Blog";
 import Contact from "./pages/Contact";
 import ArticleTenantLandlord from "./pages/ArticleTenantLandlord";
+import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,6 +32,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/how-it-works" element={<HowItWorks />} />
             <Route path="/services" element={<Services />} />
             <Route path="/pricing" element={<Pricing />} />

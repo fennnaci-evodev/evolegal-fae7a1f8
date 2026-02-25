@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { EvoLogo } from "@/components/EvoLogo";
 import { Mail, Lock, User, Phone, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 const Auth = () => {
@@ -18,8 +19,30 @@ const Auth = () => {
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [forgotMode, setForgotMode] = useState(false);
   const { signUp, signIn } = useAuth();
   const navigate = useNavigate();
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) return;
+    setSubmitting(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) {
+        toast.error(error.message);
+      } else {
+        toast.success("Check your email for a password reset link.");
+        setForgotMode(false);
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Something went wrong");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,6 +100,25 @@ const Auth = () => {
           </p>
         </div>
 
+        {forgotMode ? (
+          <form onSubmit={handleForgotPassword} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-sm">Email</Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input id="email" type="email" placeholder="you@example.com" className="pl-10 bg-muted/30 border-border/50" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              </div>
+            </div>
+            <Button type="submit" className="w-full" variant="hero" size="lg" disabled={submitting}>
+              {submitting ? "Sending…" : "Send Reset Link"}
+            </Button>
+            <p className="text-center text-sm text-muted-foreground">
+              <button onClick={() => setForgotMode(false)} className="text-primary hover:underline font-medium">
+                Back to Sign In
+              </button>
+            </p>
+          </form>
+        ) : (
         <form onSubmit={handleSubmit} className="space-y-4">
           {isSignUp && (
             <>
@@ -133,9 +175,16 @@ const Auth = () => {
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
-            {isSignUp && (
-              <p className="text-[10px] text-muted-foreground/60">Minimum 6 characters</p>
-            )}
+          {isSignUp && (
+            <p className="text-[10px] text-muted-foreground/60">Minimum 6 characters</p>
+          )}
+          {!isSignUp && (
+            <div className="text-right">
+              <button type="button" onClick={() => setForgotMode(true)} className="text-xs text-primary hover:underline">
+                Forgot password?
+              </button>
+            </div>
+          )}
           </div>
 
           {isSignUp && (
@@ -152,6 +201,7 @@ const Auth = () => {
             {submitting ? "Please wait..." : isSignUp ? "Create Account" : "Sign In"}
           </Button>
         </form>
+        )}
 
         <p className="text-center text-sm text-muted-foreground mt-6">
           {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
