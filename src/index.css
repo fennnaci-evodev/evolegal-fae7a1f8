@@ -94,7 +94,26 @@
     background: hsla(240, 12%, 100%, 0.08);
     border-color: hsla(186, 100%, 50%, 0.15);
     box-shadow: 0 12px 40px hsla(0, 0%, 0%, 0.3), 0 0 30px hsla(186, 100%, 50%, 0.05);
-    transform: translateY(-2px) scale(1.01);
+    transform: translateY(-2px);
+  }
+
+  /* GPU hints for animated elements */
+  .will-animate {
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .glass-card,
+    .glass-card:hover {
+      transition: none !important;
+      transform: none !important;
+    }
+    .animate-pulse,
+    .pulse-glow {
+      animation: none !important;
+    }
   }
 
   .glow-cyan {

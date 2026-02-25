@@ -21,10 +21,10 @@ export function EvoLogo({ size = "md", animate = true, showText = true }: EvoLog
   return (
     <div className={`flex flex-col items-center ${s.gap}`}>
       <motion.div
-        className="relative"
+        className="relative will-animate"
         initial={animate ? { rotate: 0, opacity: 0, scale: 0.92 } : false}
         animate={animate ? { rotate: -33, opacity: 1, scale: 1 } : false}
-        transition={{ duration: 1.6, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
         style={{ rotate: animate ? undefined : -33 }}
       >
         <svg

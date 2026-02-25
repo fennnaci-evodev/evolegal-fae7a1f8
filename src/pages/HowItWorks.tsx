@@ -4,27 +4,27 @@ import { Footer } from "@/components/Footer";
 import { ParticleBackground } from "@/components/ParticleBackground";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { FileText, Bot, UserCheck, ArrowRight } from "lucide-react";
+import { FileText, Search, UserCheck, ArrowRight } from "lucide-react";
 
 import { fadeUp } from "@/lib/animations";
 const steps = [
   {
     icon: FileText,
     number: "01",
-    title: "Submit Your Request",
-    desc: "Describe your topic, share key facts, and upload relevant documents. Available for US residents anywhere — optionally select your state for context.",
+    title: "Share Your Question",
+    desc: "Describe the topic you'd like to understand — share key facts, upload documents, and optionally select your state for context. Available for US residents anywhere.",
   },
   {
-    icon: Bot,
+    icon: Search,
     number: "02",
-    title: "AI Drafts General Insights",
-    desc: "Our AI analyzes public legal frameworks and drafts a comprehensive, depersonalized overview covering processes, terms, risks, and options — drawing from federal, state, and UK sources as relevant.",
+    title: "Hugo Researches & Drafts",
+    desc: "Hugo and our team research from a vast base of cases, legislation, and public legal frameworks to prepare a comprehensive, structured overview covering processes, terminology, risks, and options.",
   },
   {
     icon: UserCheck,
     number: "03",
-    title: "Human Review & Delivery",
-    desc: "An EvoLegal Expert reviews every response for accuracy, removes any tailored advice, ensures compliance, and delivers clear, general information to your portal.",
+    title: "Expert Review & Delivery",
+    desc: "Every response is reviewed by an EvoLegal Expert for accuracy and completeness, then delivered to your portal — typically within 4 hours for Pro and 8 hours for Basic.",
   },
 ];
 
@@ -41,7 +41,7 @@ const HowItWorks = () => {
               How <span className="text-gradient">EvoLegal</span> Works
             </h1>
             <p className="text-lg text-muted-foreground max-w-lg mx-auto">
-              Three simple steps from question to clarity. AI-powered research, human-verified quality — for Americans nationwide.
+              Three simple steps from question to clarity — Hugo and our Experts are here to help, for Americans nationwide.
             </p>
           </motion.div>
 
@@ -78,7 +78,7 @@ const HowItWorks = () => {
           >
             <h3 className="text-xl font-display font-semibold mb-3">Quality You Can Trust</h3>
             <p className="text-muted-foreground max-w-lg mx-auto mb-6">
-              Every response goes through our human review checklist: no absolutes, no tailored advice, structured with Options → Risks → Steps → Resources → When to consult a lawyer. State-specific redirects included when applicable.
+              Every response is carefully reviewed by our Experts — structured with Options → Risks → Steps → Resources. We deeply care about accuracy and your legal security.
             </p>
             <Link to="/auth">
               <Button variant="hero" size="lg">

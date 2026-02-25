@@ -1,8 +1,9 @@
 import { ReactNode } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Home, PlayCircle, MessageCircle, FileText, BookOpen, Settings, LogOut } from "lucide-react";
 import { motion } from "framer-motion";
 import { EvoLogo } from "./EvoLogo";
+import { useAuth } from "@/hooks/useAuth";
 
 const navItems = [
   { title: "Home", url: "/dashboard", icon: Home },
@@ -15,7 +16,8 @@ const navItems = [
 
 export function DashboardLayout({ children }: { children: ReactNode }) {
   const location = useLocation();
-
+  const navigate = useNavigate();
+  const { signOut } = useAuth();
   return (
     <div className="flex min-h-screen w-full">
       {/* Sidebar */}
@@ -55,7 +57,8 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
             Hugo & our Experts are here to help.
           </p>
           <Link
-            to="/"
+            to="#"
+            onClick={async (e) => { e.preventDefault(); await signOut(); navigate("/"); }}
             className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-muted/30 transition-all"
           >
             <LogOut className="h-4 w-4" />
