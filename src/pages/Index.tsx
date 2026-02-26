@@ -25,7 +25,7 @@ const topics = [
   "Tenant Rights (US)", "Landlord Obligations (US)", "UK Tenancy Law", "Family Court (US)",
   "UK Divorce Process", "Lease Agreements", "Child Custody Overview", "Eviction Procedures",
   "Security Deposits", "Mediation Basics", "Personal Injury (US)", "Insurance Claims",
-  "Employment Basics", "Contract Disputes",
+  "Employment Basics", "Contract Disputes", "Crypto Law (US & UK)",
 ];
 
 const sampleContent = [
@@ -184,7 +184,7 @@ const Index = () => {
         <div className="container mx-auto max-w-4xl">
           <motion.div className="text-center mb-10" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
             <h2 className="text-3xl md:text-4xl font-display font-bold mb-3">Topics We Cover</h2>
-            <p className="text-muted-foreground">Tenant-Landlord, Family, Personal Injury, Insurance, Employment, Contracts & more.</p>
+            <p className="text-muted-foreground">Tenant-Landlord, Family, Personal Injury, Insurance, Employment, Contracts, Crypto Law & more.</p>
           </motion.div>
 
           <motion.div
