@@ -5,7 +5,7 @@ import { PlayCircle, FileText, Download, Clock, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { fadeUp } from "@/lib/animations";
 
-const categories = ["All", "Tenant-Landlord", "Family Law", "Personal Injury", "Insurance", "Employment", "Contracts"];
+const categories = ["All", "Tenant-Landlord", "Family Law", "Personal Injury", "Insurance", "Employment", "Contracts", "Crypto Law"];
 
 const videos = [
   { title: "Understanding US Tenant Rights Nationwide", duration: "12:34", topic: "Tenant-Landlord", free: true },
@@ -18,6 +18,9 @@ const videos = [
   { title: "Insurance Claims: What to Expect", duration: "13:45", topic: "Insurance", free: false },
   { title: "Employment Law Basics for US Workers", duration: "17:30", topic: "Employment", free: true },
   { title: "Contract Dispute Overview", duration: "14:00", topic: "Contracts", free: false },
+  { title: "How Crypto Assets Are Classified: US vs UK", duration: "16:20", topic: "Crypto Law", free: true },
+  { title: "Regulatory Considerations for Digital Tokens", duration: "19:45", topic: "Crypto Law", free: false },
+  { title: "Crypto Tax Treatment Overview", duration: "14:30", topic: "Crypto Law", free: false },
 ];
 
 const guides = [
@@ -27,6 +30,8 @@ const guides = [
   { title: "Family Court Preparation Checklist", pages: 8, topic: "Family Law", free: false },
   { title: "Personal Injury Documentation Guide", pages: 6, topic: "Personal Injury", free: false },
   { title: "Insurance Claim Filing Checklist", pages: 4, topic: "Insurance", free: true },
+  { title: "Crypto Regulatory Quick Reference (US & UK)", pages: 5, topic: "Crypto Law", free: true },
+  { title: "Crypto Tax Reporting Checklist", pages: 4, topic: "Crypto Law", free: false },
 ];
 
 const Library = () => {

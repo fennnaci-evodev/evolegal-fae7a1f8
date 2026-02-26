@@ -8,7 +8,7 @@ import { ArrowRight, Clock } from "lucide-react";
 
 import { fadeUp } from "@/lib/animations";
 
-const categories = ["All", "Tenant-Landlord", "Family Law", "Personal Injury", "Insurance", "Employment", "UK for US Residents"];
+const categories = ["All", "Tenant-Landlord", "Family Law", "Personal Injury", "Insurance", "Employment", "UK for US Residents", "Crypto Law"];
 
 const posts = [
   {
@@ -73,6 +73,30 @@ const posts = [
     excerpt: "A glossary of common lease agreement terms and what they generally mean for tenants and landlords.",
     topic: "Tenant-Landlord",
     date: "Jan 28, 2026",
+    readTime: "5 min read",
+    to: "/blog",
+  },
+  {
+    title: "How Crypto Assets Are Generally Classified in the US and UK",
+    excerpt: "An overview of how digital assets like Bitcoin, stablecoins, and utility tokens are categorized under US SEC guidance and UK FCA frameworks.",
+    topic: "Crypto Law",
+    date: "Feb 24, 2026",
+    readTime: "7 min read",
+    to: "/blog",
+  },
+  {
+    title: "Common Regulatory Considerations for Digital Tokens",
+    excerpt: "A general look at the regulatory landscape for token issuance, DeFi protocols, and exchange operations in the US and UK.",
+    topic: "Crypto Law",
+    date: "Feb 22, 2026",
+    readTime: "6 min read",
+    to: "/blog",
+  },
+  {
+    title: "General Tax Treatment of Crypto Transactions",
+    excerpt: "How crypto transactions are generally treated for tax purposes — capital gains, income recognition, and reporting obligations in the US and UK.",
+    topic: "Crypto Law",
+    date: "Feb 20, 2026",
     readTime: "5 min read",
     to: "/blog",
   },

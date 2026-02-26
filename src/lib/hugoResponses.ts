@@ -105,6 +105,46 @@ Personal injury law covers situations where a person suffers harm due to another
 For significant injuries, disputed liability, or insurance claim denials, working with a licensed personal injury attorney can make a real difference. Many work on contingency (no upfront fees).${HUGO_SIGN_OFF}`;
   }
 
+  if (lower.includes("crypto") || lower.includes("bitcoin") || lower.includes("blockchain") || lower.includes("token") || lower.includes("defi") || lower.includes("nft") || lower.includes("digital asset") || lower.includes("web3")) {
+    return `**Overview**
+Crypto law is a rapidly evolving area covering the regulation, classification, taxation, and legal treatment of digital assets such as cryptocurrencies, tokens, NFTs, and decentralized finance (DeFi) protocols. Both the US and UK have developing frameworks, though approaches differ significantly.
+
+**Key Legal Framework**
+• **US: SEC guidance** — The Howey Test is widely used to determine whether a digital asset qualifies as a security
+• **US: CFTC jurisdiction** — Bitcoin and Ether are generally treated as commodities; the CFTC oversees derivatives markets
+• **US: FinCEN** — Money transmission rules apply to certain crypto businesses; AML/KYC requirements are enforced
+• **US: IRS Notice 2014-21** — Crypto is treated as property for federal tax purposes; every disposal is a taxable event
+• **UK: FCA** — The Financial Conduct Authority regulates certain crypto-assets; most utility tokens are unregulated, but security tokens and stablecoins fall under specific rules
+• **UK: HMRC** — Crypto is subject to Capital Gains Tax for individuals; Income Tax may apply for mining/staking rewards
+• **EU: MiCA Regulation** — The Markets in Crypto-Assets regulation provides a comprehensive EU-wide framework (relevant context for UK comparisons)
+
+**Common Topics & Considerations**
+1. **Token classification** — Whether a token is a security, commodity, utility token, or payment token affects which regulations apply
+2. **Exchange and wallet regulation** — Platforms facilitating crypto trading must generally register and comply with AML/KYC rules in both the US and UK
+3. **DeFi and smart contracts** — Legal status of decentralized protocols remains largely unsettled; liability questions are actively debated
+4. **NFT ownership** — NFTs generally convey ownership of the token, not necessarily the underlying IP; terms vary widely
+5. **Cross-border considerations** — Crypto transactions frequently involve multiple jurisdictions, creating complex regulatory questions
+6. **Tax reporting** — Both the US (Form 8949, Schedule D) and UK (Self Assessment) require reporting of crypto gains and disposals
+
+**Potential Risks & Considerations**
+• Regulatory enforcement actions by the SEC, CFTC, or FCA can significantly impact token projects and exchanges
+• Tax non-compliance penalties can be substantial — the IRS and HMRC are both increasing enforcement
+• Wallet security and private key management carry significant legal and financial implications
+• "Rug pulls," scams, and fraud in the crypto space are subject to existing fraud and consumer protection laws
+• Sanctions compliance (OFAC in the US, OFSI in the UK) applies to crypto transactions
+
+**Helpful Resources**
+• SEC.gov — Digital assets and initial coin offerings guidance
+• CFTC.gov — Digital asset information
+• FCA.uk — Cryptoasset registration and guidance
+• IRS.gov — Virtual currency FAQs
+• HMRC — Cryptoassets Manual
+• Nolo.com and FindLaw for general overviews
+
+**When Professional Help May Be Valuable**
+For matters involving token launches, regulatory compliance, tax planning for significant crypto holdings, exchange licensing, or any enforcement-related inquiries, working with a licensed attorney or tax professional experienced in digital assets is strongly recommended.${HUGO_SIGN_OFF}`;
+  }
+
   return `Thank you for your question — great topic to explore.
 
 **Key Considerations**

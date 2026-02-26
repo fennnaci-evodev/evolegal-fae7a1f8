@@ -28,6 +28,7 @@ const topicOptions = [
   { value: "insurance-us", label: "Insurance Claims (US)" },
   { value: "employment-us", label: "Employment Basics (US)" },
   { value: "contracts-us", label: "Contract Disputes (US)" },
+  { value: "crypto", label: "Crypto Law (US & UK)" },
   { value: "other", label: "Other" },
 ];
 
