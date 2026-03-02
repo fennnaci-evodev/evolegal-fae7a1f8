@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Send, User, Info } from "lucide-react";
 import { generateHugoResponse } from "@/lib/hugoResponses";
+import { isRateLimited } from "@/lib/security";
 
 const tips = [
   "US tenants generally have a warranty of habitability — landlords must maintain livable conditions...",
@@ -46,6 +47,9 @@ const ExpertChat = () => {
 
   const handleSend = () => {
     if (!input.trim() || loading) return;
+    if (isRateLimited("hugo_chat", 15, 60_000)) {
+      return;
+    }
     const userMsg: Message = { id: Date.now().toString(), role: "user", content: input };
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
@@ -87,7 +91,7 @@ const ExpertChat = () => {
                 </p>
               </div>
               <div className="flex flex-wrap gap-2 justify-center max-w-md">
-                {["What are tenant rights in the US?", "UK divorce process overview", "How do personal injury claims work?", "Insurance claim basics"].map((q) => (
+                {["What are tenant rights in the US?", "UK divorce process overview", "How do personal injury claims work?", "How does crypto regulation work?"].map((q) => (
                   <button
                     key={q}
                     onClick={() => setInput(q)}
