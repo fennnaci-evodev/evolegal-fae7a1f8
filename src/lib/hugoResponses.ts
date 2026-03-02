@@ -1,172 +1,80 @@
 /**
- * Hugo response generator — produces structured, human-feeling responses.
- * In production, this would call the Grok API with the system prompt.
+ * Hugo response generator — produces natural, conversational responses
+ * in the voice of a calm, experienced legal expert.
  */
 
-const HUGO_SIGN_OFF = `\n\n— Hugo here. Happy to clarify anything further. If you'd like deeper support, feel free to reach out to one of our Legal Experts.`;
+const HUGO_CLOSE = `\n\nIf anything is unclear or you'd like to go deeper into any of this, just let me know — I'm here to help. And if you ever want more detailed, hands-on guidance, one of our Managers can dive even further.`;
 
 export function generateHugoResponse(input: string): string {
   const lower = input.toLowerCase();
 
   if (lower.includes("tenant") || lower.includes("landlord") || lower.includes("rent") || lower.includes("lease") || lower.includes("evict")) {
-    return `**Overview**
-Tenant-landlord law governs the rights and responsibilities of renters and property owners in residential settings. While federal protections like the Fair Housing Act apply nationwide, most rules come from state statutes and local ordinances.
+    return `Great question — tenant-landlord law is one of those areas where the rules can vary enormously depending on where you are, so it's always worth understanding the broader landscape before diving into specifics.
 
-**Key Legal Framework**
-• **Fair Housing Act (1968)** — Prohibits discrimination in housing based on race, color, national origin, religion, sex, familial status, or disability
-• **Uniform Residential Landlord and Tenant Act (URLTA)** — Model law adopted (with variations) by many states
-• **State-specific statutes** — Each state has its own landlord-tenant code covering deposits, evictions, repairs, and notice requirements
-• **UK: Housing Act 1988** — Governs Assured Shorthold Tenancies (ASTs), the most common form of residential tenancy in England
+In the US, the foundation starts with the Fair Housing Act, which prohibits discrimination in housing across the board. Beyond that, most of the real substance — things like security deposit limits, eviction procedures, repair obligations, and notice requirements — comes from state-level statutes. Some states follow the Uniform Residential Landlord and Tenant Act as a model, but every state puts its own spin on it. So what's true in California might be quite different from what applies in Texas.
 
-**Common Options & Processes**
-1. Review the lease agreement carefully for specific terms and obligations
-2. Document all communications in writing (email, certified mail)
-3. Report habitability issues to the landlord in writing with a reasonable deadline
-4. If repairs aren't made, many states allow "repair and deduct" or rent withholding under strict conditions
-5. For disputes, consider mediation before escalating to small claims court
-6. For eviction defense, respond to court notices within the required timeframe
+One concept that comes up a lot is the warranty of habitability. In most US jurisdictions, landlords have a legal obligation to maintain livable conditions — working plumbing, heat, structural integrity, that sort of thing. If they fail to do that, many states allow tenants to take steps like "repair and deduct" or, in some cases, withhold rent until the issue is resolved. That said, these remedies usually come with strict procedural requirements, so it's important to follow the right steps.
 
-**Potential Risks & Considerations**
-• Self-help evictions (changing locks, shutting off utilities) are illegal in virtually all US jurisdictions
-• Security deposit disputes are among the most common issues — rules on amounts, holding, and return deadlines vary significantly by state
-• Retaliatory actions by landlords against tenants who exercise their rights are prohibited in most states
-• In the UK, landlords must protect deposits in government-approved schemes or face penalties
+On the UK side, things work a bit differently. Most residential tenancies in England fall under the Housing Act 1988 as Assured Shorthold Tenancies. Landlords there are required to protect deposits in government-approved schemes — failure to do so can result in penalties. The eviction process has also been evolving, with ongoing reforms around Section 21 "no-fault" evictions.
 
-**Helpful Resources**
-• State attorney general's office (tenant rights division)
-• HUD.gov — Fair housing information and complaint filing
-• Local legal aid societies and tenant unions
-• UK: Citizens Advice (citizensadvice.org.uk) and Shelter
-• Nolo.com and FindLaw for state-specific overviews
+One thing that's true on both sides of the Atlantic: always put things in writing. Whether it's a repair request, a complaint, or any agreement you reach with your landlord, having a written record makes an enormous difference if things ever escalate. And if you're facing an active eviction, responding to court notices within the required timeframe is absolutely critical.
 
-**When Professional Help May Be Valuable**
-For matters involving active eviction proceedings, significant property damage claims, discrimination complaints, or any situation where formal enforcement may be needed, working with a licensed attorney in your jurisdiction can be very helpful.${HUGO_SIGN_OFF}`;
+For US resources, your state attorney general's office and local legal aid societies are great starting points. In the UK, Citizens Advice and Shelter are excellent. HUD.gov is also useful for anything related to fair housing.${HUGO_CLOSE}`;
   }
 
   if (lower.includes("family") || lower.includes("divorce") || lower.includes("custody") || lower.includes("child") || lower.includes("marriage")) {
-    return `**Overview**
-Family law encompasses legal matters related to family relationships, including divorce, child custody, child support, adoption, and domestic relations. Both US and UK systems prioritize the welfare of children in custody matters, though processes differ significantly.
+    return `I understand this area can feel especially personal and complex, so let me walk you through the landscape in a way that hopefully makes things feel a bit more manageable.
 
-**Key Legal Framework**
-• **US: State family codes** — Family law is primarily governed by state law; each state has its own procedures
-• **Uniform Child Custody Jurisdiction and Enforcement Act (UCCJEA)** — Adopted by all 50 states for custody jurisdiction
-• **US: No-fault divorce** — Available in all 50 states, though grounds and waiting periods vary
-• **UK: Divorce, Dissolution and Separation Act 2020** — Introduced no-fault divorce in England and Wales
-• **UK: Children Act 1989** — Establishes that the child's welfare is the paramount consideration
+Family law covers a wide range of matters — divorce, child custody, child support, adoption, and domestic relations more broadly. In both the US and UK, the courts place enormous emphasis on the welfare of children in any custody-related matter, though the specific processes differ quite a bit.
 
-**Common Options & Processes**
-1. Determine the appropriate jurisdiction (generally, the state/country of residence)
-2. Consider mediation or collaborative law processes before court proceedings
-3. For divorce: file a petition, serve the other party, negotiate terms
-4. For custody: courts generally apply the "best interests of the child" standard
-5. Financial disclosure is typically required in both US and UK proceedings
-6. In the UK, a 20-week "reflection period" is built into the no-fault divorce process
+In the US, family law is primarily governed at the state level, which means procedures, waiting periods, and even grounds for divorce can vary. The good news is that all 50 states now offer no-fault divorce, so you don't necessarily need to prove wrongdoing — though the specifics of property division, spousal support, and custody arrangements will depend on your state's laws. For custody matters, courts generally apply what's known as the "best interests of the child" standard, which considers factors like stability, the child's relationship with each parent, and each parent's ability to provide care.
 
-**Potential Risks & Considerations**
-• Custody arrangements can be modified if circumstances change significantly
-• Moving to a different state with a child may require court permission
-• Hidden assets during disclosure can result in serious consequences
-• Emergency orders (protective orders) are available in urgent situations
+Over in England and Wales, the Divorce, Dissolution and Separation Act 2020 introduced no-fault divorce, which was a significant modernisation. There's a built-in 20-week reflection period, and the Children Act 1989 establishes that the child's welfare is the paramount consideration in any decision.
 
-**Helpful Resources**
-• Local family court self-help centers
-• State bar association lawyer referral services
-• UK: Family Mediation Council, Citizens Advice
-• National Domestic Violence Hotline: 1-800-799-7233
+One thing I'd strongly encourage in both jurisdictions is exploring mediation early on. In the UK, it's often required before you can begin court proceedings, and in the US, many courts strongly recommend or even mandate it. Mediation tends to be faster, less expensive, and often leads to outcomes that both parties can live with more comfortably than a court-imposed decision.
 
-**When Professional Help May Be Valuable**
-For contested custody disputes, complex financial situations, or international/cross-border matters, working with a licensed family law attorney is strongly recommended.${HUGO_SIGN_OFF}`;
+Financial disclosure is a big part of both US and UK proceedings — being upfront about assets and income is not just expected, it's legally required, and hiding assets can lead to serious consequences. If there's any urgency or safety concern, emergency protective orders are available in both systems.
+
+For support, local family court self-help centres can be incredibly helpful, and in the UK, the Family Mediation Council and Citizens Advice are great resources. If you're in a situation involving domestic violence, the National Domestic Violence Hotline (1-800-799-7233) is always available.${HUGO_CLOSE}`;
   }
 
   if (lower.includes("injury") || lower.includes("accident") || lower.includes("negligence")) {
-    return `**Overview**
-Personal injury law covers situations where a person suffers harm due to another party's negligence, recklessness, or intentional conduct. Most personal injury matters in the US are governed by state tort law, with significant variations in statute of limitations, damage caps, and liability standards.
+    return `Personal injury is one of those areas where understanding the basics can really help you feel more confident about what's going on and what your options might be.
 
-**Key Legal Framework**
-• **Negligence standard** — Most claims require proving: duty of care, breach, causation, and damages
-• **Comparative vs. contributory negligence** — States differ on how fault affects recovery
-• **Statute of limitations** — Ranges from 1 to 6 years depending on the state and type of injury
-• **Workers' compensation** — Separate system for workplace injuries in all states
+At its core, most personal injury claims in the US are built on the concept of negligence. That means you generally need to show four things: that the other party owed you a duty of care, that they breached that duty, that the breach caused your injury, and that you suffered actual damages as a result. It sounds formal, but in practice it covers a huge range of situations — car accidents, slip-and-falls, medical issues, workplace incidents, and more.
 
-**Common Options & Processes**
-1. Seek medical attention and document all injuries and treatment
-2. Report the incident to relevant parties (employer, property owner, police)
-3. Preserve evidence (photos, witness information, medical records)
-4. Consider consulting with a personal injury attorney (many offer free consultations)
-5. Insurance claims are often the first step before litigation
-6. Most cases settle without going to trial
+One important wrinkle is how different states handle shared fault. Some states follow "comparative negligence," where your compensation is reduced by your percentage of fault — so if you're found 20% responsible, you'd recover 80% of the damages. A few states still use "contributory negligence," which can bar recovery entirely if you're found even slightly at fault. It's a significant distinction.
 
-**Helpful Resources**
-• State bar association lawyer referral programs
-• Local legal aid organizations
-• State insurance department for claims disputes
+Statutes of limitations are another crucial factor. Depending on the state and the type of injury, you might have anywhere from one to six years to file a claim. Missing that window usually means losing the right to pursue it entirely, so timing matters.
 
-**When Professional Help May Be Valuable**
-For significant injuries, disputed liability, or insurance claim denials, working with a licensed personal injury attorney can make a real difference. Many work on contingency (no upfront fees).${HUGO_SIGN_OFF}`;
+From a practical standpoint, the most important things you can do early on are to document everything — photos of the scene, medical records, witness contact information — and to report the incident to the relevant parties, whether that's an employer, a property owner, or law enforcement. Medical attention should always come first, both for your health and because those records become important evidence.
+
+Most personal injury cases actually settle without ever going to trial, and insurance claims are typically the first step in that process. Many attorneys in this area work on a contingency basis, meaning no upfront fees — they only get paid if you recover something.${HUGO_CLOSE}`;
   }
 
   if (lower.includes("crypto") || lower.includes("bitcoin") || lower.includes("blockchain") || lower.includes("token") || lower.includes("defi") || lower.includes("nft") || lower.includes("digital asset") || lower.includes("web3")) {
-    return `**Overview**
-Crypto law is a rapidly evolving area covering the regulation, classification, taxation, and legal treatment of digital assets such as cryptocurrencies, tokens, NFTs, and decentralized finance (DeFi) protocols. Both the US and UK have developing frameworks, though approaches differ significantly.
+    return `Crypto law is one of the most fascinating and fast-moving areas right now, so I'm glad you're asking about it. Many people find this space confusing at first, and honestly, even regulators are still working out the details — so you're not alone.
 
-**Key Legal Framework**
-• **US: SEC guidance** — The Howey Test is widely used to determine whether a digital asset qualifies as a security
-• **US: CFTC jurisdiction** — Bitcoin and Ether are generally treated as commodities; the CFTC oversees derivatives markets
-• **US: FinCEN** — Money transmission rules apply to certain crypto businesses; AML/KYC requirements are enforced
-• **US: IRS Notice 2014-21** — Crypto is treated as property for federal tax purposes; every disposal is a taxable event
-• **UK: FCA** — The Financial Conduct Authority regulates certain crypto-assets; most utility tokens are unregulated, but security tokens and stablecoins fall under specific rules
-• **UK: HMRC** — Crypto is subject to Capital Gains Tax for individuals; Income Tax may apply for mining/staking rewards
-• **EU: MiCA Regulation** — The Markets in Crypto-Assets regulation provides a comprehensive EU-wide framework (relevant context for UK comparisons)
+Let me give you the big picture. In the US, one of the central questions is how a digital asset gets classified. The SEC uses something called the Howey Test to determine whether a token qualifies as a security — and if it does, a whole set of registration and disclosure requirements kick in. Meanwhile, the CFTC treats assets like Bitcoin and Ether generally as commodities, and they oversee the derivatives markets around them. So right from the start, you've got overlapping regulatory frameworks depending on what the asset actually is and how it's being used.
 
-**Common Topics & Considerations**
-1. **Token classification** — Whether a token is a security, commodity, utility token, or payment token affects which regulations apply
-2. **Exchange and wallet regulation** — Platforms facilitating crypto trading must generally register and comply with AML/KYC rules in both the US and UK
-3. **DeFi and smart contracts** — Legal status of decentralized protocols remains largely unsettled; liability questions are actively debated
-4. **NFT ownership** — NFTs generally convey ownership of the token, not necessarily the underlying IP; terms vary widely
-5. **Cross-border considerations** — Crypto transactions frequently involve multiple jurisdictions, creating complex regulatory questions
-6. **Tax reporting** — Both the US (Form 8949, Schedule D) and UK (Self Assessment) require reporting of crypto gains and disposals
+On the UK side, the Financial Conduct Authority takes a somewhat different approach. Most utility tokens are largely unregulated, but security tokens and certain stablecoins fall under specific rules. The FCA has also been quite active in requiring crypto businesses to register and comply with anti-money laundering and know-your-customer requirements — similar to FinCEN's role in the US.
 
-**Potential Risks & Considerations**
-• Regulatory enforcement actions by the SEC, CFTC, or FCA can significantly impact token projects and exchanges
-• Tax non-compliance penalties can be substantial — the IRS and HMRC are both increasing enforcement
-• Wallet security and private key management carry significant legal and financial implications
-• "Rug pulls," scams, and fraud in the crypto space are subject to existing fraud and consumer protection laws
-• Sanctions compliance (OFAC in the US, OFSI in the UK) applies to crypto transactions
+Tax treatment is another area people often have questions about. In the US, the IRS treats crypto as property, which means every disposal — whether you're selling, trading, or even using crypto to buy something — is potentially a taxable event. You'd report gains on Form 8949 and Schedule D. In the UK, HMRC takes a similar view, with crypto subject to Capital Gains Tax for individuals, and Income Tax potentially applying to mining or staking rewards.
 
-**Helpful Resources**
-• SEC.gov — Digital assets and initial coin offerings guidance
-• CFTC.gov — Digital asset information
-• FCA.uk — Cryptoasset registration and guidance
-• IRS.gov — Virtual currency FAQs
-• HMRC — Cryptoassets Manual
-• Nolo.com and FindLaw for general overviews
+DeFi and smart contracts raise some genuinely novel questions. The legal status of decentralised protocols is still largely unsettled — who's liable when a smart contract executes as coded but produces an unexpected outcome? These are questions the courts and regulators are actively grappling with. NFT ownership is another interesting one — buying an NFT generally gives you ownership of the token itself, but not necessarily the underlying intellectual property. The terms vary widely from project to project.
 
-**When Professional Help May Be Valuable**
-For matters involving token launches, regulatory compliance, tax planning for significant crypto holdings, exchange licensing, or any enforcement-related inquiries, working with a licensed attorney or tax professional experienced in digital assets is strongly recommended.${HUGO_SIGN_OFF}`;
+Cross-border considerations come up constantly in crypto because transactions don't respect national boundaries the way traditional finance does. That creates complex questions around which jurisdiction's rules apply, and sanctions compliance — through OFAC in the US and OFSI in the UK — adds another layer.
+
+For resources, the SEC, CFTC, and FCA all have published guidance on digital assets that's worth reviewing. The IRS virtual currency FAQs and HMRC's Cryptoassets Manual are helpful for tax questions specifically.${HUGO_CLOSE}`;
   }
 
-  return `Thank you for your question — great topic to explore.
+  return `Thanks for bringing that up — it's a good area to think through carefully.
 
-**Key Considerations**
-• Federal laws provide baseline protections that apply across all states
-• State laws add additional rules that can vary significantly
-• Local ordinances may further modify requirements in specific areas
-• UK law follows a different framework that may be relevant for cross-border matters
+The legal landscape around most topics tends to work in layers. At the top, you have federal laws that provide baseline protections applying across all states. Below that, state statutes add their own rules, which can vary quite significantly from one place to another. And then local ordinances can modify things even further at the city or county level. If there's a cross-border dimension, UK law follows its own framework, which can be relevant depending on the situation.
 
-**Common Next Steps**
-1. Research the relevant federal and state laws for your area of interest
-2. Review any applicable documents, contracts, or agreements
-3. Document all relevant facts, communications, and timelines
-4. Consider whether mediation or alternative dispute resolution might be appropriate
+As a starting point, I'd suggest looking into the specific federal and state laws that apply to your area of interest. Reviewing any relevant documents, contracts, or agreements is always a good idea, and keeping a clear record of facts, communications, and timelines can make a real difference down the road. It's also worth considering whether mediation or some form of alternative dispute resolution might be appropriate — it's often faster, less expensive, and less stressful than formal proceedings.
 
-**Helpful Resources**
-• State attorney general's office
-• Local legal aid societies
-• Court self-help centers
-• UK: Citizens Advice and GOV.UK
+We've actually got some detailed video lectures and guides in our library that cover many specific topics in depth — definitely worth exploring if you want to build a stronger foundation.
 
-We have detailed video lectures and guides in our library covering many specific topics — feel free to explore!
-
-**When Professional Help May Be Valuable**
-For any matter involving potential legal proceedings or significant financial stakes, working with a licensed professional in your jurisdiction can be very helpful.${HUGO_SIGN_OFF}`;
+For more formal resources, your state attorney general's office, local legal aid societies, and court self-help centres are all excellent starting points. In the UK, Citizens Advice and GOV.UK cover a wide range of topics very well.${HUGO_CLOSE}`;
 }
