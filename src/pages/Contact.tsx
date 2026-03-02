@@ -9,13 +9,20 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Send, Mail, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
+import { isRateLimited } from "@/lib/security";
 
 import { fadeUp } from "@/lib/animations";
 const Contact = () => {
   const [sending, setSending] = useState(false);
+  const [honeypot, setHoneypot] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (honeypot) return;
+    if (isRateLimited("contact_form", 5, 60_000)) {
+      toast.error("Too many submissions. Please wait a moment.");
+      return;
+    }
     setSending(true);
     setTimeout(() => {
       setSending(false);
@@ -55,23 +62,27 @@ const Contact = () => {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
+              {/* Honeypot */}
+              <div className="absolute opacity-0 pointer-events-none h-0 overflow-hidden" aria-hidden="true" tabIndex={-1}>
+                <input type="text" name="company_url" autoComplete="off" value={honeypot} onChange={(e) => setHoneypot(e.target.value)} tabIndex={-1} />
+              </div>
               <div className="grid sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label className="text-sm">Name</Label>
-                  <Input placeholder="Your name" className="bg-muted/30 border-border/50" required />
+                  <Input placeholder="Your name" className="bg-muted/30 border-border/50" required maxLength={100} />
                 </div>
                 <div className="space-y-2">
                   <Label className="text-sm">Email</Label>
-                  <Input type="email" placeholder="you@example.com" className="bg-muted/30 border-border/50" required />
+                  <Input type="email" placeholder="you@example.com" className="bg-muted/30 border-border/50" required maxLength={255} />
                 </div>
               </div>
               <div className="space-y-2">
                 <Label className="text-sm">Subject</Label>
-                <Input placeholder="How can we help?" className="bg-muted/30 border-border/50" required />
+                <Input placeholder="How can we help?" className="bg-muted/30 border-border/50" required maxLength={200} />
               </div>
               <div className="space-y-2">
                 <Label className="text-sm">Message</Label>
-                <Textarea placeholder="Tell us more..." rows={5} className="bg-muted/30 border-border/50 resize-none" required />
+                <Textarea placeholder="Tell us more..." rows={5} className="bg-muted/30 border-border/50 resize-none" required maxLength={2000} />
               </div>
 
               <Button type="submit" variant="hero" size="lg" className="w-full" disabled={sending}>

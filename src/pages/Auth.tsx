@@ -9,6 +9,7 @@ import { Mail, Lock, User, Phone, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { checkPasswordStrength, isRateLimited } from "@/lib/security";
 
 const Auth = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -47,6 +48,22 @@ const Auth = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) return;
+
+    // Client-side rate limiting
+    if (isRateLimited("auth_submit", 5, 60_000)) {
+      toast.error("Too many attempts. Please wait a minute before trying again.");
+      return;
+    }
+
+    // Password strength check on signup
+    if (isSignUp) {
+      const strength = checkPasswordStrength(password);
+      if (!strength.strong) {
+        toast.error("Password too weak: " + strength.feedback.join(", "));
+        return;
+      }
+    }
+
     setSubmitting(true);
 
     try {

@@ -1,12 +1,61 @@
 /**
  * Hugo response generator — produces natural, conversational responses
- * in the voice of a calm, experienced legal expert.
+ * in the voice of a calm, experienced legal expert who also has a sense of humour.
  */
 
 const HUGO_CLOSE = `\n\nIf anything is unclear or you'd like to go deeper into any of this, just let me know — I'm here to help. And if you ever want more detailed, hands-on guidance, one of our Managers can dive even further.`;
 
+/* ---------- off-topic / fun detection ---------- */
+const FUN_PATTERNS = [
+  /joke/i, /funny/i, /laugh/i, /haha/i, /lol/i, /tell me something (fun|interesting|random)/i,
+  /knock knock/i, /what do you think about (pizza|cats|dogs|beer|coffee|football|soccer|weather)/i,
+  /are you (real|human|robot|ai|alive)/i, /do you (sleep|eat|dream|have feelings)/i,
+  /meaning of life/i, /favorite (movie|song|book|food|colour|color)/i,
+  /who would win/i, /can you sing/i, /tell me a story/i, /bored/i,
+];
+
+const FUN_RESPONSES = [
+  `Ha — you know, if I weren't so busy reading case law, I'd probably have a great stand-up career. But between you and me, my real talent is making complex legal concepts feel approachable. Got a legal topic on your mind? I'd love to dig into it with you.`,
+  `I appreciate the lighter side of conversation — honestly, it keeps me sharp. That said, I'm at my absolute best when we're working through something that actually matters to you. Tenant questions, crypto regulations, family law — throw anything at me and I'll give you the clearest picture I can.`,
+  `You know, I could probably tell you a decent joke, but I think you'd get a lot more value if I helped you untangle something that's been on your mind legally. What do you say — anything you've been curious about?`,
+  `I like the energy! But I'll be honest, my comedy material is mostly contract clauses and statutory interpretation — niche audience, let's say. What I'm genuinely good at is making legal topics feel clear and manageable. Want to try me?`,
+  `That made me smile. I'm happy to chat, but I'm really in my element when we're exploring legal questions together. Got something on your mind? Big or small, I'm here for it.`,
+];
+
+const GREETING_PATTERNS = [
+  /^(hi|hello|hey|howdy|yo|sup|good (morning|afternoon|evening))[\s!?.]*$/i,
+  /^what'?s up/i, /^how are you/i, /^nice to meet you/i,
+];
+
+const GREETING_RESPONSES = [
+  `Hey there! Great to see you. I'm Hugo, your Expert Manager here at EvoLegal. I'm ready whenever you are — feel free to ask me about any legal topic, from tenant rights to crypto regulations, family law, personal injury, or anything else. What's on your mind?`,
+  `Hello! Welcome — I'm Hugo. Whether you've got a quick question or something more involved, I'm here to walk you through it clearly and thoroughly. What would you like to explore today?`,
+];
+
+function isFunQuestion(text: string): boolean {
+  return FUN_PATTERNS.some((p) => p.test(text));
+}
+
+function isGreeting(text: string): boolean {
+  return GREETING_PATTERNS.some((p) => p.test(text.trim()));
+}
+
+function pickRandom<T>(arr: T[]): T {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
 export function generateHugoResponse(input: string): string {
   const lower = input.toLowerCase();
+
+  /* greetings */
+  if (isGreeting(input)) {
+    return pickRandom(GREETING_RESPONSES);
+  }
+
+  /* fun / off-topic */
+  if (isFunQuestion(input)) {
+    return pickRandom(FUN_RESPONSES);
+  }
 
   if (lower.includes("tenant") || lower.includes("landlord") || lower.includes("rent") || lower.includes("lease") || lower.includes("evict")) {
     return `Great question — tenant-landlord law is one of those areas where the rules can vary enormously depending on where you are, so it's always worth understanding the broader landscape before diving into specifics.

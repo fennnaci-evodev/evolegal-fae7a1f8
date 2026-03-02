@@ -1,13 +1,14 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Upload, Send, FileText, Info, MapPin } from "lucide-react";
+import { Upload, Send, FileText, Info, MapPin, X } from "lucide-react";
 import { toast } from "sonner";
 import { fadeUp } from "@/lib/animations";
+import { validateFile, sanitizeFilename, validateTextLength, isRateLimited } from "@/lib/security";
 
 const US_STATES = [
   "Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut","Delaware",
@@ -40,12 +41,44 @@ const SubmitRequest = () => {
   const [description, setDescription] = useState("");
   const [keyFacts, setKeyFacts] = useState("");
 
+  const [honeypot, setHoneypot] = useState("");
+  const [files, setFiles] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFiles = (incoming: FileList | null) => {
+    if (!incoming) return;
+    const validated: File[] = [];
+    for (const file of Array.from(incoming)) {
+      const result = validateFile(file);
+      if (!result.valid) {
+        toast.error(result.error);
+      } else {
+        validated.push(file);
+      }
+    }
+    setFiles((prev) => [...prev, ...validated].slice(0, 5));
+  };
+
+  const removeFile = (idx: number) => setFiles((prev) => prev.filter((_, i) => i !== idx));
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Honeypot check
+    if (honeypot) return;
+
+    if (isRateLimited("submit_request", 5, 60_000)) {
+      toast.error("Too many submissions. Please wait a minute.");
+      return;
+    }
+
     if (!topic || !description.trim()) {
       toast.error("Please select a topic and describe your question.");
       return;
     }
+    const descCheck = validateTextLength(description, 5000, "Description");
+    if (!descCheck.valid) { toast.error(descCheck.error); return; }
+
     setSubmitting(true);
     setTimeout(() => {
       setSubmitting(false);
@@ -55,6 +88,7 @@ const SubmitRequest = () => {
       setTitle("");
       setDescription("");
       setKeyFacts("");
+      setFiles([]);
     }, 2000);
   };
 
@@ -150,14 +184,46 @@ const SubmitRequest = () => {
             />
           </div>
 
+          {/* Honeypot — hidden from real users */}
+          <div className="absolute opacity-0 pointer-events-none h-0 overflow-hidden" aria-hidden="true" tabIndex={-1}>
+            <input type="text" name="website" autoComplete="off" value={honeypot} onChange={(e) => setHoneypot(e.target.value)} tabIndex={-1} />
+          </div>
+
           {/* Upload */}
           <div className="space-y-2">
-            <Label className="text-sm font-display">Upload Documents <span className="text-muted-foreground text-xs">(optional)</span></Label>
-            <div className="glass rounded-xl p-6 text-center cursor-pointer hover:border-primary/20 transition-colors group">
+            <Label className="text-sm font-display">Upload Documents <span className="text-muted-foreground text-xs">(optional, max 5 files)</span></Label>
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.webp"
+              className="hidden"
+              onChange={(e) => handleFiles(e.target.files)}
+            />
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={(e) => { e.preventDefault(); handleFiles(e.dataTransfer.files); }}
+              className="glass rounded-xl p-6 text-center cursor-pointer hover:border-primary/20 transition-colors group"
+            >
               <Upload className="h-8 w-8 text-muted-foreground mx-auto mb-2 group-hover:text-primary transition-colors" />
               <p className="text-sm text-muted-foreground">Drag & drop files here, or click to browse</p>
-              <p className="text-xs text-muted-foreground/50 mt-1">PDF, DOC, TXT — Max 10MB</p>
+              <p className="text-xs text-muted-foreground/50 mt-1">PDF, DOC, TXT, JPG, PNG — Max 15 MB each</p>
             </div>
+            {files.length > 0 && (
+              <div className="space-y-1.5 mt-2">
+                {files.map((f, i) => (
+                  <div key={i} className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/20 rounded-lg px-3 py-1.5">
+                    <FileText className="h-3 w-3 shrink-0" />
+                    <span className="truncate flex-1">{f.name}</span>
+                    <span className="text-muted-foreground/50">{(f.size / 1024).toFixed(0)} KB</span>
+                    <button type="button" onClick={() => removeFile(i)} className="text-muted-foreground hover:text-destructive transition-colors">
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <Button type="submit" variant="hero" size="lg" className="w-full" disabled={submitting}>
