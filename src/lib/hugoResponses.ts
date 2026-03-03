@@ -1,9 +1,16 @@
 /**
  * Hugo response generator — produces natural, conversational responses
  * in the voice of a calm, experienced legal expert who also has a sense of humour.
+ * Hugo asks clarifying questions for vague inputs and provides initial helpful context.
  */
 
-const HUGO_CLOSE = `\n\nIf anything is unclear or you'd like to go deeper into any of this, just let me know — I'm here to help. And if you ever want more detailed, hands-on guidance, one of our Managers can dive even further.`;
+const HUGO_CLOSE_VARIANTS = [
+  `\n\nIf anything is unclear or you'd like to go deeper into any of this, just let me know — I'm here to help.`,
+  `\n\nAnything unclear? Just let me know — happy to clarify or explore further.`,
+  `\n\nIf this feels bigger than expected, one of our Managers would be glad to go deeper with you.`,
+  `\n\nHappy to keep going on any of this — just say the word.`,
+  `\n\nIf you'd like more detailed, hands-on guidance, one of our Managers can dive even further.`,
+];
 
 /* ---------- off-topic / fun detection ---------- */
 const FUN_PATTERNS = [
@@ -30,6 +37,33 @@ const GREETING_PATTERNS = [
 const GREETING_RESPONSES = [
   `Hey there! Great to see you. I'm Hugo, your Expert Manager here at EvoLegal. I'm ready whenever you are — feel free to ask me about any legal topic, from tenant rights to crypto regulations, family law, personal injury, or anything else. What's on your mind?`,
   `Hello! Welcome — I'm Hugo. Whether you've got a quick question or something more involved, I'm here to walk you through it clearly and thoroughly. What would you like to explore today?`,
+  `Hi! I'm Hugo — glad you're here. I cover everything from UK tenancy law to US personal injury to crypto regulation, and I genuinely enjoy untangling these things. What can I help with?`,
+];
+
+/* ---------- vague / short input detection ---------- */
+const VAGUE_TENANT_PATTERNS = [
+  /^(landlord|tenant|rent|lease|evict\w*|housing)\s*(issues?|problems?|help|questions?|law|rights?)?\s*[?.!]*$/i,
+  /^(my )?(landlord|tenant)\s*$/i,
+];
+
+const VAGUE_FAMILY_PATTERNS = [
+  /^(divorce|custody|family|marriage|child\s*support)\s*(law|issues?|help|questions?|rights?)?\s*[?.!]*$/i,
+  /^(getting|want(ing)?|need) (a )?divorce\s*$/i,
+];
+
+const VAGUE_CRYPTO_PATTERNS = [
+  /^(crypto|bitcoin|blockchain|token|nft|defi|web3)\s*(law|tax(es)?|rules?|regulation|issues?|help|questions?)?\s*[?.!]*$/i,
+  /^(what about|how about|tell me about) crypto\s*(tax(es)?|law|regulation)?\s*[?.!]*$/i,
+];
+
+const VAGUE_INJURY_PATTERNS = [
+  /^(injury|accident|negligence|personal injury)\s*(claim|law|help|questions?)?\s*[?.!]*$/i,
+];
+
+const VAGUE_GENERIC_PATTERNS = [
+  /^(help|question|legal|law|advice|issue|problem)\s*[?.!]*$/i,
+  /^(i need|i have|i want|i got) (help|a question|an issue|a problem)\s*[?.!]*$/i,
+  /^(can you help|what can you do|what do you know)\s*[?.!]*$/i,
 ];
 
 function isFunQuestion(text: string): boolean {
@@ -40,22 +74,67 @@ function isGreeting(text: string): boolean {
   return GREETING_PATTERNS.some((p) => p.test(text.trim()));
 }
 
+function isVague(text: string, patterns: RegExp[]): boolean {
+  return patterns.some((p) => p.test(text.trim()));
+}
+
 function pickRandom<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
+function hugoClose(): string {
+  return pickRandom(HUGO_CLOSE_VARIANTS);
+}
+
 export function generateHugoResponse(input: string): string {
   const lower = input.toLowerCase();
+  const trimmed = input.trim();
 
   /* greetings */
-  if (isGreeting(input)) {
+  if (isGreeting(trimmed)) {
     return pickRandom(GREETING_RESPONSES);
   }
 
   /* fun / off-topic */
-  if (isFunQuestion(input)) {
+  if (isFunQuestion(trimmed)) {
     return pickRandom(FUN_RESPONSES);
   }
+
+  /* ---------- vague inputs — ask clarifying questions ---------- */
+
+  if (isVague(trimmed, VAGUE_TENANT_PATTERNS)) {
+    return `Landlord-tenant matters come up a lot — I can definitely help you think through the landscape here. The rules can vary quite a bit depending on where you are, so just to make sure I'm focusing on the right area, is this more about a UK situation or something in a particular US state? And what kind of issue are we looking at — eviction, repairs, deposit disputes, rent increases, something else?
+
+Even without those details, I can tell you that both the US and UK have fairly robust tenant protections, though they work quite differently. In England, most residential tenancies fall under Assured Shorthold Tenancies with specific rules around deposits and eviction notices. In the US, it's state-by-state, but concepts like the warranty of habitability and security deposit caps come up everywhere. Happy to go deeper once I know a bit more about your situation.${hugoClose()}`;
+  }
+
+  if (isVague(trimmed, VAGUE_FAMILY_PATTERNS)) {
+    return `Family law is one of those areas that can feel especially personal and complex, so I want to make sure I'm giving you the most relevant picture. Could you share a bit more about what you're focused on — is it divorce, child custody, financial settlements, or something else? And are we talking about a UK context or a particular US state? That makes a real difference in how things work.
+
+What I can say broadly is that both jurisdictions have moved towards no-fault divorce, which simplifies things considerably. Courts on both sides of the Atlantic prioritise the welfare of children above almost everything else in custody matters, and mediation is increasingly encouraged — and in England often required — before court proceedings begin.${hugoClose()}`;
+  }
+
+  if (isVague(trimmed, VAGUE_CRYPTO_PATTERNS)) {
+    return `Thanks for asking — crypto law is one of the most fascinating and fast-moving areas right now, and I can see why people have questions. Many people find crypto regulation confusing at first, and honestly, even regulators are still working out the details, so you're not alone.
+
+With crypto matters, it often helps to know whether we're talking about a token, an NFT, a DeFi protocol, stablecoins, or something else — could you share a bit more about what's on your mind? And are you mostly thinking about this in a US context, a UK context, or both? Tax treatment, classification rules, and regulatory frameworks can differ quite a bit between the two.
+
+In the meantime, the big picture is that the US approach centres on whether something qualifies as a security under the Howey Test, while the UK's FCA takes a somewhat different classification approach. Tax-wise, both the IRS and HMRC generally treat crypto disposals as taxable events, though the specifics vary.${hugoClose()}`;
+  }
+
+  if (isVague(trimmed, VAGUE_INJURY_PATTERNS)) {
+    return `Personal injury is an area where understanding the basics can really help you feel more confident about what's going on. To point you in the most useful direction, could you tell me a bit more about what kind of situation you're thinking about — a car accident, workplace injury, medical issue, slip-and-fall, or something else? And is there a particular timeframe or event you're focused on? That can make a big difference in how things are viewed, especially when it comes to limitation periods.
+
+What I can tell you generally is that most personal injury claims in the US are built on negligence — duty of care, breach, causation, and damages. Statutes of limitations vary by state, typically ranging from one to six years, so timing always matters.${hugoClose()}`;
+  }
+
+  if (isVague(trimmed, VAGUE_GENERIC_PATTERNS)) {
+    return `I'm glad you're here — I cover a pretty wide range of legal topics and I'm happy to help however I can. To get us started in the right direction, could you give me a sense of what area you're curious about? I work across tenant-landlord law, family and divorce matters, personal injury, contract disputes, employment issues, crypto regulation, and quite a bit more.
+
+If you've got a specific question, go ahead and fire away. If it's more of a general "where do I even start" situation, that's perfectly fine too — we can work through it together.${hugoClose()}`;
+  }
+
+  /* ---------- substantive topic responses ---------- */
 
   if (lower.includes("tenant") || lower.includes("landlord") || lower.includes("rent") || lower.includes("lease") || lower.includes("evict")) {
     return `Great question — tenant-landlord law is one of those areas where the rules can vary enormously depending on where you are, so it's always worth understanding the broader landscape before diving into specifics.
@@ -66,9 +145,7 @@ One concept that comes up a lot is the warranty of habitability. In most US juri
 
 On the UK side, things work a bit differently. Most residential tenancies in England fall under the Housing Act 1988 as Assured Shorthold Tenancies. Landlords there are required to protect deposits in government-approved schemes — failure to do so can result in penalties. The eviction process has also been evolving, with ongoing reforms around Section 21 "no-fault" evictions.
 
-One thing that's true on both sides of the Atlantic: always put things in writing. Whether it's a repair request, a complaint, or any agreement you reach with your landlord, having a written record makes an enormous difference if things ever escalate. And if you're facing an active eviction, responding to court notices within the required timeframe is absolutely critical.
-
-For US resources, your state attorney general's office and local legal aid societies are great starting points. In the UK, Citizens Advice and Shelter are excellent. HUD.gov is also useful for anything related to fair housing.${HUGO_CLOSE}`;
+One thing that's true on both sides of the Atlantic: always put things in writing. Whether it's a repair request, a complaint, or any agreement you reach with your landlord, having a written record makes an enormous difference if things ever escalate. And if you're facing an active eviction, responding to court notices within the required timeframe is absolutely critical.${hugoClose()}`;
   }
 
   if (lower.includes("family") || lower.includes("divorce") || lower.includes("custody") || lower.includes("child") || lower.includes("marriage")) {
@@ -76,15 +153,13 @@ For US resources, your state attorney general's office and local legal aid socie
 
 Family law covers a wide range of matters — divorce, child custody, child support, adoption, and domestic relations more broadly. In both the US and UK, the courts place enormous emphasis on the welfare of children in any custody-related matter, though the specific processes differ quite a bit.
 
-In the US, family law is primarily governed at the state level, which means procedures, waiting periods, and even grounds for divorce can vary. The good news is that all 50 states now offer no-fault divorce, so you don't necessarily need to prove wrongdoing — though the specifics of property division, spousal support, and custody arrangements will depend on your state's laws. For custody matters, courts generally apply what's known as the "best interests of the child" standard, which considers factors like stability, the child's relationship with each parent, and each parent's ability to provide care.
+In the US, family law is primarily governed at the state level, which means procedures, waiting periods, and even grounds for divorce can vary. All 50 states now offer no-fault divorce, so you don't necessarily need to prove wrongdoing — though the specifics of property division, spousal support, and custody arrangements will depend on your state's laws. For custody matters, courts generally apply what's known as the "best interests of the child" standard, which considers factors like stability, the child's relationship with each parent, and each parent's ability to provide care.
 
 Over in England and Wales, the Divorce, Dissolution and Separation Act 2020 introduced no-fault divorce, which was a significant modernisation. There's a built-in 20-week reflection period, and the Children Act 1989 establishes that the child's welfare is the paramount consideration in any decision.
 
 One thing I'd strongly encourage in both jurisdictions is exploring mediation early on. In the UK, it's often required before you can begin court proceedings, and in the US, many courts strongly recommend or even mandate it. Mediation tends to be faster, less expensive, and often leads to outcomes that both parties can live with more comfortably than a court-imposed decision.
 
-Financial disclosure is a big part of both US and UK proceedings — being upfront about assets and income is not just expected, it's legally required, and hiding assets can lead to serious consequences. If there's any urgency or safety concern, emergency protective orders are available in both systems.
-
-For support, local family court self-help centres can be incredibly helpful, and in the UK, the Family Mediation Council and Citizens Advice are great resources. If you're in a situation involving domestic violence, the National Domestic Violence Hotline (1-800-799-7233) is always available.${HUGO_CLOSE}`;
+Financial disclosure is a big part of both US and UK proceedings — being upfront about assets and income is not just expected, it's legally required, and hiding assets can lead to serious consequences.${hugoClose()}`;
   }
 
   if (lower.includes("injury") || lower.includes("accident") || lower.includes("negligence")) {
@@ -98,32 +173,47 @@ Statutes of limitations are another crucial factor. Depending on the state and t
 
 From a practical standpoint, the most important things you can do early on are to document everything — photos of the scene, medical records, witness contact information — and to report the incident to the relevant parties, whether that's an employer, a property owner, or law enforcement. Medical attention should always come first, both for your health and because those records become important evidence.
 
-Most personal injury cases actually settle without ever going to trial, and insurance claims are typically the first step in that process. Many attorneys in this area work on a contingency basis, meaning no upfront fees — they only get paid if you recover something.${HUGO_CLOSE}`;
+Most personal injury cases actually settle without ever going to trial, and insurance claims are typically the first step in that process. Many attorneys in this area work on a contingency basis, meaning no upfront fees — they only get paid if you recover something.${hugoClose()}`;
   }
 
-  if (lower.includes("crypto") || lower.includes("bitcoin") || lower.includes("blockchain") || lower.includes("token") || lower.includes("defi") || lower.includes("nft") || lower.includes("digital asset") || lower.includes("web3")) {
+  if (lower.includes("crypto") || lower.includes("bitcoin") || lower.includes("blockchain") || lower.includes("token") || lower.includes("defi") || lower.includes("nft") || lower.includes("digital asset") || lower.includes("web3") || lower.includes("stablecoin") || lower.includes("wallet") || lower.includes("mining") || lower.includes("staking")) {
     return `Crypto law is one of the most fascinating and fast-moving areas right now, so I'm glad you're asking about it. Many people find this space confusing at first, and honestly, even regulators are still working out the details — so you're not alone.
 
-Let me give you the big picture. In the US, one of the central questions is how a digital asset gets classified. The SEC uses something called the Howey Test to determine whether a token qualifies as a security — and if it does, a whole set of registration and disclosure requirements kick in. Meanwhile, the CFTC treats assets like Bitcoin and Ether generally as commodities, and they oversee the derivatives markets around them. So right from the start, you've got overlapping regulatory frameworks depending on what the asset actually is and how it's being used.
+Let me give you the big picture. In the US, one of the central questions is how a digital asset gets classified. The SEC uses something called the Howey Test to determine whether a token qualifies as a security — essentially asking whether there's an investment of money in a common enterprise with an expectation of profits derived from the efforts of others. If the answer is yes, a whole set of registration and disclosure requirements kick in. Meanwhile, the CFTC treats assets like Bitcoin and Ether generally as commodities, and they oversee the derivatives markets around them. So right from the start, you've got overlapping regulatory frameworks depending on what the asset actually is and how it's being used.
 
-On the UK side, the Financial Conduct Authority takes a somewhat different approach. Most utility tokens are largely unregulated, but security tokens and certain stablecoins fall under specific rules. The FCA has also been quite active in requiring crypto businesses to register and comply with anti-money laundering and know-your-customer requirements — similar to FinCEN's role in the US.
+On the UK side, the Financial Conduct Authority takes a somewhat different approach. The FCA classifies most cryptoassets under the Financial Services and Markets Act, with security tokens falling under existing securities regulation and utility tokens largely sitting outside the regulated perimeter for now. Stablecoins and staking are under active review, and the FCA has been quite active in requiring crypto businesses to register and comply with anti-money laundering and know-your-customer requirements — similar to FinCEN's role in the US.
 
-Tax treatment is another area people often have questions about. In the US, the IRS treats crypto as property, which means every disposal — whether you're selling, trading, or even using crypto to buy something — is potentially a taxable event. You'd report gains on Form 8949 and Schedule D. In the UK, HMRC takes a similar view, with crypto subject to Capital Gains Tax for individuals, and Income Tax potentially applying to mining or staking rewards.
+Tax treatment is another area people often have questions about. In the US, the IRS treats crypto as property, which means every disposal — whether you're selling, trading, or even using crypto to buy something — is potentially a taxable event. In the UK, HMRC takes a similar view, with crypto subject to Capital Gains Tax for individuals, and Income Tax potentially applying to mining or staking rewards.
 
-DeFi and smart contracts raise some genuinely novel questions. The legal status of decentralised protocols is still largely unsettled — who's liable when a smart contract executes as coded but produces an unexpected outcome? These are questions the courts and regulators are actively grappling with. NFT ownership is another interesting one — buying an NFT generally gives you ownership of the token itself, but not necessarily the underlying intellectual property. The terms vary widely from project to project.
+DeFi and smart contracts raise some genuinely novel questions. The legal status of decentralised protocols is still largely unsettled — who's liable when a smart contract executes as coded but produces an unexpected outcome? Smart contract vulnerabilities, rug pulls, and protocol exploits sit in a grey area between code-is-law philosophy and traditional legal frameworks. NFT ownership is another interesting one — buying an NFT generally gives you ownership of the token itself, but not necessarily the underlying intellectual property. The terms vary widely from project to project.
 
-Cross-border considerations come up constantly in crypto because transactions don't respect national boundaries the way traditional finance does. That creates complex questions around which jurisdiction's rules apply, and sanctions compliance — through OFAC in the US and OFSI in the UK — adds another layer.
-
-For resources, the SEC, CFTC, and FCA all have published guidance on digital assets that's worth reviewing. The IRS virtual currency FAQs and HMRC's Cryptoassets Manual are helpful for tax questions specifically.${HUGO_CLOSE}`;
+Cross-border considerations come up constantly in crypto because transactions don't respect national boundaries the way traditional finance does. That creates complex questions around which jurisdiction's rules apply, and sanctions compliance — through OFAC in the US and OFSI in the UK — adds another layer. Wallet security also intersects with legal responsibility in interesting ways — the question of who bears the loss when private keys are compromised or when exchanges fail is still evolving.${hugoClose()}`;
   }
 
-  return `Thanks for bringing that up — it's a good area to think through carefully.
+  if (lower.includes("contract") || lower.includes("agreement") || lower.includes("breach")) {
+    return `Contract law is one of the foundational areas of legal practice, and the principles are surprisingly consistent across many jurisdictions, even though the details can differ meaningfully between the US and UK.
 
-The legal landscape around most topics tends to work in layers. At the top, you have federal laws that provide baseline protections applying across all states. Below that, state statutes add their own rules, which can vary quite significantly from one place to another. And then local ordinances can modify things even further at the city or county level. If there's a cross-border dimension, UK law follows its own framework, which can be relevant depending on the situation.
+At the core, a valid contract generally requires an offer, acceptance, consideration (something of value exchanged), and an intention to create legal relations. In England, that last element is particularly important — social and domestic agreements are presumed not to create legal obligations unless there's clear evidence otherwise.
 
-As a starting point, I'd suggest looking into the specific federal and state laws that apply to your area of interest. Reviewing any relevant documents, contracts, or agreements is always a good idea, and keeping a clear record of facts, communications, and timelines can make a real difference down the road. It's also worth considering whether mediation or some form of alternative dispute resolution might be appropriate — it's often faster, less expensive, and less stressful than formal proceedings.
+When things go wrong, the concept of breach comes into play. A material breach — one that goes to the heart of the agreement — typically allows the non-breaching party to terminate and seek damages. A minor breach might entitle you to damages but not necessarily to walk away from the deal. The distinction matters quite a bit in practice.
 
-We've actually got some detailed video lectures and guides in our library that cover many specific topics in depth — definitely worth exploring if you want to build a stronger foundation.
+Just to make sure I'm giving you the most useful insight — are you mostly thinking about this in a US context, or does it involve UK rules too? And is there a particular type of contract or situation you have in mind? Employment agreements, commercial contracts, and consumer contracts can each have their own specific rules layered on top of the general principles.${hugoClose()}`;
+  }
 
-For more formal resources, your state attorney general's office, local legal aid societies, and court self-help centres are all excellent starting points. In the UK, Citizens Advice and GOV.UK cover a wide range of topics very well.${HUGO_CLOSE}`;
+  if (lower.includes("employ") || lower.includes("work") || lower.includes("fired") || lower.includes("dismissal") || lower.includes("redundan")) {
+    return `Employment law is an area that touches nearly everyone at some point, and the frameworks in the US and UK are quite different in their underlying philosophy.
+
+In the US, most employment relationships are "at-will," which means either party can end the relationship at any time for any reason — or no reason at all — as long as it's not for a prohibited reason like discrimination. Federal laws like Title VII, the Americans with Disabilities Act, and the Fair Labor Standards Act set important baselines, but individual states often add their own protections on top.
+
+The UK takes a fundamentally different approach. Employees there have statutory protections against unfair dismissal after a qualifying period, and employers generally need to follow fair procedures when ending someone's employment. The Employment Rights Act 1996 is the primary statute, and employment tribunals handle disputes.
+
+I can see why this area feels complex — there's a lot of nuance depending on the specific circumstances. Could you share a bit more about what's on your mind? Whether it's a termination, workplace dispute, contract question, or something else, that context helps me give you a clearer picture.${hugoClose()}`;
+  }
+
+  /* ---------- catch-all with clarifying questions ---------- */
+  return `Thanks for bringing that up — I'd love to help you think through this. I can see there's something on your mind, and to make sure I give you the most useful insight, could you share a bit more about the specifics? A couple of things that would help me focus: what area of law are we looking at — tenant-landlord, family, personal injury, crypto, contracts, employment, or something else entirely? And is this primarily a US or UK situation, or does it involve both?
+
+Even in general terms, most legal questions benefit from understanding which jurisdiction's rules apply and what the key facts are. The frameworks in the US and UK can overlap in philosophy but diverge quite a bit in the details — and that's doubly true for newer areas like crypto regulation, where the rules are still actively being shaped.
+
+In the meantime, we've got some detailed guides and video lectures in our library that cover many specific topics in depth — definitely worth exploring if you want to build a stronger foundation while we narrow things down.${hugoClose()}`;
 }
