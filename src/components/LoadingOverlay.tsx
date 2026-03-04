@@ -2,9 +2,8 @@ import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLoading } from "@/contexts/LoadingContext";
 
-const MIN_DISPLAY_MS = 1800;
+const MIN_DISPLAY_MS = 2000;
 
-// Same paths as InitialLoader
 const E_PATH = "M22 10 L78 10 L78 23 L38 23 L38 43 L70 43 L70 56 L38 56 L38 77 L78 77 L78 90 L22 90 Z";
 const L_PATH = "M22 10 L38 10 L38 10 L38 10 L38 10 L38 10 L38 10 L38 10 L38 77 L78 77 L78 90 L22 90 Z";
 
@@ -36,10 +35,7 @@ export function LoadingOverlay() {
         <motion.div
           key="loading-overlay"
           className="fixed inset-0 z-[9999] flex items-center justify-center"
-          style={{
-            background: "hsl(240 20% 4%)",
-            willChange: "opacity",
-          }}
+          style={{ background: "hsl(240 20% 4%)", willChange: "opacity" }}
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
@@ -80,13 +76,13 @@ export function LoadingOverlay() {
                       fill="url(#lo-grad)"
                       initial={{ d: E_PATH }}
                       animate={{ d: [E_PATH, L_PATH, E_PATH] }}
-                      transition={{ duration: 1.6, ease: "easeInOut", times: [0, 0.45, 1], repeat: Infinity, repeatDelay: 0.4 }}
+                      transition={{ duration: 1.6, ease: [0.37, 0, 0.63, 1], times: [0, 0.5, 1], repeat: Infinity, repeatDelay: 0.4 }}
                     />
                     <motion.path
                       fill="url(#lo-rim)"
                       initial={{ d: E_PATH }}
                       animate={{ d: [E_PATH, L_PATH, E_PATH] }}
-                      transition={{ duration: 1.6, ease: "easeInOut", times: [0, 0.45, 1], repeat: Infinity, repeatDelay: 0.4 }}
+                      transition={{ duration: 1.6, ease: [0.37, 0, 0.63, 1], times: [0, 0.5, 1], repeat: Infinity, repeatDelay: 0.4 }}
                     />
                   </>
                 )}
