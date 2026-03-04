@@ -21,11 +21,11 @@ export function EvoLogo({ size = "md", animate = true, showText = true }: EvoLog
   return (
     <div className={`flex flex-col items-center ${s.gap}`}>
       <motion.div
-        className="relative will-animate"
+        className="relative"
         initial={animate ? { rotate: 0, opacity: 0, scale: 0.92 } : false}
         animate={animate ? { rotate: -33, opacity: 1, scale: 1 } : false}
         transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-        style={{ rotate: animate ? undefined : -33 }}
+        style={{ rotate: animate ? undefined : -33, willChange: "transform, opacity" }}
       >
         <svg
           width={s.svg}
@@ -36,18 +36,15 @@ export function EvoLogo({ size = "md", animate = true, showText = true }: EvoLog
           className="relative z-10"
         >
           <defs>
-            {/* Main gradient — rich cyan */}
             <linearGradient id={`${uid}-main`} x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stopColor="hsl(186 100% 58%)" />
               <stop offset="50%" stopColor="hsl(186 100% 50%)" />
               <stop offset="100%" stopColor="hsl(195 100% 55%)" />
             </linearGradient>
-            {/* Purple rim — subtle depth */}
             <linearGradient id={`${uid}-rim`} x1="100%" y1="0%" x2="0%" y2="100%">
               <stop offset="0%" stopColor="hsla(270 80% 75% / 0.35)" />
               <stop offset="100%" stopColor="hsla(270 80% 75% / 0)" />
             </linearGradient>
-            {/* Soft bloom glow — no hard edges */}
             <filter id={`${uid}-bloom`} x="-60%" y="-60%" width="220%" height="220%">
               <feGaussianBlur in="SourceGraphic" stdDeviation={s.blur} result="soft" />
               <feColorMatrix in="soft" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.6 0" result="dimmed" />
@@ -58,29 +55,28 @@ export function EvoLogo({ size = "md", animate = true, showText = true }: EvoLog
             </filter>
           </defs>
 
-          {/* E shape — refined proportions: thicker horizontals for sophistication */}
           <path
             d="M22 10 L78 10 L78 23 L38 23 L38 43 L70 43 L70 56 L38 56 L38 77 L78 77 L78 90 L22 90 Z"
             fill={`url(#${uid}-main)`}
             filter={`url(#${uid}-bloom)`}
           />
-          {/* Purple rim overlay */}
           <path
             d="M22 10 L78 10 L78 23 L38 23 L38 43 L70 43 L70 56 L38 56 L38 77 L78 77 L78 90 L22 90 Z"
             fill={`url(#${uid}-rim)`}
           />
         </svg>
 
-        {/* Ambient radial glow behind — hero only */}
+        {/* Breathing glow — hero idle animation */}
         {isHero && (
           <motion.div
             className="absolute inset-0 pointer-events-none"
             initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5, duration: 1.4 }}
+            animate={{ opacity: [0.4, 0.8, 0.4] }}
+            transition={{ delay: 1.2, duration: 3, ease: "easeInOut", repeat: Infinity }}
             style={{
               background: "radial-gradient(circle, hsla(186 100% 50% / 0.15) 0%, hsla(186 100% 50% / 0.03) 45%, transparent 70%)",
               transform: "scale(3.5)",
+              willChange: "opacity",
             }}
           />
         )}

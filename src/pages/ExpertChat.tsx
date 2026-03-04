@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Send, User, Info } from "lucide-react";
 import { generateHugoResponse } from "@/lib/hugoResponses";
 import { isRateLimited } from "@/lib/security";
+import { useLoading } from "@/contexts/LoadingContext";
 
 const tips = [
   "US tenants generally have a warranty of habitability — landlords must maintain livable conditions...",
@@ -32,6 +33,7 @@ const ExpertChat = () => {
   const [loading, setLoading] = useState(false);
   const [currentTip, setCurrentTip] = useState(0);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const { showLoader, hideLoader } = useLoading();
 
   useEffect(() => {
     if (!loading) return;
@@ -52,10 +54,12 @@ const ExpertChat = () => {
     }
     const userMsg: Message = { id: Date.now().toString(), role: "user", content: input };
     setMessages((prev) => [...prev, userMsg]);
+    const question = input;
     setInput("");
     setLoading(true);
+    showLoader();
 
-    const response = generateHugoResponse(input);
+    const response = generateHugoResponse(question);
 
     setTimeout(() => {
       setMessages((prev) => [...prev, {
@@ -64,6 +68,7 @@ const ExpertChat = () => {
         content: response,
       }]);
       setLoading(false);
+      hideLoader();
     }, Math.random() * 3000 + 5000);
   };
 

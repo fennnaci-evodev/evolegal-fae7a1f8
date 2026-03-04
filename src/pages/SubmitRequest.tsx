@@ -9,6 +9,7 @@ import { Upload, Send, FileText, Info, MapPin, X } from "lucide-react";
 import { toast } from "sonner";
 import { fadeUp } from "@/lib/animations";
 import { validateFile, sanitizeFilename, validateTextLength, isRateLimited } from "@/lib/security";
+import { useLoading } from "@/contexts/LoadingContext";
 
 const US_STATES = [
   "Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut","Delaware",
@@ -44,6 +45,7 @@ const SubmitRequest = () => {
   const [honeypot, setHoneypot] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { showLoader, hideLoader } = useLoading();
 
   const handleFiles = (incoming: FileList | null) => {
     if (!incoming) return;
@@ -64,7 +66,6 @@ const SubmitRequest = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Honeypot check
     if (honeypot) return;
 
     if (isRateLimited("submit_request", 5, 60_000)) {
@@ -80,8 +81,10 @@ const SubmitRequest = () => {
     if (!descCheck.valid) { toast.error(descCheck.error); return; }
 
     setSubmitting(true);
+    showLoader();
     setTimeout(() => {
       setSubmitting(false);
+      hideLoader();
       toast.success("Request submitted! You'll receive a response within 24 hours.");
       setTopic("");
       setState("");
