@@ -7,11 +7,13 @@ interface EvoLogoProps {
 }
 
 const sizes = {
-  sm: { svg: 32, text: "text-sm", gap: "gap-1", blur: 3, glow: 6 },
-  md: { svg: 52, text: "text-lg", gap: "gap-2", blur: 5, glow: 10 },
-  lg: { svg: 80, text: "text-2xl", gap: "gap-3", blur: 8, glow: 16 },
-  hero: { svg: 160, text: "text-3xl md:text-4xl", gap: "gap-4", blur: 14, glow: 28 },
+  sm: { svg: 32, text: "text-sm", gap: "gap-1" },
+  md: { svg: 52, text: "text-lg", gap: "gap-2" },
+  lg: { svg: 80, text: "text-2xl", gap: "gap-3" },
+  hero: { svg: 160, text: "text-3xl md:text-4xl", gap: "gap-4" },
 };
+
+const E_PATH = "M22 10 L78 10 L78 23 L38 23 L38 43 L70 43 L70 56 L38 56 L38 77 L78 77 L78 90 L22 90 Z";
 
 export function EvoLogo({ size = "md", animate = true, showText = true }: EvoLogoProps) {
   const s = sizes[size];
@@ -22,10 +24,10 @@ export function EvoLogo({ size = "md", animate = true, showText = true }: EvoLog
     <div className={`flex flex-col items-center ${s.gap}`}>
       <motion.div
         className="relative"
-        initial={animate ? { rotate: 0, opacity: 0, scale: 0.92 } : false}
-        animate={animate ? { rotate: -33, opacity: 1, scale: 1 } : false}
+        style={{ willChange: "transform, opacity" }}
+        initial={animate ? { rotate: 0, opacity: 0, scale: 0.92 } : { rotate: -33 }}
+        animate={{ rotate: -33, opacity: 1, scale: 1 }}
         transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-        style={{ rotate: animate ? undefined : -33, willChange: "transform, opacity" }}
       >
         <svg
           width={s.svg}
@@ -34,6 +36,9 @@ export function EvoLogo({ size = "md", animate = true, showText = true }: EvoLog
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
           className="relative z-10"
+          style={{
+            filter: "drop-shadow(0 0 6px hsla(186, 100%, 50%, 0.4)) drop-shadow(0 0 14px hsla(186, 100%, 50%, 0.15))",
+          }}
         >
           <defs>
             <linearGradient id={`${uid}-main`} x1="0%" y1="0%" x2="100%" y2="100%">
@@ -45,25 +50,10 @@ export function EvoLogo({ size = "md", animate = true, showText = true }: EvoLog
               <stop offset="0%" stopColor="hsla(270 80% 75% / 0.35)" />
               <stop offset="100%" stopColor="hsla(270 80% 75% / 0)" />
             </linearGradient>
-            <filter id={`${uid}-bloom`} x="-60%" y="-60%" width="220%" height="220%">
-              <feGaussianBlur in="SourceGraphic" stdDeviation={s.blur} result="soft" />
-              <feColorMatrix in="soft" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.6 0" result="dimmed" />
-              <feMerge>
-                <feMergeNode in="dimmed" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
           </defs>
 
-          <path
-            d="M22 10 L78 10 L78 23 L38 23 L38 43 L70 43 L70 56 L38 56 L38 77 L78 77 L78 90 L22 90 Z"
-            fill={`url(#${uid}-main)`}
-            filter={`url(#${uid}-bloom)`}
-          />
-          <path
-            d="M22 10 L78 10 L78 23 L38 23 L38 43 L70 43 L70 56 L38 56 L38 77 L78 77 L78 90 L22 90 Z"
-            fill={`url(#${uid}-rim)`}
-          />
+          <path d={E_PATH} fill={`url(#${uid}-main)`} />
+          <path d={E_PATH} fill={`url(#${uid}-rim)`} />
         </svg>
 
         {/* Breathing glow — hero idle animation */}

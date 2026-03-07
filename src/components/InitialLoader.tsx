@@ -2,7 +2,14 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const E_PATH = "M22 10 L78 10 L78 23 L38 23 L38 43 L70 43 L70 56 L38 56 L38 77 L78 77 L78 90 L22 90 Z";
-const L_PATH = "M22 10 L38 10 L38 10 L38 10 L38 10 L38 10 L38 10 L38 10 L38 77 L78 77 L78 90 L22 90 Z";
+
+// Individual segments of the E for stroke-by-stroke reveal
+const E_SEGMENTS = [
+  "M22 10 L78 10 L78 23 L22 23 Z",       // top bar
+  "M22 10 L38 10 L38 90 L22 90 Z",        // vertical spine
+  "M38 43 L70 43 L70 56 L38 56 Z",        // middle bar
+  "M22 77 L78 77 L78 90 L22 90 Z",        // bottom bar
+];
 
 export function InitialLoader({ onComplete }: { onComplete: () => void }) {
   const [visible, setVisible] = useState(true);
@@ -38,19 +45,35 @@ export function InitialLoader({ onComplete }: { onComplete: () => void }) {
           transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
         >
           <div className="relative flex items-center justify-center" style={{ willChange: "transform, opacity" }}>
+            {/* Ambient glow */}
             <div
               className="absolute rounded-full"
               style={{
                 width: 280, height: 280,
-                background: "radial-gradient(circle, hsla(186 100% 50% / 0.1) 0%, transparent 70%)",
+                background: "radial-gradient(circle, hsla(186 100% 50% / 0.08) 0%, transparent 70%)",
               }}
             />
 
+            {/* Main E: rotates from 90° (upright) → -33° (slanted left) */}
             <motion.div
-              style={{ rotate: -33, willChange: "transform, opacity" }}
-              initial={{ scale: 0.85, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+              style={{ willChange: "transform, opacity, filter" }}
+              initial={{ rotate: 90, scale: 0.9, opacity: 0 }}
+              animate={{
+                rotate: -33,
+                scale: 1,
+                opacity: 1,
+                filter: [
+                  "drop-shadow(0 0 0px hsla(186,100%,50%,0)) drop-shadow(0 0 0px hsla(270,80%,75%,0))",
+                  "drop-shadow(0 0 12px hsla(186,100%,50%,0.6)) drop-shadow(0 0 24px hsla(270,80%,75%,0.3))",
+                  "drop-shadow(0 0 8px hsla(186,100%,50%,0.5)) drop-shadow(0 0 16px hsla(270,80%,75%,0.2))",
+                ],
+              }}
+              transition={{
+                rotate: { duration: 1.2, ease: [0.25, 0.1, 0.25, 1], delay: 0.6 },
+                scale: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
+                opacity: { duration: 0.4 },
+                filter: { duration: 1.8, ease: "easeOut", times: [0, 0.6, 1] },
+              }}
             >
               <svg width={140} height={140} viewBox="0 0 100 100" fill="none">
                 <defs>
@@ -68,32 +91,40 @@ export function InitialLoader({ onComplete }: { onComplete: () => void }) {
                   <path d={E_PATH} fill="url(#il-grad)" />
                 ) : (
                   <>
+                    {/* Stroke-by-stroke segment reveal */}
+                    {E_SEGMENTS.map((seg, i) => (
+                      <motion.path
+                        key={i}
+                        d={seg}
+                        fill="url(#il-grad)"
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{
+                          delay: 0.15 + i * 0.18,
+                          duration: 0.4,
+                          ease: [0.22, 1, 0.36, 1],
+                        }}
+                        style={{ transformOrigin: "center", willChange: "opacity, transform" }}
+                      />
+                    ))}
+                    {/* Full E rim overlay fades in after segments */}
                     <motion.path
-                      fill="url(#il-grad)"
-                      initial={{ d: E_PATH }}
-                      animate={{ d: [E_PATH, L_PATH, E_PATH] }}
-                      transition={{
-                        d: { duration: 1.8, ease: [0.37, 0, 0.63, 1], times: [0, 0.5, 1] },
-                      }}
-                    />
-                    <motion.path
+                      d={E_PATH}
                       fill="url(#il-rim)"
-                      initial={{ d: E_PATH, opacity: 0 }}
-                      animate={{ d: [E_PATH, L_PATH, E_PATH], opacity: 1 }}
-                      transition={{
-                        d: { duration: 1.8, ease: [0.37, 0, 0.63, 1], times: [0, 0.5, 1] },
-                        opacity: { delay: 0.2, duration: 0.5 },
-                      }}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.8, duration: 0.5 }}
                     />
                   </>
                 )}
               </svg>
 
+              {/* Breathing glow after settle */}
               {!reducedMotion && (
                 <motion.div
                   className="absolute inset-0 pointer-events-none"
                   initial={{ opacity: 0 }}
-                  animate={{ opacity: [0, 0, 0.6, 0.3] }}
+                  animate={{ opacity: [0, 0, 0.6, 0.35] }}
                   transition={{ duration: 2.2, ease: "easeInOut", times: [0, 0.75, 0.9, 1] }}
                   style={{
                     background: "radial-gradient(circle, hsla(186 100% 50% / 0.18) 0%, transparent 60%)",

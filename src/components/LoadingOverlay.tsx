@@ -4,8 +4,14 @@ import { useLoading } from "@/contexts/LoadingContext";
 
 const MIN_DISPLAY_MS = 2000;
 
+const E_SEGMENTS = [
+  "M22 10 L78 10 L78 23 L22 23 Z",
+  "M22 10 L38 10 L38 90 L22 90 Z",
+  "M38 43 L70 43 L70 56 L38 56 Z",
+  "M22 77 L78 77 L78 90 L22 90 Z",
+];
+
 const E_PATH = "M22 10 L78 10 L78 23 L38 23 L38 43 L70 43 L70 56 L38 56 L38 77 L78 77 L78 90 L22 90 Z";
-const L_PATH = "M22 10 L38 10 L38 10 L38 10 L38 10 L38 10 L38 10 L38 10 L38 77 L78 77 L78 90 L22 90 Z";
 
 export function LoadingOverlay() {
   const { isLoading } = useLoading();
@@ -44,17 +50,30 @@ export function LoadingOverlay() {
             <div
               className="absolute rounded-full"
               style={{
-                width: 220,
-                height: 220,
-                background: "radial-gradient(circle, hsla(186 100% 50% / 0.1) 0%, transparent 70%)",
+                width: 220, height: 220,
+                background: "radial-gradient(circle, hsla(186 100% 50% / 0.08) 0%, transparent 70%)",
               }}
             />
 
             <motion.div
-              style={{ rotate: -33, willChange: "transform, opacity" }}
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+              style={{ willChange: "transform, opacity, filter" }}
+              initial={{ rotate: 90, scale: 0.9, opacity: 0 }}
+              animate={{
+                rotate: -33,
+                scale: 1,
+                opacity: 1,
+                filter: [
+                  "drop-shadow(0 0 0px hsla(186,100%,50%,0))",
+                  "drop-shadow(0 0 12px hsla(186,100%,50%,0.6)) drop-shadow(0 0 24px hsla(270,80%,75%,0.3))",
+                  "drop-shadow(0 0 8px hsla(186,100%,50%,0.5)) drop-shadow(0 0 16px hsla(270,80%,75%,0.2))",
+                ],
+              }}
+              transition={{
+                rotate: { duration: 1.2, ease: [0.25, 0.1, 0.25, 1], delay: 0.5 },
+                scale: { duration: 0.4, ease: [0.22, 1, 0.36, 1] },
+                opacity: { duration: 0.3 },
+                filter: { duration: 1.6, ease: "easeOut", times: [0, 0.6, 1] },
+              }}
             >
               <svg width={100} height={100} viewBox="0 0 100 100" fill="none">
                 <defs>
@@ -72,17 +91,27 @@ export function LoadingOverlay() {
                   <path d={E_PATH} fill="url(#lo-grad)" />
                 ) : (
                   <>
+                    {E_SEGMENTS.map((seg, i) => (
+                      <motion.path
+                        key={i}
+                        d={seg}
+                        fill="url(#lo-grad)"
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{
+                          delay: 0.1 + i * 0.15,
+                          duration: 0.35,
+                          ease: [0.22, 1, 0.36, 1],
+                        }}
+                        style={{ transformOrigin: "center", willChange: "opacity, transform" }}
+                      />
+                    ))}
                     <motion.path
-                      fill="url(#lo-grad)"
-                      initial={{ d: E_PATH }}
-                      animate={{ d: [E_PATH, L_PATH, E_PATH] }}
-                      transition={{ duration: 1.6, ease: [0.37, 0, 0.63, 1], times: [0, 0.5, 1], repeat: Infinity, repeatDelay: 0.4 }}
-                    />
-                    <motion.path
+                      d={E_PATH}
                       fill="url(#lo-rim)"
-                      initial={{ d: E_PATH }}
-                      animate={{ d: [E_PATH, L_PATH, E_PATH] }}
-                      transition={{ duration: 1.6, ease: [0.37, 0, 0.63, 1], times: [0, 0.5, 1], repeat: Infinity, repeatDelay: 0.4 }}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.7, duration: 0.4 }}
                     />
                   </>
                 )}
