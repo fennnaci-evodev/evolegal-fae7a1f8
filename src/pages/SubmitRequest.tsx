@@ -8,8 +8,10 @@ import { Label } from "@/components/ui/label";
 import { Upload, Send, FileText, Info, MapPin, X } from "lucide-react";
 import { toast } from "sonner";
 import { fadeUp } from "@/lib/animations";
-import { validateFile, sanitizeFilename, validateTextLength, isRateLimited } from "@/lib/security";
+import { validateFile, validateTextLength, isRateLimited } from "@/lib/security";
 import { useLoading } from "@/contexts/LoadingContext";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 const US_STATES = [
   "Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut","Delaware",
@@ -41,11 +43,11 @@ const SubmitRequest = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [keyFacts, setKeyFacts] = useState("");
-
   const [honeypot, setHoneypot] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { showLoader, hideLoader } = useLoading();
+  const { user } = useAuth();
 
   const handleFiles = (incoming: FileList | null) => {
     if (!incoming) return;
@@ -63,7 +65,7 @@ const SubmitRequest = () => {
 
   const removeFile = (idx: number) => setFiles((prev) => prev.filter((_, i) => i !== idx));
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (honeypot) return;
@@ -77,22 +79,51 @@ const SubmitRequest = () => {
       toast.error("Please select a topic and describe your question.");
       return;
     }
+
+    if (!user) {
+      toast.error("You must be signed in to submit a request.");
+      return;
+    }
+
     const descCheck = validateTextLength(description, 5000, "Description");
     if (!descCheck.valid) { toast.error(descCheck.error); return; }
 
     setSubmitting(true);
     showLoader();
-    setTimeout(() => {
-      setSubmitting(false);
-      hideLoader();
-      toast.success("Request submitted! You'll receive a response within 24 hours.");
+
+    try {
+      const topicLabel = topicOptions.find(o => o.value === topic)?.label ?? topic;
+
+      const { error } = await supabase.from("legal_requests" as any).insert({
+        user_id: user.id,
+        topic: topicLabel,
+        title: title.trim() || "Untitled Request",
+        description: description.trim(),
+        facts: keyFacts.trim() ? { summary: keyFacts.trim() } : {},
+        state: state,
+        audit_log: [{ timestamp: new Date().toISOString(), action: "created", actor: "user", note: "Request submitted" }],
+      } as any);
+
+      if (error) {
+        console.error("Failed to save request:", error);
+        toast.error("Something went wrong — please try again or contact support.");
+        return;
+      }
+
+      toast.success("Your request has been received and is now in the register. Hugo will prepare insights soon.");
       setTopic("");
       setState("");
       setTitle("");
       setDescription("");
       setKeyFacts("");
       setFiles([]);
-    }, 2000);
+    } catch (err) {
+      console.error("Unexpected error submitting request:", err);
+      toast.error("Something went wrong — please try again.");
+    } finally {
+      setSubmitting(false);
+      hideLoader();
+    }
   };
 
   return (
@@ -103,7 +134,6 @@ const SubmitRequest = () => {
           <p className="text-muted-foreground">Describe your topic and we'll prepare a detailed, general informational response.</p>
         </motion.div>
 
-        {/* Info banner */}
         <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0.5} className="glass rounded-xl px-5 py-3 flex items-start gap-3">
           <Info className="h-4 w-4 text-primary mt-0.5 shrink-0" />
           <p className="text-xs text-muted-foreground leading-relaxed">
@@ -116,7 +146,6 @@ const SubmitRequest = () => {
           className="glass-card p-8 space-y-5"
           initial="hidden" animate="visible" variants={fadeUp} custom={1}
         >
-          {/* Topic + State row */}
           <div className="grid sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label className="text-sm font-display">Topic Area <span className="text-destructive">*</span></Label>
@@ -151,7 +180,6 @@ const SubmitRequest = () => {
             </div>
           </div>
 
-          {/* Request title */}
           <div className="space-y-2">
             <Label className="text-sm font-display">Request Title</Label>
             <Input
@@ -162,37 +190,33 @@ const SubmitRequest = () => {
             />
           </div>
 
-          {/* Description */}
           <div className="space-y-2">
             <Label className="text-sm font-display">Describe Your Topic <span className="text-destructive">*</span></Label>
             <Textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Describe what you'd like general information about. Include any relevant context or specific terms you'd like explained..."
+              placeholder="Describe what you'd like general information about..."
               rows={5}
               className="bg-muted/30 border-border/50 resize-none"
               required
             />
           </div>
 
-          {/* Key Facts */}
           <div className="space-y-2">
             <Label className="text-sm font-display">Key Facts <span className="text-muted-foreground text-xs">(optional)</span></Label>
             <Textarea
               value={keyFacts}
               onChange={(e) => setKeyFacts(e.target.value)}
-              placeholder="List any relevant facts, such as dates, specific terminology, or details that help us research the general topic..."
+              placeholder="List any relevant facts, such as dates, specific terminology, or details..."
               rows={3}
               className="bg-muted/30 border-border/50 resize-none"
             />
           </div>
 
-          {/* Honeypot — hidden from real users */}
           <div className="absolute opacity-0 pointer-events-none h-0 overflow-hidden" aria-hidden="true" tabIndex={-1}>
             <input type="text" name="website" autoComplete="off" value={honeypot} onChange={(e) => setHoneypot(e.target.value)} tabIndex={-1} />
           </div>
 
-          {/* Upload */}
           <div className="space-y-2">
             <Label className="text-sm font-display">Upload Documents <span className="text-muted-foreground text-xs">(optional, max 5 files)</span></Label>
             <input
@@ -228,6 +252,10 @@ const SubmitRequest = () => {
               </div>
             )}
           </div>
+
+          <p className="text-[10px] text-muted-foreground/50">
+            By submitting, you agree we store this request securely for processing and record-keeping.
+          </p>
 
           <Button type="submit" variant="hero" size="lg" className="w-full" disabled={submitting}>
             {submitting ? "Submitting..." : <>Submit Request <Send className="ml-2 h-4 w-4" /></>}

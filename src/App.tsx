@@ -22,6 +22,7 @@ import Blog from "./pages/Blog";
 import Contact from "./pages/Contact";
 import ArticleTenantLandlord from "./pages/ArticleTenantLandlord";
 import ResetPassword from "./pages/ResetPassword";
+import MyRequests from "./pages/MyRequests";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -55,6 +56,7 @@ const App = () => {
                 <Route path="/dashboard/chat" element={<ExpertChat />} />
                 <Route path="/dashboard/library" element={<Library />} />
                 <Route path="/dashboard/submit" element={<SubmitRequest />} />
+                <Route path="/dashboard/requests" element={<MyRequests />} />
                 <Route path="/dashboard/saved" element={<Library />} />
                 <Route path="/dashboard/settings" element={<Dashboard />} />
                 <Route path="*" element={<NotFound />} />
