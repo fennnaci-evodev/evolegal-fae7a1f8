@@ -56,6 +56,7 @@ const App = () => {
                 <Route path="/dashboard/chat" element={<ExpertChat />} />
                 <Route path="/dashboard/library" element={<Library />} />
                 <Route path="/dashboard/submit" element={<SubmitRequest />} />
+                <Route path="/dashboard/requests" element={<MyRequests />} />
                 <Route path="/dashboard/saved" element={<Library />} />
                 <Route path="/dashboard/settings" element={<Dashboard />} />
                 <Route path="*" element={<NotFound />} />
