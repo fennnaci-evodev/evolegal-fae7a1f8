@@ -1,9 +1,13 @@
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { PlayCircle, MessageCircle, BookOpen, FileText, ArrowRight, Upload } from "lucide-react";
+import { PlayCircle, MessageCircle, FileText, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { fadeUp } from "@/lib/animations";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { Badge } from "@/components/ui/badge";
 
 const quickActions = [
   { icon: PlayCircle, title: "Video Lectures", desc: "Watch expert explanations", to: "/dashboard/library" },
@@ -18,12 +22,37 @@ const featuredContent = [
   { title: "Divorce Filing Steps in NY", type: "Guide", duration: "10 min read", topic: "Family Law" },
 ];
 
-const recentActivity = [
-  { title: "Tenant rights inquiry submitted", time: "2 hours ago", status: "In Review" },
-  { title: "UK divorce overview — delivered", time: "1 day ago", status: "Complete" },
-];
+interface RecentRequest {
+  id: string;
+  title: string;
+  created_at: string;
+  status: string;
+}
+
+const statusColors: Record<string, string> = {
+  pending: "bg-yellow-500/10 text-yellow-400",
+  reviewing: "bg-blue-500/10 text-blue-400",
+  completed: "bg-primary/10 text-primary",
+  archived: "bg-muted/30 text-muted-foreground",
+};
 
 const Dashboard = () => {
+  const { user } = useAuth();
+  const [recentRequests, setRecentRequests] = useState<RecentRequest[]>([]);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("legal_requests" as any)
+      .select("id, title, created_at, status")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(5)
+      .then(({ data }) => {
+        if (data) setRecentRequests(data as any);
+      });
+  }, [user]);
+
   return (
     <DashboardLayout>
       <div className="max-w-5xl mx-auto space-y-8">
@@ -49,22 +78,27 @@ const Dashboard = () => {
           ))}
         </div>
 
-        {/* Recent Activity */}
-        {recentActivity.length > 0 && (
+        {/* Recent Requests from DB */}
+        {recentRequests.length > 0 && (
           <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={4}>
-            <h2 className="text-lg font-display font-semibold mb-3">Recent Activity</h2>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-lg font-display font-semibold">Recent Requests</h2>
+              <Link to="/dashboard/requests">
+                <Button variant="ghost" size="sm" className="text-primary">
+                  View all <ArrowRight className="ml-1 h-3 w-3" />
+                </Button>
+              </Link>
+            </div>
             <div className="space-y-2">
-              {recentActivity.map((item) => (
-                <div key={item.title} className="glass-card p-4 flex items-center justify-between">
+              {recentRequests.map((item) => (
+                <div key={item.id} className="glass-card p-4 flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium">{item.title}</p>
-                    <p className="text-xs text-muted-foreground">{item.time}</p>
+                    <p className="text-xs text-muted-foreground">{new Date(item.created_at).toLocaleDateString()}</p>
                   </div>
-                  <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
-                    item.status === "Complete" ? "bg-primary/10 text-primary" : "bg-accent/10 text-accent"
-                  }`}>
+                  <Badge variant="outline" className={`text-[10px] ${statusColors[item.status] ?? ""}`}>
                     {item.status}
-                  </span>
+                  </Badge>
                 </div>
               ))}
             </div>

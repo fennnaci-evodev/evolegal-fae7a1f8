@@ -80,7 +80,7 @@ const Pricing = () => {
                 className={`text-center p-5 rounded-t-2xl relative ${plan.highlight ? "glass-card glow-cyan" : "glass-card"}`}
               >
                 {plan.highlight && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-primary text-primary-foreground text-[10px] font-semibold z-10 whitespace-nowrap">
+                  <span className="absolute -top-3 inset-x-0 mx-auto w-fit px-3 py-0.5 rounded-full bg-primary text-primary-foreground text-[10px] font-semibold z-10 whitespace-nowrap">
                     Recommended
                   </span>
                 )}
