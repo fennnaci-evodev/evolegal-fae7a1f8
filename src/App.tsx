@@ -58,6 +58,7 @@ const App = () => {
                 <Route path="/dashboard/library" element={<Library />} />
                 <Route path="/dashboard/submit" element={<SubmitRequest />} />
                 <Route path="/dashboard/requests" element={<MyRequests />} />
+                <Route path="/dashboard/admin/requests" element={<AdminRequests />} />
                 <Route path="/dashboard/saved" element={<Library />} />
                 <Route path="/dashboard/settings" element={<Dashboard />} />
                 <Route path="*" element={<NotFound />} />
