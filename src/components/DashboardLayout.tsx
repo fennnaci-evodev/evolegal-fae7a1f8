@@ -80,7 +80,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
           <EvoLogo size="sm" animate={false} showText={false} />
         </Link>
         <div className="flex gap-1">
-          {navItems.slice(0, 4).map((item) => (
+          {allNavItems.slice(0, 5).map((item) => (
             <Link
               key={item.url}
               to={item.url}
