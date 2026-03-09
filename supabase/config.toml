@@ -1,1 +1,4 @@
 project_id = "ccgjhxkvjdxnyqendlno"
+
+[functions.hugo-clarify]
+verify_jwt = false
