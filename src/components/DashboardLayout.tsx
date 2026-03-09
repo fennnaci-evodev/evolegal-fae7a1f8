@@ -1,9 +1,10 @@
 import { ReactNode } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Home, PlayCircle, MessageCircle, FileText, BookOpen, Settings, LogOut } from "lucide-react";
+import { Home, PlayCircle, MessageCircle, FileText, BookOpen, Settings, LogOut, ShieldCheck } from "lucide-react";
 import { motion } from "framer-motion";
 import { EvoLogo } from "./EvoLogo";
 import { useAuth } from "@/hooks/useAuth";
+import { useAdminRole } from "@/hooks/useAdminRole";
 
 const navItems = [
   { title: "Home", url: "/dashboard", icon: Home },
@@ -18,6 +19,12 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { signOut } = useAuth();
+  const { isAdmin } = useAdminRole();
+
+  const allNavItems = isAdmin
+    ? [...navItems, { title: "Admin Requests", url: "/dashboard/admin/requests", icon: ShieldCheck }]
+    : navItems;
+
   return (
     <div className="flex min-h-screen w-full">
       {/* Sidebar */}
@@ -27,7 +34,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
         </Link>
 
         <nav className="flex-1 space-y-1">
-          {navItems.map((item) => {
+          {allNavItems.map((item) => {
             const isActive = location.pathname === item.url;
             return (
               <Link
@@ -73,7 +80,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
           <EvoLogo size="sm" animate={false} showText={false} />
         </Link>
         <div className="flex gap-1">
-          {navItems.slice(0, 4).map((item) => (
+          {allNavItems.slice(0, 5).map((item) => (
             <Link
               key={item.url}
               to={item.url}
