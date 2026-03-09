@@ -19,6 +19,12 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { signOut } = useAuth();
+  const { isAdmin } = useAdminRole();
+
+  const allNavItems = isAdmin
+    ? [...navItems, { title: "Admin Requests", url: "/dashboard/admin/requests", icon: ShieldCheck }]
+    : navItems;
+
   return (
     <div className="flex min-h-screen w-full">
       {/* Sidebar */}
