@@ -12,6 +12,7 @@ import { validateFile, validateTextLength, isRateLimited } from "@/lib/security"
 import { useLoading } from "@/contexts/LoadingContext";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { HugoClarificationModal } from "@/components/HugoClarificationModal";
 
 const US_STATES = [
   "Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut","Delaware",
@@ -49,6 +50,12 @@ const SubmitRequest = () => {
   const { showLoader, hideLoader } = useLoading();
   const { user } = useAuth();
 
+  // Clarification modal state
+  const [clarifyOpen, setClarifyOpen] = useState(false);
+  const [clarifyMessage, setClarifyMessage] = useState("");
+  const [clarifyLoading, setClarifyLoading] = useState(false);
+  const [additionalContext, setAdditionalContext] = useState("");
+
   const handleFiles = (incoming: FileList | null) => {
     if (!incoming) return;
     const validated: File[] = [];
@@ -64,6 +71,48 @@ const SubmitRequest = () => {
   };
 
   const removeFile = (idx: number) => setFiles((prev) => prev.filter((_, i) => i !== idx));
+
+  const saveRequest = async (extraContext?: string) => {
+    if (!user) return;
+    showLoader();
+
+    try {
+      const topicLabel = topicOptions.find(o => o.value === topic)?.label ?? topic;
+      const finalDescription = extraContext
+        ? `${description.trim()}\n\n--- Additional context provided ---\n${extraContext}`
+        : description.trim();
+
+      const { error } = await supabase.from("legal_requests").insert({
+        user_id: user.id,
+        topic: topicLabel,
+        title: title.trim() || "Untitled Request",
+        description: finalDescription,
+        facts: keyFacts.trim() ? { summary: keyFacts.trim() } : {},
+        state: state,
+        audit_log: [{ timestamp: new Date().toISOString(), action: "created", actor: "user", note: "Request submitted" }],
+      });
+
+      if (error) {
+        console.error("Failed to save request:", error);
+        toast.error("Something went wrong — please try again or contact support.");
+        return;
+      }
+
+      toast.success("Your request has been received and is now in the register. Hugo will prepare insights soon.");
+      setTopic("");
+      setState("");
+      setTitle("");
+      setDescription("");
+      setKeyFacts("");
+      setFiles([]);
+      setAdditionalContext("");
+    } catch (err) {
+      console.error("Unexpected error submitting request:", err);
+      toast.error("Something went wrong — please try again.");
+    } finally {
+      hideLoader();
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,38 +141,82 @@ const SubmitRequest = () => {
     showLoader();
 
     try {
+      // Ask Hugo if clarification is needed
       const topicLabel = topicOptions.find(o => o.value === topic)?.label ?? topic;
+      const { data, error } = await supabase.functions.invoke("hugo-clarify", {
+        body: {
+          topic: topicLabel,
+          description: description.trim(),
+          facts: keyFacts.trim(),
+          state: state,
+        },
+      });
 
-      const { error } = await supabase.from("legal_requests" as any).insert({
-        user_id: user.id,
-        topic: topicLabel,
-        title: title.trim() || "Untitled Request",
-        description: description.trim(),
-        facts: keyFacts.trim() ? { summary: keyFacts.trim() } : {},
-        state: state,
-        audit_log: [{ timestamp: new Date().toISOString(), action: "created", actor: "user", note: "Request submitted" }],
-      } as any);
+      hideLoader();
 
-      if (error) {
-        console.error("Failed to save request:", error);
-        toast.error("Something went wrong — please try again or contact support.");
-        return;
+      if (error || !data) {
+        // On error, proceed without clarification
+        console.warn("Hugo clarification unavailable, proceeding:", error);
+        await saveRequest();
+      } else if (data.clear) {
+        // Input is clear — save directly
+        await saveRequest();
+      } else if (data.message) {
+        // Hugo wants to ask questions
+        setClarifyMessage(data.message);
+        setClarifyOpen(true);
+      } else {
+        await saveRequest();
       }
-
-      toast.success("Your request has been received and is now in the register. Hugo will prepare insights soon.");
-      setTopic("");
-      setState("");
-      setTitle("");
-      setDescription("");
-      setKeyFacts("");
-      setFiles([]);
     } catch (err) {
-      console.error("Unexpected error submitting request:", err);
-      toast.error("Something went wrong — please try again.");
+      console.error("Clarification check failed:", err);
+      hideLoader();
+      // Fallback: save anyway
+      await saveRequest();
     } finally {
       setSubmitting(false);
-      hideLoader();
     }
+  };
+
+  const handleClarifyAnswer = async (answer: string) => {
+    setClarifyLoading(true);
+    const combined = additionalContext ? `${additionalContext}\n${answer}` : answer;
+    setAdditionalContext(combined);
+
+    try {
+      // Re-evaluate with the new context
+      const topicLabel = topicOptions.find(o => o.value === topic)?.label ?? topic;
+      const { data, error } = await supabase.functions.invoke("hugo-clarify", {
+        body: {
+          topic: topicLabel,
+          description: `${description.trim()}\n\nUser clarification: ${combined}`,
+          facts: keyFacts.trim(),
+          state: state,
+        },
+      });
+
+      if (error || !data || data.clear) {
+        // Clear now or error — save with context
+        setClarifyOpen(false);
+        await saveRequest(combined);
+      } else if (data.message) {
+        // More questions
+        setClarifyMessage(data.message);
+      } else {
+        setClarifyOpen(false);
+        await saveRequest(combined);
+      }
+    } catch {
+      setClarifyOpen(false);
+      await saveRequest(combined);
+    } finally {
+      setClarifyLoading(false);
+    }
+  };
+
+  const handleClarifySkip = async () => {
+    setClarifyOpen(false);
+    await saveRequest(additionalContext || undefined);
   };
 
   return (
@@ -266,6 +359,14 @@ const SubmitRequest = () => {
           </p>
         </motion.form>
       </div>
+
+      <HugoClarificationModal
+        open={clarifyOpen}
+        hugoMessage={clarifyMessage}
+        onSubmitAnswer={handleClarifyAnswer}
+        onSkip={handleClarifySkip}
+        loading={clarifyLoading}
+      />
     </DashboardLayout>
   );
 };
