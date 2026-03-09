@@ -34,7 +34,7 @@ export const HugoClarificationModal = ({
       <DialogContent className="glass-card sm:max-w-lg border-border/30" onPointerDownOutside={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle className="font-display text-lg flex items-center gap-2">
-            <HugoAvatar size="sm" />
+            <HugoAvatar size={28} />
             Hugo needs a bit more info…
           </DialogTitle>
           <DialogDescription className="text-muted-foreground text-xs">
