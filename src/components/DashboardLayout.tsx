@@ -34,7 +34,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
         </Link>
 
         <nav className="flex-1 space-y-1">
-          {navItems.map((item) => {
+          {allNavItems.map((item) => {
             const isActive = location.pathname === item.url;
             return (
               <Link
