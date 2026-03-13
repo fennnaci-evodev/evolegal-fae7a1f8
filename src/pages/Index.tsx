@@ -297,9 +297,9 @@ const Index = () => {
         </div>
       </section>
 
+      <HugoDemoBubble />
       <Footer />
     </div>
-  );
 };
 
 export default Index;
