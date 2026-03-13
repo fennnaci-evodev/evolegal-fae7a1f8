@@ -225,6 +225,18 @@ const SubmitRequest = () => {
         <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
           <h1 className="text-2xl font-display font-bold mb-2">Submit a Request</h1>
           <p className="text-muted-foreground">Describe your topic and we'll prepare a detailed, general informational response.</p>
+          {/* Progress indicator */}
+          <div className="flex items-center gap-2 mt-4">
+            {["Topic", "Details", "Files", "Review"].map((step, i) => {
+              const filled = topic ? (description.trim() ? (i <= 2 ? true : i <= 3) : i <= 0) : false;
+              return (
+                <div key={step} className="flex items-center gap-2 flex-1">
+                  <div className={`h-1.5 rounded-full flex-1 transition-colors duration-300 ${filled ? "bg-primary" : "bg-muted"}`} />
+                  <span className={`text-[10px] font-display ${filled ? "text-primary" : "text-muted-foreground/50"}`}>{step}</span>
+                </div>
+              );
+            })}
+          </div>
         </motion.div>
 
         <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0.5} className="glass rounded-xl px-5 py-3 flex items-start gap-3">
