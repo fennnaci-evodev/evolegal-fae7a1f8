@@ -6,6 +6,7 @@ import { Footer } from "@/components/Footer";
 import { ParticleBackground } from "@/components/ParticleBackground";
 import { DisclaimerModal } from "@/components/DisclaimerModal";
 import { EvoLogo } from "@/components/EvoLogo";
+import { HugoDemoBubble } from "@/components/HugoDemoBubble";
 import { ArrowRight, PlayCircle, BookOpen, MessageCircle, Shield, Zap, Globe, Check, ChevronRight } from "lucide-react";
 
 import { fadeUp } from "@/lib/animations";
