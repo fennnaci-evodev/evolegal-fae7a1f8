@@ -2,3 +2,6 @@ project_id = "ccgjhxkvjdxnyqendlno"
 
 [functions.hugo-clarify]
 verify_jwt = false
+
+[functions.hugo-chat]
+verify_jwt = false
