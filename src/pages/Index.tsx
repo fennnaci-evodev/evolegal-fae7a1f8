@@ -246,7 +246,7 @@ const Index = () => {
             {plans.map((plan, i) => (
               <motion.div
                 key={plan.name}
-                className={`glass-card p-7 flex flex-col relative ${plan.highlight ? "gradient-border glow-cyan" : ""}`}
+                className={`glass-card p-7 pt-8 flex flex-col relative overflow-visible ${plan.highlight ? "gradient-border glow-cyan" : ""}`}
                 initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i + 1}
               >
                 {plan.highlight && (
