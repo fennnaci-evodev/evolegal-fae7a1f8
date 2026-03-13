@@ -6,6 +6,7 @@ import { Footer } from "@/components/Footer";
 import { ParticleBackground } from "@/components/ParticleBackground";
 import { DisclaimerModal } from "@/components/DisclaimerModal";
 import { EvoLogo } from "@/components/EvoLogo";
+import { HugoDemoBubble } from "@/components/HugoDemoBubble";
 import { ArrowRight, PlayCircle, BookOpen, MessageCircle, Shield, Zap, Globe, Check, ChevronRight } from "lucide-react";
 
 import { fadeUp } from "@/lib/animations";
@@ -246,11 +247,11 @@ const Index = () => {
             {plans.map((plan, i) => (
               <motion.div
                 key={plan.name}
-                className={`glass-card p-7 flex flex-col relative ${plan.highlight ? "gradient-border glow-cyan" : ""}`}
+                className={`glass-card p-7 pt-8 flex flex-col relative overflow-visible ${plan.highlight ? "gradient-border glow-cyan" : ""}`}
                 initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i + 1}
               >
                 {plan.highlight && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-primary text-primary-foreground text-xs font-semibold">
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-primary text-primary-foreground text-[11px] font-semibold whitespace-nowrap z-10 shadow-lg">
                     Most Popular
                   </span>
                 )}
@@ -296,6 +297,7 @@ const Index = () => {
         </div>
       </section>
 
+      <HugoDemoBubble />
       <Footer />
     </div>
   );

@@ -1,25 +1,15 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { ScalesOfJustice } from "@/components/ScalesOfJustice";
 import { HugoAvatar } from "@/components/HugoAvatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, User, Info } from "lucide-react";
-import { generateHugoResponse } from "@/lib/hugoResponses";
+import { Send, User, Info, Mic, MicOff } from "lucide-react";
 import { isRateLimited } from "@/lib/security";
-import { useLoading } from "@/contexts/LoadingContext";
+import { toast } from "sonner";
 
-const tips = [
-  "US tenants generally have a warranty of habitability — landlords must maintain livable conditions...",
-  "English law distinguishes between assured and assured shorthold tenancies...",
-  "Always document communications with your landlord in writing...",
-  "Security deposit rules vary by state — some limit amounts to 1-2 months' rent...",
-  "UK family courts prioritize the welfare of the child above all else...",
-  "Mediation is often required before family court proceedings in England...",
-  "Personal injury claims in the US typically involve proving negligence...",
-  "Insurance claim timelines vary by state and type of coverage...",
-];
+const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/hugo-chat`;
 
 interface Message {
   id: string;
@@ -27,49 +17,151 @@ interface Message {
   content: string;
 }
 
+const presets = [
+  "What are tenant rights in the US?",
+  "UK divorce process overview",
+  "How do personal injury claims work?",
+  "How does crypto regulation work?",
+];
+
 const ExpertChat = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [currentTip, setCurrentTip] = useState(0);
+  const [listening, setListening] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
-  const { showLoader, hideLoader } = useLoading();
-
-  useEffect(() => {
-    if (!loading) return;
-    const interval = setInterval(() => {
-      setCurrentTip((prev) => (prev + 1) % tips.length);
-    }, Math.random() * 3000 + 5000);
-    return () => clearInterval(interval);
-  }, [loading]);
+  const recognitionRef = useRef<any>(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
 
-  const handleSend = () => {
+  const streamChat = useCallback(async (allMessages: Message[]) => {
+    const apiMessages = allMessages.map(m => ({ role: m.role, content: m.content }));
+
+    const resp = await fetch(CHAT_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      },
+      body: JSON.stringify({ messages: apiMessages }),
+    });
+
+    if (!resp.ok) {
+      if (resp.status === 429) throw new Error("Too many requests — please wait a moment.");
+      if (resp.status === 402) throw new Error("AI credits exhausted. Please check your workspace.");
+      throw new Error("Hugo is temporarily unavailable.");
+    }
+
+    if (!resp.body) throw new Error("No response stream");
+
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let textBuffer = "";
+    let assistantSoFar = "";
+
+    const updateAssistant = (text: string) => {
+      assistantSoFar = text;
+      setMessages(prev => {
+        const last = prev[prev.length - 1];
+        if (last?.role === "assistant") {
+          return prev.map((m, i) => i === prev.length - 1 ? { ...m, content: assistantSoFar } : m);
+        }
+        return [...prev, { id: Date.now().toString(), role: "assistant", content: assistantSoFar }];
+      });
+    };
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      textBuffer += decoder.decode(value, { stream: true });
+
+      let newlineIndex: number;
+      while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
+        let line = textBuffer.slice(0, newlineIndex);
+        textBuffer = textBuffer.slice(newlineIndex + 1);
+
+        if (line.endsWith("\r")) line = line.slice(0, -1);
+        if (line.startsWith(":") || line.trim() === "") continue;
+        if (!line.startsWith("data: ")) continue;
+
+        const jsonStr = line.slice(6).trim();
+        if (jsonStr === "[DONE]") break;
+
+        try {
+          const parsed = JSON.parse(jsonStr);
+          const content = parsed.choices?.[0]?.delta?.content;
+          if (content) {
+            assistantSoFar += content;
+            updateAssistant(assistantSoFar);
+          }
+        } catch {
+          textBuffer = line + "\n" + textBuffer;
+          break;
+        }
+      }
+    }
+  }, []);
+
+  const handleSend = async () => {
     if (!input.trim() || loading) return;
     if (isRateLimited("hugo_chat", 15, 60_000)) {
+      toast.error("Too many messages — please wait a moment.");
       return;
     }
+
     const userMsg: Message = { id: Date.now().toString(), role: "user", content: input };
-    setMessages((prev) => [...prev, userMsg]);
-    const question = input;
+    const updated = [...messages, userMsg];
+    setMessages(updated);
     setInput("");
     setLoading(true);
-    showLoader();
 
-    const response = generateHugoResponse(question);
-
-    setTimeout(() => {
-      setMessages((prev) => [...prev, {
+    try {
+      await streamChat(updated);
+    } catch (err: any) {
+      toast.error(err.message || "Something went wrong.");
+      // Add error as assistant message
+      setMessages(prev => [...prev, {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: response,
+        content: "I'm sorry, I wasn't able to process that right now. Please try again in a moment — I'm not going anywhere.",
       }]);
+    } finally {
       setLoading(false);
-      hideLoader();
-    }, Math.random() * 3000 + 5000);
+    }
+  };
+
+  // Voice input via Web Speech API
+  const toggleVoice = () => {
+    if (!("webkitSpeechRecognition" in window || "SpeechRecognition" in window)) {
+      toast.error("Voice input is not supported in this browser.");
+      return;
+    }
+
+    if (listening && recognitionRef.current) {
+      recognitionRef.current.stop();
+      setListening(false);
+      return;
+    }
+
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = "en-US";
+
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      setInput(prev => prev ? `${prev} ${transcript}` : transcript);
+      setListening(false);
+    };
+    recognition.onerror = () => setListening(false);
+    recognition.onend = () => setListening(false);
+
+    recognitionRef.current = recognition;
+    recognition.start();
+    setListening(true);
   };
 
   return (
@@ -96,11 +188,12 @@ const ExpertChat = () => {
                 </p>
               </div>
               <div className="flex flex-wrap gap-2 justify-center max-w-md">
-                {["What are tenant rights in the US?", "UK divorce process overview", "How do personal injury claims work?", "How does crypto regulation work?"].map((q) => (
+                {presets.map((q) => (
                   <button
                     key={q}
                     onClick={() => setInput(q)}
                     className="glass rounded-full px-4 py-2 text-xs text-muted-foreground hover:text-foreground hover:border-primary/20 transition-all"
+                    aria-label={`Ask: ${q}`}
                   >
                     {q}
                   </button>
@@ -134,21 +227,16 @@ const ExpertChat = () => {
             ))}
           </AnimatePresence>
 
-          {loading && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center py-8 space-y-4">
-              <ScalesOfJustice animating />
-              <p className="text-sm text-primary font-display font-medium animate-pulse">Preparing your insights...</p>
-              <AnimatePresence mode="wait">
-                <motion.p
-                  key={currentTip}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="text-xs text-muted-foreground text-center max-w-xs"
-                >
-                  {tips[currentTip]}
-                </motion.p>
-              </AnimatePresence>
+          {loading && messages[messages.length - 1]?.role === "user" && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex gap-3">
+              <HugoAvatar size={32} animate={false} />
+              <div className="glass rounded-2xl rounded-bl-md px-5 py-4">
+                <div className="flex gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "0ms" }} />
+                  <span className="w-2 h-2 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "150ms" }} />
+                  <span className="w-2 h-2 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "300ms" }} />
+                </div>
+              </div>
             </motion.div>
           )}
           <div ref={bottomRef} />
@@ -164,14 +252,25 @@ const ExpertChat = () => {
 
         {/* Input */}
         <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="glass-strong p-3 flex gap-3" style={{ borderRadius: "1rem" }}>
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            onClick={toggleVoice}
+            className={`shrink-0 ${listening ? "text-primary" : "text-muted-foreground"}`}
+            aria-label={listening ? "Stop recording" : "Start voice input"}
+          >
+            {listening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+          </Button>
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Ask Hugo about a legal topic..."
             className="bg-transparent border-0 focus-visible:ring-0"
             disabled={loading}
+            aria-label="Message input"
           />
-          <Button type="submit" size="icon" disabled={!input.trim() || loading} className="shrink-0">
+          <Button type="submit" size="icon" disabled={!input.trim() || loading} className="shrink-0" aria-label="Send message">
             <Send className="h-4 w-4" />
           </Button>
         </form>
