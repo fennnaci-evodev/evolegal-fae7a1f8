@@ -300,6 +300,7 @@ const Index = () => {
       <HugoDemoBubble />
       <Footer />
     </div>
+  );
 };
 
 export default Index;
