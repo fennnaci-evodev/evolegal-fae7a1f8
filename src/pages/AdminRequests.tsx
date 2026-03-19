@@ -5,11 +5,15 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from "@/components/ui/dialog";
 import {
-  FileText, Clock, Search, Eye, MessageSquare, CheckCircle, Archive, Filter,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import {
+  FileText, Clock, Search, Eye, MessageSquare, CheckCircle, Archive, Download,
 } from "lucide-react";
 import { fadeUp } from "@/lib/animations";
 import { useAdminRole } from "@/hooks/useAdminRole";
@@ -53,6 +57,9 @@ const AdminRequests = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
+  // Selection state for bulk actions
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
   // Detail modal
   const [selected, setSelected] = useState<AdminRequest | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
@@ -61,6 +68,9 @@ const AdminRequests = () => {
   const [respondOpen, setRespondOpen] = useState(false);
   const [responseText, setResponseText] = useState("");
   const [responding, setResponding] = useState(false);
+
+  // Bulk status change
+  const [bulkStatus, setBulkStatus] = useState<string>("");
 
   useEffect(() => {
     if (roleLoading) return;
@@ -101,6 +111,77 @@ const AdminRequests = () => {
       toast.success(`Status updated to ${newStatus}.`);
       setRequests(prev => prev.map(r => r.id === req.id ? { ...r, status: newStatus, audit_log: updatedLog } : r));
       if (selected?.id === req.id) setSelected({ ...req, status: newStatus, audit_log: updatedLog });
+    }
+  };
+
+  // Bulk status change
+  const handleBulkStatusChange = async () => {
+    if (!bulkStatus || selectedIds.size === 0) return;
+    const ids = Array.from(selectedIds);
+    let successCount = 0;
+
+    for (const id of ids) {
+      const req = requests.find(r => r.id === id);
+      if (!req) continue;
+      const updatedLog = [
+        ...(req.audit_log || []),
+        { timestamp: new Date().toISOString(), action: `bulk_status_changed_to_${bulkStatus}`, actor: "admin", note: `Bulk status change to ${bulkStatus}` },
+      ];
+      const { error } = await supabase
+        .from("legal_requests" as any)
+        .update({ status: bulkStatus, audit_log: updatedLog, updated_at: new Date().toISOString() } as any)
+        .eq("id", id);
+      if (!error) successCount++;
+    }
+
+    toast.success(`${successCount} request(s) updated to "${bulkStatus}".`);
+    setSelectedIds(new Set());
+    setBulkStatus("");
+    fetchRequests();
+  };
+
+  // CSV export
+  const handleExportCSV = () => {
+    const toExport = selectedIds.size > 0
+      ? requests.filter(r => selectedIds.has(r.id))
+      : filtered;
+
+    const header = "ID,User ID,Date,Topic,Status,Title,Description\n";
+    const rows = toExport.map(r =>
+      [
+        r.id,
+        r.user_id,
+        new Date(r.created_at).toLocaleDateString(),
+        `"${(r.topic || "").replace(/"/g, '""')}"`,
+        r.status,
+        `"${(r.title || "").replace(/"/g, '""')}"`,
+        `"${(r.description || "").slice(0, 200).replace(/"/g, '""')}"`,
+      ].join(",")
+    ).join("\n");
+
+    const blob = new Blob([header + rows], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `evolegal-requests-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success(`Exported ${toExport.length} request(s) to CSV.`);
+  };
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === filtered.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(filtered.map(r => r.id)));
     }
   };
 
@@ -173,7 +254,7 @@ const AdminRequests = () => {
         </motion.div>
 
         {/* Filters */}
-        <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0.5} className="flex flex-wrap gap-3">
+        <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0.5} className="flex flex-wrap gap-3 items-center">
           <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -184,26 +265,51 @@ const AdminRequests = () => {
             />
           </div>
           <div className="flex gap-1.5">
-            <Button
-              variant={statusFilter === "all" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setStatusFilter("all")}
-            >
-              All
-            </Button>
+            <Button variant={statusFilter === "all" ? "default" : "outline"} size="sm" onClick={() => setStatusFilter("all")}>All</Button>
             {statusOptions.map(s => (
-              <Button
-                key={s}
-                variant={statusFilter === s ? "default" : "outline"}
-                size="sm"
-                onClick={() => setStatusFilter(s)}
-                className="capitalize"
-              >
-                {s}
-              </Button>
+              <Button key={s} variant={statusFilter === s ? "default" : "outline"} size="sm" onClick={() => setStatusFilter(s)} className="capitalize">{s}</Button>
             ))}
           </div>
         </motion.div>
+
+        {/* Bulk actions bar */}
+        {filtered.length > 0 && (
+          <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0.7} className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2">
+              <Checkbox
+                checked={selectedIds.size === filtered.length && filtered.length > 0}
+                onCheckedChange={toggleSelectAll}
+                aria-label="Select all"
+              />
+              <span className="text-xs text-muted-foreground">
+                {selectedIds.size > 0 ? `${selectedIds.size} selected` : "Select all"}
+              </span>
+            </div>
+
+            {selectedIds.size > 0 && (
+              <>
+                <Select value={bulkStatus} onValueChange={setBulkStatus}>
+                  <SelectTrigger className="w-[140px] h-8 text-xs bg-muted/30 border-border/50">
+                    <SelectValue placeholder="Change status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {statusOptions.map(s => (
+                      <SelectItem key={s} value={s} className="capitalize text-xs">{s}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button size="sm" variant="outline" onClick={handleBulkStatusChange} disabled={!bulkStatus} className="text-xs h-8">
+                  Apply
+                </Button>
+              </>
+            )}
+
+            <Button size="sm" variant="outline" onClick={handleExportCSV} className="text-xs h-8 ml-auto gap-1.5">
+              <Download className="h-3.5 w-3.5" />
+              Export CSV{selectedIds.size > 0 ? ` (${selectedIds.size})` : ""}
+            </Button>
+          </motion.div>
+        )}
 
         {/* Request List */}
         {loading ? (
@@ -227,6 +333,12 @@ const AdminRequests = () => {
                 custom={i * 0.05 + 1}
                 className="glass-card p-4 flex items-center gap-4"
               >
+                <Checkbox
+                  checked={selectedIds.has(req.id)}
+                  onCheckedChange={() => toggleSelect(req.id)}
+                  aria-label={`Select request ${req.title || req.id}`}
+                  className="shrink-0"
+                />
                 <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
                   <FileText className="h-4 w-4 text-primary" />
                 </div>
@@ -283,15 +395,7 @@ const AdminRequests = () => {
                 <p className="text-muted-foreground text-xs mb-1">Status</p>
                 <div className="flex gap-1.5">
                   {statusOptions.map(s => (
-                    <Button
-                      key={s}
-                      variant={selected.status === s ? "default" : "outline"}
-                      size="sm"
-                      className="capitalize text-xs"
-                      onClick={() => changeStatus(selected, s)}
-                    >
-                      {s}
-                    </Button>
+                    <Button key={s} variant={selected.status === s ? "default" : "outline"} size="sm" className="capitalize text-xs" onClick={() => changeStatus(selected, s)}>{s}</Button>
                   ))}
                 </div>
               </div>
