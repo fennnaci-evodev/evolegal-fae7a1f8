@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Send, User, Info, Mic, MicOff } from "lucide-react";
 import { isRateLimited } from "@/lib/security";
+import { InlineELoader } from "@/components/InlineELoader";
 import { toast } from "sonner";
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/hugo-chat`;
