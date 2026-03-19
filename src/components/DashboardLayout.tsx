@@ -22,7 +22,11 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
   const { isAdmin } = useAdminRole();
 
   const allNavItems = isAdmin
-    ? [...navItems, { title: "Admin Requests", url: "/dashboard/admin/requests", icon: ShieldCheck }]
+    ? [
+        ...navItems,
+        { title: "Admin Requests", url: "/dashboard/admin/requests", icon: ShieldCheck },
+        { title: "Expert Dashboard", url: "/dashboard/admin/workdesk", icon: LayoutDashboard },
+      ]
     : navItems;
 
   return (
