@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Home, PlayCircle, MessageCircle, FileText, BookOpen, Settings, LogOut, ShieldCheck, LayoutDashboard } from "lucide-react";
+import { Home, PlayCircle, MessageCircle, FileText, BookOpen, Settings, LogOut, ShieldCheck, LayoutDashboard, Route as RouteIcon } from "lucide-react";
 import { motion } from "framer-motion";
 import { EvoLogo } from "./EvoLogo";
 import { useAuth } from "@/hooks/useAuth";
@@ -11,6 +11,7 @@ const navItems = [
   { title: "Videos & Lectures", url: "/dashboard/library", icon: PlayCircle },
   { title: "Ask Hugo", url: "/dashboard/chat", icon: MessageCircle },
   { title: "Submit Request", url: "/dashboard/submit", icon: FileText },
+  { title: "Workflow Guides", url: "/dashboard/workflows", icon: RouteIcon },
   { title: "My Library", url: "/dashboard/saved", icon: BookOpen },
   { title: "Settings", url: "/dashboard/settings", icon: Settings },
 ];
