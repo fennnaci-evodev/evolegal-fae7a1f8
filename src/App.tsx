@@ -24,6 +24,7 @@ import ArticleTenantLandlord from "./pages/ArticleTenantLandlord";
 import ResetPassword from "./pages/ResetPassword";
 import MyRequests from "./pages/MyRequests";
 import AdminRequests from "./pages/AdminRequests";
+import ExpertDashboard from "./pages/ExpertDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
