@@ -25,6 +25,7 @@ import ResetPassword from "./pages/ResetPassword";
 import MyRequests from "./pages/MyRequests";
 import AdminRequests from "./pages/AdminRequests";
 import ExpertDashboard from "./pages/ExpertDashboard";
+import WorkflowGuides from "./pages/WorkflowGuides";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
