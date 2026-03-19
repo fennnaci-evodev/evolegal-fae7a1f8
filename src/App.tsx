@@ -62,6 +62,7 @@ const App = () => {
                 <Route path="/dashboard/requests" element={<MyRequests />} />
                 <Route path="/dashboard/admin/requests" element={<AdminRequests />} />
                 <Route path="/dashboard/admin/workdesk" element={<ExpertDashboard />} />
+                <Route path="/dashboard/workflows" element={<WorkflowGuides />} />
                 <Route path="/dashboard/saved" element={<Library />} />
                 <Route path="/dashboard/settings" element={<Dashboard />} />
                 <Route path="*" element={<NotFound />} />
