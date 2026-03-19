@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Home, PlayCircle, MessageCircle, FileText, BookOpen, Settings, LogOut, ShieldCheck } from "lucide-react";
+import { Home, PlayCircle, MessageCircle, FileText, BookOpen, Settings, LogOut, ShieldCheck, LayoutDashboard } from "lucide-react";
 import { motion } from "framer-motion";
 import { EvoLogo } from "./EvoLogo";
 import { useAuth } from "@/hooks/useAuth";
@@ -22,7 +22,11 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
   const { isAdmin } = useAdminRole();
 
   const allNavItems = isAdmin
-    ? [...navItems, { title: "Admin Requests", url: "/dashboard/admin/requests", icon: ShieldCheck }]
+    ? [
+        ...navItems,
+        { title: "Admin Requests", url: "/dashboard/admin/requests", icon: ShieldCheck },
+        { title: "Expert Dashboard", url: "/dashboard/admin/workdesk", icon: LayoutDashboard },
+      ]
     : navItems;
 
   return (

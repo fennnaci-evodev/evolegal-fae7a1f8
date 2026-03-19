@@ -16,8 +16,10 @@ export type Database = {
     Tables: {
       legal_requests: {
         Row: {
+          admin_notes: string | null
           admin_response: string | null
           assigned_to: string | null
+          assigned_to_name: string | null
           audit_log: Json | null
           created_at: string
           description: string
@@ -33,8 +35,10 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          admin_notes?: string | null
           admin_response?: string | null
           assigned_to?: string | null
+          assigned_to_name?: string | null
           audit_log?: Json | null
           created_at?: string
           description: string
@@ -50,8 +54,10 @@ export type Database = {
           user_id: string
         }
         Update: {
+          admin_notes?: string | null
           admin_response?: string | null
           assigned_to?: string | null
+          assigned_to_name?: string | null
           audit_log?: Json | null
           created_at?: string
           description?: string
@@ -94,6 +100,41 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      request_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          request_id: string
+          sender_id: string
+          sender_role: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          request_id: string
+          sender_id: string
+          sender_role?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          request_id?: string
+          sender_id?: string
+          sender_role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "request_messages_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "legal_requests"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
