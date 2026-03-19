@@ -11,6 +11,7 @@ const navItems = [
   { title: "Videos & Lectures", url: "/dashboard/library", icon: PlayCircle },
   { title: "Ask Hugo", url: "/dashboard/chat", icon: MessageCircle },
   { title: "Submit Request", url: "/dashboard/submit", icon: FileText },
+  { title: "Workflow Guides", url: "/dashboard/workflows", icon: RouteIcon },
   { title: "My Library", url: "/dashboard/saved", icon: BookOpen },
   { title: "Settings", url: "/dashboard/settings", icon: Settings },
 ];
