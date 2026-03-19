@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Send, User, Info, Mic, MicOff } from "lucide-react";
 import { isRateLimited } from "@/lib/security";
+import { InlineELoader } from "@/components/InlineELoader";
 import { toast } from "sonner";
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/hugo-chat`;
@@ -228,14 +229,11 @@ const ExpertChat = () => {
           </AnimatePresence>
 
           {loading && messages[messages.length - 1]?.role === "user" && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex gap-3">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex gap-3 items-center">
               <HugoAvatar size={32} animate={false} />
-              <div className="glass rounded-2xl rounded-bl-md px-5 py-4">
-                <div className="flex gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "0ms" }} />
-                  <span className="w-2 h-2 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "150ms" }} />
-                  <span className="w-2 h-2 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "300ms" }} />
-                </div>
+              <div className="glass rounded-2xl rounded-bl-md px-4 py-3 flex items-center gap-2">
+                <InlineELoader size={24} />
+                <span className="text-xs text-muted-foreground/60">Hugo is thinking…</span>
               </div>
             </motion.div>
           )}

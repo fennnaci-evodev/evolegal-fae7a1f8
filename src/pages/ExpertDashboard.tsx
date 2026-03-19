@@ -19,6 +19,7 @@ import {
   FileText, Clock, LogOut, Search, MessageSquare, ChevronLeft,
 } from "lucide-react";
 import { toast } from "sonner";
+import { InlineELoader } from "@/components/InlineELoader";
 
 // Types
 interface RequestItem {
@@ -553,6 +554,15 @@ const ExpertDashboard = () => {
                       </div>
                     );
                   })}
+                  {sending && (
+                    <div className="flex gap-3 flex-row-reverse items-center">
+                      <div className="h-7 w-7" />
+                      <div className="glass rounded-2xl rounded-tr-md px-4 py-2.5 flex items-center gap-2">
+                        <InlineELoader size={22} />
+                        <span className="text-[11px] text-muted-foreground/50">Processing…</span>
+                      </div>
+                    </div>
+                  )}
                   <div ref={chatEndRef} />
                 </div>
               )}
