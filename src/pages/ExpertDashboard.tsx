@@ -19,6 +19,7 @@ import {
   FileText, Clock, LogOut, Search, MessageSquare, ChevronLeft,
 } from "lucide-react";
 import { toast } from "sonner";
+import { InlineELoader } from "@/components/InlineELoader";
 
 // Types
 interface RequestItem {
