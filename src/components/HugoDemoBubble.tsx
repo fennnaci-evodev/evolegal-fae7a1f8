@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, X, Send, LogIn, ArrowRight, Users } from "lucide-react";
+import { MessageCircle, X, Send, LogIn, ArrowRight, Users, Crown } from "lucide-react";
 import { HugoAvatar } from "@/components/HugoAvatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,6 +28,7 @@ export function HugoDemoBubble() {
   const [showChoice, setShowChoice] = useState(false);
   const [choiceDismissed, setChoiceDismissed] = useState(false);
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
+  const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
   const userMsgCount = messages.filter((m) => m.role === "user").length;
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -88,7 +89,6 @@ export function HugoDemoBubble() {
     const text = input.trim();
     if (!text || streaming) return;
 
-    // Guest limit: allow 1 message without auth, then prompt
     if (!user && userMsgCount >= 1) {
       setShowAuthPrompt(true);
       return;
@@ -122,9 +122,28 @@ export function HugoDemoBubble() {
   };
 
   const handleConnectExpert = () => {
-    sessionStorage.setItem("evo_bubble_history", JSON.stringify(messages));
+    if (!user) {
+      setShowChoice(false);
+      setShowAuthPrompt(true);
+      return;
+    }
+
+    // For now, all users see the upgrade prompt since Stripe isn't integrated yet.
+    // When Stripe is set up, check subscription status here.
+    // Pro/Premium users would bypass this and go directly to expert chat.
+    setShowChoice(false);
+    setShowUpgradePrompt(true);
+  };
+
+  const handleUpgradeConfirmed = () => {
+    setShowUpgradePrompt(false);
     setOpen(false);
-    navigate("/dashboard/chat?from=bubble");
+    navigate("/pricing");
+  };
+
+  const handleContinueFromUpgrade = () => {
+    setShowUpgradePrompt(false);
+    setChoiceDismissed(true);
   };
 
   const handleGoogleSignIn = async () => {
@@ -133,7 +152,7 @@ export function HugoDemoBubble() {
 
   return (
     <>
-      {/* Floating trigger — bottom-left */}
+      {/* Floating trigger — bottom-right, icon only */}
       <AnimatePresence>
         {!open && (
           <motion.button
@@ -142,17 +161,16 @@ export function HugoDemoBubble() {
             exit={{ scale: 0, opacity: 0 }}
             transition={{ delay: 2, type: "spring", stiffness: 260, damping: 20 }}
             onClick={() => setOpen(true)}
-            className="fixed bottom-6 left-6 z-50 flex items-center gap-2.5 rounded-full bg-primary px-4 py-3 shadow-lg hover:scale-105 transition-transform"
+            className="fixed bottom-6 right-6 z-50 flex items-center justify-center h-14 w-14 rounded-full bg-primary shadow-lg hover:scale-110 transition-transform"
             style={{ boxShadow: "0 0 28px hsla(186, 100%, 50%, 0.35)" }}
             aria-label="Chat with Hugo"
           >
-            <HugoAvatar size={28} animate={false} />
-            <span className="text-primary-foreground text-sm font-display font-semibold pr-1">Talk to Hugo</span>
+            <MessageCircle className="h-6 w-6 text-primary-foreground" />
           </motion.button>
         )}
       </AnimatePresence>
 
-      {/* Chat window — bottom-left */}
+      {/* Chat window — bottom-right */}
       <AnimatePresence>
         {open && (
           <motion.div
@@ -160,7 +178,7 @@ export function HugoDemoBubble() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
-            className="fixed bottom-6 left-6 z-50 w-[calc(100vw-3rem)] sm:w-96 glass-strong overflow-hidden flex flex-col"
+            className="fixed bottom-6 right-6 z-50 w-[calc(100vw-3rem)] sm:w-96 glass-strong overflow-hidden flex flex-col"
             style={{ borderRadius: "1.25rem", maxHeight: "min(520px, 80vh)", maxWidth: "24rem" }}
             role="dialog"
             aria-label="Hugo demo chat"
@@ -215,7 +233,7 @@ export function HugoDemoBubble() {
               <div ref={bottomRef} />
             </div>
 
-            {/* Choice overlay — glassmorphic bottom sheet */}
+            {/* Choice overlay */}
             <AnimatePresence>
               {showChoice && (
                 <motion.div
@@ -259,6 +277,45 @@ export function HugoDemoBubble() {
                       <Users className="h-4 w-4" style={{ color: "hsl(270, 95%, 75%)" }} />
                       Connect EvoLegal Expert
                       <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Upgrade prompt overlay */}
+            <AnimatePresence>
+              {showUpgradePrompt && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute inset-0 z-10 flex items-center justify-center"
+                  style={{ background: "hsla(0, 0%, 0%, 0.6)", backdropFilter: "blur(6px)", borderRadius: "1.25rem" }}
+                >
+                  <div className="glass-strong rounded-xl p-5 mx-4 text-center space-y-3 max-w-[280px]">
+                    <Crown className="h-7 w-7 mx-auto" style={{ color: "hsl(270, 95%, 75%)" }} />
+                    <p className="text-sm font-display font-semibold">Pro Subscription Required</p>
+                    <p className="text-[11px] text-muted-foreground leading-relaxed">
+                      To connect with an EvoLegal Expert, you need a Pro or Premium subscription. Upgrade now for full access to expert chat support.
+                    </p>
+                    <Button
+                      variant="hero"
+                      size="sm"
+                      className="w-full text-xs"
+                      onClick={handleUpgradeConfirmed}
+                      aria-label="Upgrade to Pro"
+                    >
+                      <Crown className="h-3.5 w-3.5 mr-1" />
+                      Upgrade to Pro
+                    </Button>
+                    <button
+                      onClick={handleContinueFromUpgrade}
+                      className="w-full flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground hover:text-foreground transition-colors pt-1"
+                      aria-label="Continue with Hugo instead"
+                    >
+                      <MessageCircle className="h-3 w-3" />
+                      Continue with Hugo
                     </button>
                   </div>
                 </motion.div>
