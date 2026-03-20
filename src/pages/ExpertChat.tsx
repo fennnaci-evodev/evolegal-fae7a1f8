@@ -27,7 +27,23 @@ const presets = [
 ];
 
 const ExpertChat = () => {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [searchParams] = useSearchParams();
+  const fromBubble = searchParams.get("from") === "bubble";
+
+  // Load bubble history if navigated from demo bubble
+  const initialMessages = useMemo<Message[]>(() => {
+    if (!fromBubble) return [];
+    try {
+      const raw = sessionStorage.getItem("evo_bubble_history");
+      if (raw) {
+        sessionStorage.removeItem("evo_bubble_history");
+        return JSON.parse(raw) as Message[];
+      }
+    } catch { /* ignore */ }
+    return [];
+  }, [fromBubble]);
+
+  const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [listening, setListening] = useState(false);
