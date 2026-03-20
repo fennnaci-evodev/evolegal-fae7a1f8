@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, X, Send, LogIn } from "lucide-react";
+import { MessageCircle, X, Send, LogIn, ArrowRight, Users } from "lucide-react";
 import { HugoAvatar } from "@/components/HugoAvatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,7 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { lovable } from "@/integrations/lovable/index";
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/hugo-chat`;
-const MESSAGES_BEFORE_CHOICE = 3; // user messages before showing choice
+const MESSAGES_BEFORE_CHOICE = 3;
 
 interface Msg {
   id: string;
@@ -19,13 +19,14 @@ interface Msg {
 }
 
 export function HugoDemoBubble() {
-  const { user, loading: authLoading } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Msg[]>([]);
   const [streaming, setStreaming] = useState(false);
   const [showChoice, setShowChoice] = useState(false);
+  const [choiceDismissed, setChoiceDismissed] = useState(false);
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
   const userMsgCount = messages.filter((m) => m.role === "user").length;
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -34,7 +35,6 @@ export function HugoDemoBubble() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, streaming]);
 
-  // Stream from the real hugo-chat edge function
   const streamReply = useCallback(async (allMsgs: Msg[]) => {
     const apiMessages = allMsgs.map((m) => ({ role: m.role, content: m.content }));
     const resp = await fetch(CHAT_URL, {
@@ -109,19 +109,19 @@ export function HugoDemoBubble() {
       ]);
     } finally {
       setStreaming(false);
-      // Check if we should show the choice overlay
       const newUserCount = updated.filter((m) => m.role === "user").length;
-      if (newUserCount >= MESSAGES_BEFORE_CHOICE && user && !showChoice) {
-        // Small delay so the reply renders first
+      if (newUserCount >= MESSAGES_BEFORE_CHOICE && user && !choiceDismissed) {
         setTimeout(() => setShowChoice(true), 800);
       }
     }
   };
 
-  const handleContinueHugo = () => setShowChoice(false);
+  const handleContinueHugo = () => {
+    setShowChoice(false);
+    setChoiceDismissed(true);
+  };
 
   const handleConnectExpert = () => {
-    // Save conversation to sessionStorage for the expert chat to pick up
     sessionStorage.setItem("evo_bubble_history", JSON.stringify(messages));
     setOpen(false);
     navigate("/dashboard/chat?from=bubble");
@@ -133,7 +133,7 @@ export function HugoDemoBubble() {
 
   return (
     <>
-      {/* Floating trigger */}
+      {/* Floating trigger — bottom-left */}
       <AnimatePresence>
         {!open && (
           <motion.button
@@ -142,16 +142,17 @@ export function HugoDemoBubble() {
             exit={{ scale: 0, opacity: 0 }}
             transition={{ delay: 2, type: "spring", stiffness: 260, damping: 20 }}
             onClick={() => setOpen(true)}
-            className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full bg-primary flex items-center justify-center shadow-lg hover:scale-105 transition-transform"
-            style={{ boxShadow: "0 0 24px hsla(186, 100%, 50%, 0.3)" }}
+            className="fixed bottom-6 left-6 z-50 flex items-center gap-2.5 rounded-full bg-primary px-4 py-3 shadow-lg hover:scale-105 transition-transform"
+            style={{ boxShadow: "0 0 28px hsla(186, 100%, 50%, 0.35)" }}
             aria-label="Chat with Hugo"
           >
-            <MessageCircle className="h-6 w-6 text-primary-foreground" />
+            <HugoAvatar size={28} animate={false} />
+            <span className="text-primary-foreground text-sm font-display font-semibold pr-1">Talk to Hugo</span>
           </motion.button>
         )}
       </AnimatePresence>
 
-      {/* Chat window */}
+      {/* Chat window — bottom-left */}
       <AnimatePresence>
         {open && (
           <motion.div
@@ -159,8 +160,10 @@ export function HugoDemoBubble() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
-            className="fixed bottom-6 right-6 z-50 w-80 sm:w-96 glass-strong overflow-hidden flex flex-col"
-            style={{ borderRadius: "1.25rem", maxHeight: "min(520px, 80vh)" }}
+            className="fixed bottom-6 left-6 z-50 w-[calc(100vw-3rem)] sm:w-96 glass-strong overflow-hidden flex flex-col"
+            style={{ borderRadius: "1.25rem", maxHeight: "min(520px, 80vh)", maxWidth: "24rem" }}
+            role="dialog"
+            aria-label="Hugo demo chat"
           >
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-border/20 shrink-0">
@@ -180,7 +183,6 @@ export function HugoDemoBubble() {
 
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-4 space-y-3 min-h-0">
-              {/* Intro */}
               <div className="glass rounded-xl px-4 py-3 text-sm text-foreground leading-relaxed">
                 Hey there! I'm Hugo, your Expert Manager. Ask me anything about US or UK legal topics — I'm here to help.
               </div>
@@ -213,39 +215,51 @@ export function HugoDemoBubble() {
               <div ref={bottomRef} />
             </div>
 
-            {/* Choice overlay */}
+            {/* Choice overlay — glassmorphic bottom sheet */}
             <AnimatePresence>
               {showChoice && (
                 <motion.div
-                  initial={{ opacity: 0, y: 10 }}
+                  initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  className="absolute inset-x-0 bottom-0 p-4 glass-strong border-t border-border/20"
-                  style={{ borderRadius: "0 0 1.25rem 1.25rem" }}
+                  exit={{ opacity: 0, y: 16 }}
+                  className="absolute inset-x-0 bottom-0 p-5 border-t border-border/20"
+                  style={{
+                    borderRadius: "0 0 1.25rem 1.25rem",
+                    background: "hsla(222, 47%, 6%, 0.92)",
+                    backdropFilter: "blur(16px)",
+                  }}
                 >
-                  <p className="text-xs text-muted-foreground text-center mb-3">
-                    Want to keep chatting or connect with an EvoLegal expert?
+                  <p className="text-xs text-muted-foreground text-center mb-4 leading-relaxed">
+                    Want to keep chatting with Hugo or connect with a real EvoLegal expert?
                   </p>
-                  <div className="flex flex-col gap-2">
-                    <Button
-                      variant="glass"
-                      size="sm"
+                  <div className="flex flex-col gap-2.5">
+                    <button
                       onClick={handleContinueHugo}
-                      className="w-full text-xs border border-primary/30"
-                      style={{ boxShadow: "0 0 12px hsla(186, 100%, 50%, 0.15)" }}
+                      className="w-full flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-display font-semibold text-foreground transition-all duration-200 hover:scale-[1.02]"
+                      style={{
+                        border: "1px solid hsla(186, 100%, 50%, 0.3)",
+                        boxShadow: "0 0 16px hsla(186, 100%, 50%, 0.12), inset 0 0 12px hsla(186, 100%, 50%, 0.04)",
+                        background: "hsla(186, 100%, 50%, 0.06)",
+                      }}
                       aria-label="Continue chatting with Hugo"
                     >
+                      <MessageCircle className="h-4 w-4 text-primary" />
                       Continue with Hugo
-                    </Button>
-                    <Button
-                      variant="hero"
-                      size="sm"
+                    </button>
+                    <button
                       onClick={handleConnectExpert}
-                      className="w-full text-xs"
+                      className="w-full flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-display font-semibold text-foreground transition-all duration-200 hover:scale-[1.02]"
+                      style={{
+                        border: "1px solid hsla(270, 95%, 75%, 0.35)",
+                        boxShadow: "0 0 16px hsla(270, 95%, 75%, 0.15), 0 0 32px hsla(186, 100%, 50%, 0.08)",
+                        background: "linear-gradient(135deg, hsla(270, 95%, 75%, 0.1), hsla(186, 100%, 50%, 0.08))",
+                      }}
                       aria-label="Connect with an EvoLegal Expert"
                     >
+                      <Users className="h-4 w-4" style={{ color: "hsl(270, 95%, 75%)" }} />
                       Connect EvoLegal Expert
-                    </Button>
+                      <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
+                    </button>
                   </div>
                 </motion.div>
               )}
