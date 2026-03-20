@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { ScalesOfJustice } from "@/components/ScalesOfJustice";
