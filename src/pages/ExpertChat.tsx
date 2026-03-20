@@ -147,6 +147,18 @@ const ExpertChat = () => {
       }]);
     } finally {
       setLoading(false);
+      // Strip escalation markers from Hugo's response
+      setMessages(prev => {
+        const last = prev[prev.length - 1];
+        if (last?.role === "assistant" && last.content.includes("[ESCALATE_TO_EXPERT]")) {
+          return prev.map((m, i) =>
+            i === prev.length - 1
+              ? { ...m, content: m.content.replace(/\[ESCALATE_TO_EXPERT\]/g, "").trim() || "Let me connect you with an EvoLegal Expert right away." }
+              : m
+          );
+        }
+        return prev;
+      });
     }
   };
 
