@@ -85,12 +85,23 @@ export function HugoDemoBubble() {
     }
   }, []);
 
+  const EXPERT_TRIGGER_PATTERN = /\b(connect\s*(me\s*)?(to\s*)?(an?\s*)?expert|talk\s*to\s*(an?\s*)?expert|need\s*(an?\s*)?expert|speak\s*(to|with)\s*(an?\s*)?expert)/i;
+
   const handleSend = async () => {
     const text = input.trim();
     if (!text || streaming) return;
 
     if (!user && userMsgCount >= 1) {
       setShowAuthPrompt(true);
+      return;
+    }
+
+    // If user explicitly asks for expert, show choice overlay immediately
+    if (EXPERT_TRIGGER_PATTERN.test(text)) {
+      const userMsg: Msg = { id: Date.now().toString(), role: "user", content: text };
+      setMessages((prev) => [...prev, userMsg]);
+      setInput("");
+      setShowChoice(true);
       return;
     }
 
@@ -109,6 +120,21 @@ export function HugoDemoBubble() {
       ]);
     } finally {
       setStreaming(false);
+
+      // Check if Hugo's response contains the escalation signal
+      setMessages((prev) => {
+        const lastMsg = prev[prev.length - 1];
+        if (lastMsg?.role === "assistant" && lastMsg.content.includes("[ESCALATE_TO_EXPERT]")) {
+          // Remove the escalation marker message and show choice overlay
+          const cleaned = prev.map((m, i) =>
+            i === prev.length - 1 ? { ...m, content: m.content.replace(/\[ESCALATE_TO_EXPERT\]/g, "").trim() } : m
+          ).filter((m) => m.content.length > 0);
+          setTimeout(() => setShowChoice(true), 300);
+          return cleaned;
+        }
+        return prev;
+      });
+
       const newUserCount = updated.filter((m) => m.role === "user").length;
       if (newUserCount >= MESSAGES_BEFORE_CHOICE && user && !choiceDismissed) {
         setTimeout(() => setShowChoice(true), 800);
