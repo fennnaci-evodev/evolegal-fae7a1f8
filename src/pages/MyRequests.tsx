@@ -2,12 +2,14 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Clock, ArrowRight } from "lucide-react";
+import { FileText, Clock, ArrowRight, Download } from "lucide-react";
 import { fadeUp } from "@/lib/animations";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { generateCasePdf } from "@/lib/generateCasePdf";
+import { toast } from "sonner";
 
 interface LegalRequest {
   id: string;
