@@ -18,6 +18,10 @@ interface LegalRequest {
   topic: string;
   title: string;
   description: string;
+  state: string;
+  facts: any;
+  admin_response: string;
+  responded_at: string | null;
 }
 
 const statusColors: Record<string, string> = {
