@@ -65,7 +65,7 @@ const App = () => {
                 <Route path="/dashboard/admin/workdesk" element={<ExpertDashboard />} />
                 <Route path="/dashboard/workflows" element={<WorkflowGuides />} />
                 <Route path="/dashboard/saved" element={<Library />} />
-                <Route path="/dashboard/settings" element={<Dashboard />} />
+                <Route path="/dashboard/settings" element={<SettingsPage />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
