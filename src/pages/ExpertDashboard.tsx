@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { InlineELoader } from "@/components/InlineELoader";
+import { generateCasePdf } from "@/lib/generateCasePdf";
 
 // Types
 interface RequestItem {
