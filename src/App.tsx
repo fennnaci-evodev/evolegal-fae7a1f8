@@ -26,6 +26,7 @@ import MyRequests from "./pages/MyRequests";
 import AdminRequests from "./pages/AdminRequests";
 import ExpertDashboard from "./pages/ExpertDashboard";
 import WorkflowGuides from "./pages/WorkflowGuides";
+import SettingsPage from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -64,7 +65,7 @@ const App = () => {
                 <Route path="/dashboard/admin/workdesk" element={<ExpertDashboard />} />
                 <Route path="/dashboard/workflows" element={<WorkflowGuides />} />
                 <Route path="/dashboard/saved" element={<Library />} />
-                <Route path="/dashboard/settings" element={<Dashboard />} />
+                <Route path="/dashboard/settings" element={<SettingsPage />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
