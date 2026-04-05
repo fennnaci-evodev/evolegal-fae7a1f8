@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { PlayCircle, MessageCircle, FileText, ArrowRight } from "lucide-react";
+import { PlayCircle, MessageCircle, FileText, ArrowRight, ShieldCheck, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { fadeUp } from "@/lib/animations";
@@ -27,6 +27,17 @@ interface RecentRequest {
   title: string;
   created_at: string;
   status: string;
+  topic: string;
+  admin_response: string | null;
+  responded_at: string | null;
+}
+
+interface ChatEntry {
+  id: string;
+  title: string;
+  topic: string;
+  responded_at: string;
+  lastMessage?: string;
 }
 
 const statusColors: Record<string, string> = {
@@ -38,19 +49,92 @@ const statusColors: Record<string, string> = {
 
 const Dashboard = () => {
   const { user } = useAuth();
-  const [recentRequests, setRecentRequests] = useState<RecentRequest[]>([]);
+  const [pendingRequests, setPendingRequests] = useState<RecentRequest[]>([]);
+  const [activeChats, setActiveChats] = useState<ChatEntry[]>([]);
 
   useEffect(() => {
     if (!user) return;
-    supabase
-      .from("legal_requests" as any)
-      .select("id, title, created_at, status")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false })
-      .limit(5)
-      .then(({ data }) => {
-        if (data) setRecentRequests(data as any);
-      });
+
+    const load = async () => {
+      // Fetch all user requests
+      const { data } = await supabase
+        .from("legal_requests" as any)
+        .select("id, title, created_at, status, topic, admin_response, responded_at")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(20);
+
+      if (!data) return;
+      const requests = data as unknown as RecentRequest[];
+
+      // Requests that have been answered (have admin_response or completed/reviewing with messages) go to Chats
+      const answered: ChatEntry[] = [];
+      const pending: RecentRequest[] = [];
+
+      for (const req of requests) {
+        if (req.admin_response && req.admin_response.trim().length > 0) {
+          answered.push({
+            id: req.id,
+            title: req.title || req.topic,
+            topic: req.topic,
+            responded_at: req.responded_at || req.created_at,
+            lastMessage: req.admin_response.slice(0, 80) + (req.admin_response.length > 80 ? "…" : ""),
+          });
+        } else {
+          pending.push(req);
+        }
+      }
+
+      // Also check for requests with expert messages (even if admin_response column is empty)
+      const answeredIds = new Set(answered.map((a) => a.id));
+      const pendingIds = pending.map((p) => p.id);
+      if (pendingIds.length > 0) {
+        const { data: msgData } = await supabase
+          .from("request_messages" as any)
+          .select("request_id, content, created_at")
+          .in("request_id", pendingIds)
+          .in("sender_role", ["admin", "expert"])
+          .order("created_at", { ascending: false })
+          .limit(50);
+
+        if (msgData) {
+          const msgsByRequest = new Map<string, any>();
+          for (const m of msgData as any[]) {
+            if (!msgsByRequest.has(m.request_id)) {
+              msgsByRequest.set(m.request_id, m);
+            }
+          }
+
+          // Move requests with expert messages to chats
+          const stillPending: RecentRequest[] = [];
+          for (const req of pending) {
+            const expertMsg = msgsByRequest.get(req.id);
+            if (expertMsg && !answeredIds.has(req.id)) {
+              answered.push({
+                id: req.id,
+                title: req.title || req.topic,
+                topic: req.topic,
+                responded_at: expertMsg.created_at,
+                lastMessage: expertMsg.content?.slice(0, 80) + (expertMsg.content?.length > 80 ? "…" : ""),
+              });
+            } else {
+              stillPending.push(req);
+            }
+          }
+          setPendingRequests(stillPending.slice(0, 5));
+        } else {
+          setPendingRequests(pending.slice(0, 5));
+        }
+      } else {
+        setPendingRequests([]);
+      }
+
+      // Sort chats by most recent activity
+      answered.sort((a, b) => new Date(b.responded_at).getTime() - new Date(a.responded_at).getTime());
+      setActiveChats(answered.slice(0, 5));
+    };
+
+    load();
   }, [user]);
 
   return (
@@ -78,11 +162,49 @@ const Dashboard = () => {
           ))}
         </div>
 
-        {/* Recent Requests from DB */}
-        {recentRequests.length > 0 && (
+        {/* Active Chats with Experts */}
+        {activeChats.length > 0 && (
           <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={4}>
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-lg font-display font-semibold">Recent Requests</h2>
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="h-4 w-4" style={{ color: "hsl(270, 95%, 75%)" }} />
+                <h2 className="text-lg font-display font-semibold">Chats</h2>
+              </div>
+            </div>
+            <div className="space-y-2">
+              {activeChats.map((chat) => (
+                <Link key={chat.id} to={`/dashboard/chat/${chat.id}`}>
+                  <div className="glass-card p-4 flex items-center gap-4 hover:border-primary/20 transition-all cursor-pointer group">
+                    <div className="h-10 w-10 rounded-full flex items-center justify-center shrink-0" style={{ background: "hsla(270, 95%, 75%, 0.12)" }}>
+                      <ShieldCheck className="h-5 w-5" style={{ color: "hsl(270, 95%, 75%)" }} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium group-hover:text-primary transition-colors truncate">
+                        {chat.title}
+                      </p>
+                      <p className="text-xs text-muted-foreground truncate">{chat.lastMessage}</p>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="text-[10px] text-muted-foreground">{new Date(chat.responded_at).toLocaleDateString()}</p>
+                      <Badge variant="outline" className="text-[10px] mt-1" style={{ color: "hsl(270, 95%, 75%)", borderColor: "hsla(270, 95%, 75%, 0.3)" }}>
+                        Expert
+                      </Badge>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Recent Requests (pending / not yet answered) */}
+        {pendingRequests.length > 0 && (
+          <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={5}>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <Clock className="h-4 w-4 text-muted-foreground" />
+                <h2 className="text-lg font-display font-semibold">Recent Requests</h2>
+              </div>
               <Link to="/dashboard/requests">
                 <Button variant="ghost" size="sm" className="text-primary">
                   View all <ArrowRight className="ml-1 h-3 w-3" />
@@ -90,10 +212,10 @@ const Dashboard = () => {
               </Link>
             </div>
             <div className="space-y-2">
-              {recentRequests.map((item) => (
+              {pendingRequests.map((item) => (
                 <div key={item.id} className="glass-card p-4 flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium">{item.title}</p>
+                    <p className="text-sm font-medium">{item.title || item.topic}</p>
                     <p className="text-xs text-muted-foreground">{new Date(item.created_at).toLocaleDateString()}</p>
                   </div>
                   <Badge variant="outline" className={`text-[10px] ${statusColors[item.status] ?? ""}`}>
@@ -119,7 +241,7 @@ const Dashboard = () => {
             {featuredContent.map((item, i) => (
               <motion.div
                 key={item.title}
-                initial="hidden" animate="visible" variants={fadeUp} custom={5 + i}
+                initial="hidden" animate="visible" variants={fadeUp} custom={6 + i}
                 className="glass-card p-5 cursor-pointer group"
               >
                 <div className="flex items-start justify-between mb-3">
