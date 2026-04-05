@@ -176,6 +176,64 @@
   }
 }
 
+/* Shimmering oval focus effect for all inputs */
+@layer utilities {
+  @keyframes shimmer-border {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  input:focus,
+  textarea:focus,
+  select:focus,
+  [contenteditable="true"]:focus {
+    outline: none !important;
+    border-color: transparent !important;
+    border-radius: 9999px !important;
+    box-shadow:
+      0 0 0 2px hsl(var(--background)),
+      0 0 0 4px transparent,
+      0 0 18px 2px hsla(186, 100%, 50%, 0.18),
+      0 0 30px 4px hsla(270, 80%, 75%, 0.10) !important;
+    background-clip: padding-box !important;
+    position: relative;
+  }
+
+  input:focus,
+  textarea:focus,
+  select:focus,
+  [contenteditable="true"]:focus {
+    background-image:
+      linear-gradient(hsl(var(--background)), hsl(var(--background))),
+      linear-gradient(90deg, #00eaff, #c084fc, #00eaff, #c084fc) !important;
+    background-origin: border-box !important;
+    background-clip: padding-box, border-box !important;
+    border: 2px solid transparent !important;
+    border-radius: 9999px !important;
+    background-size: 100% 100%, 300% 100% !important;
+    animation: shimmer-border 3.5s ease infinite !important;
+  }
+
+  /* Textareas keep slight rounding instead of full pill */
+  textarea:focus {
+    border-radius: 1.25rem !important;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    input:focus,
+    textarea:focus,
+    select:focus,
+    [contenteditable="true"]:focus {
+      animation: none !important;
+      box-shadow:
+        0 0 0 2px hsl(var(--background)),
+        0 0 12px 2px hsla(186, 100%, 50%, 0.15) !important;
+      background-size: 100% 100%, 100% 100% !important;
+    }
+  }
+}
+
 /* Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
