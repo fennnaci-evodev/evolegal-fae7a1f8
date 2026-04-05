@@ -87,35 +87,22 @@ export function InitialLoader({ onComplete }: { onComplete: () => void }) {
                   </linearGradient>
                 </defs>
 
-                {reducedMotion ? (
-                  <path d={E_PATH} fill="url(#il-grad)" />
-                ) : (
-                  <>
-                    {/* Stroke-by-stroke segment reveal */}
-                    {E_SEGMENTS.map((seg, i) => (
-                      <motion.path
-                        key={i}
-                        d={seg}
-                        fill="url(#il-grad)"
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{
-                          delay: 0.15 + i * 0.18,
-                          duration: 0.4,
-                          ease: [0.22, 1, 0.36, 1],
-                        }}
-                        style={{ transformOrigin: "center", willChange: "opacity, transform" }}
-                      />
-                    ))}
-                    {/* Full E rim overlay fades in after segments */}
-                    <motion.path
-                      d={E_PATH}
-                      fill="url(#il-rim)"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.8, duration: 0.5 }}
-                    />
-                  </>
+                {/* Solid E letter */}
+                <motion.path
+                  d={E_PATH}
+                  fill="url(#il-grad)"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.5, ease: "easeOut" }}
+                />
+                {!reducedMotion && (
+                  <motion.path
+                    d={E_PATH}
+                    fill="url(#il-rim)"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.4, duration: 0.6 }}
+                  />
                 )}
               </svg>
 
