@@ -12,6 +12,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import ExpertChat from "./pages/ExpertChat";
+import UserChat from "./pages/UserChat";
 import Library from "./pages/Library";
 import SubmitRequest from "./pages/SubmitRequest";
 import HowItWorks from "./pages/HowItWorks";
