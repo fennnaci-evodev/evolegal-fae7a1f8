@@ -111,6 +111,32 @@ const MyRequests = () => {
                     <span>{new Date(req.created_at).toLocaleDateString()}</span>
                   </div>
                 </div>
+                {req.status === "completed" && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="shrink-0 text-xs gap-1.5"
+                    onClick={() => {
+                      generateCasePdf({
+                        requestId: req.id,
+                        title: req.title,
+                        topic: req.topic,
+                        description: req.description,
+                        status: req.status,
+                        state: req.state,
+                        facts: req.facts,
+                        adminResponse: req.admin_response,
+                        createdAt: req.created_at,
+                        respondedAt: req.responded_at,
+                      });
+                      toast.success("PDF downloaded");
+                    }}
+                    aria-label="Download PDF summary"
+                  >
+                    <Download className="h-3.5 w-3.5" />
+                    PDF
+                  </Button>
+                )}
               </motion.div>
             ))}
           </div>
