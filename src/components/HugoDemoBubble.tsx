@@ -274,7 +274,7 @@ export function HugoDemoBubble() {
                   }}
                 >
                   <p className="text-xs text-muted-foreground text-center mb-4 leading-relaxed">
-                    Want to keep chatting with Hugo or connect with a real EvoLegal expert?
+                    For more precise and refined analysis, connect with an EvoLegal Expert for human review.
                   </p>
                   <div className="flex flex-col gap-2.5">
                     <button
