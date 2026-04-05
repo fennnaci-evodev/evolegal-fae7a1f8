@@ -2,12 +2,14 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Clock, ArrowRight } from "lucide-react";
+import { FileText, Clock, ArrowRight, Download } from "lucide-react";
 import { fadeUp } from "@/lib/animations";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { generateCasePdf } from "@/lib/generateCasePdf";
+import { toast } from "sonner";
 
 interface LegalRequest {
   id: string;
@@ -16,6 +18,10 @@ interface LegalRequest {
   topic: string;
   title: string;
   description: string;
+  state: string;
+  facts: any;
+  admin_response: string;
+  responded_at: string | null;
 }
 
 const statusColors: Record<string, string> = {
@@ -35,7 +41,7 @@ const MyRequests = () => {
     const fetchRequests = async () => {
       const { data, error } = await supabase
         .from("legal_requests" as any)
-        .select("id, created_at, status, topic, title, description")
+        .select("id, created_at, status, topic, title, description, state, facts, admin_response, responded_at")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
 
@@ -105,6 +111,32 @@ const MyRequests = () => {
                     <span>{new Date(req.created_at).toLocaleDateString()}</span>
                   </div>
                 </div>
+                {req.status === "completed" && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="shrink-0 text-xs gap-1.5"
+                    onClick={() => {
+                      generateCasePdf({
+                        requestId: req.id,
+                        title: req.title,
+                        topic: req.topic,
+                        description: req.description,
+                        status: req.status,
+                        state: req.state,
+                        facts: req.facts,
+                        adminResponse: req.admin_response,
+                        createdAt: req.created_at,
+                        respondedAt: req.responded_at,
+                      });
+                      toast.success("PDF downloaded");
+                    }}
+                    aria-label="Download PDF summary"
+                  >
+                    <Download className="h-3.5 w-3.5" />
+                    PDF
+                  </Button>
+                )}
               </motion.div>
             ))}
           </div>

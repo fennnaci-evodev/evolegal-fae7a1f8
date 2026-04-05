@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { InlineELoader } from "@/components/InlineELoader";
+import { generateCasePdf } from "@/lib/generateCasePdf";
 
 // Types
 interface RequestItem {
@@ -752,7 +753,22 @@ const ExpertDashboard = () => {
               variant="outline"
               size="sm"
               className="text-[10px] h-8"
-              onClick={() => toast.info("Export coming soon")}
+              onClick={() => {
+                if (!selected) return;
+                generateCasePdf({
+                  requestId: selected.id,
+                  title: selected.title,
+                  topic: selected.topic,
+                  description: selected.description,
+                  status: selected.status,
+                  state: selected.state,
+                  facts: selected.facts,
+                  adminResponse: selected.admin_response,
+                  createdAt: selected.created_at,
+                  respondedAt: selected.responded_at,
+                });
+                toast.success("PDF downloaded");
+              }}
             >
               <FileDown className="h-3 w-3 mr-1" /> Export
             </Button>

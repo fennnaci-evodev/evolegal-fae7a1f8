@@ -85,7 +85,7 @@ export function HugoDemoBubble() {
     }
   }, []);
 
-  const EXPERT_TRIGGER_PATTERN = /\b(connect\s*(me\s*)?(to\s*)?(an?\s*)?expert|talk\s*to\s*(an?\s*)?expert|need\s*(an?\s*)?expert|speak\s*(to|with)\s*(an?\s*)?expert)/i;
+  const EXPERT_TRIGGER_PATTERN = /\b(connect\s*(me\s*)?(to\s*)?(an?\s*)?expert|talk\s*to\s*(an?\s*)?expert|need\s*(an?\s*)?expert|speak\s*(to|with)\s*(an?\s*)?expert|more\s*precise\s*help|review\s*by\s*expert|human\s*review)/i;
 
   const handleSend = async () => {
     const text = input.trim();
@@ -274,7 +274,7 @@ export function HugoDemoBubble() {
                   }}
                 >
                   <p className="text-xs text-muted-foreground text-center mb-4 leading-relaxed">
-                    Want to keep chatting with Hugo or connect with a real EvoLegal expert?
+                    For more precise and refined analysis, connect with an EvoLegal Expert for human review.
                   </p>
                   <div className="flex flex-col gap-2.5">
                     <button
@@ -301,7 +301,7 @@ export function HugoDemoBubble() {
                       aria-label="Connect with an EvoLegal Expert"
                     >
                       <Users className="h-4 w-4" style={{ color: "hsl(270, 95%, 75%)" }} />
-                      Connect EvoLegal Expert
+                      Get Precise Help from EvoLegal Expert
                       <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
                     </button>
                   </div>

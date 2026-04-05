@@ -201,8 +201,8 @@ const ExpertChat = () => {
         <div className="glass-card p-4 mb-4 flex items-center gap-3" style={{ borderRadius: "1rem" }}>
           <HugoAvatar size={44} />
           <div>
-            <h2 className="font-display font-semibold">Hugo <span className="text-muted-foreground font-normal text-sm">· Expert Manager</span></h2>
-            <p className="text-xs text-muted-foreground">Here to help — US & UK legal topics</p>
+            <h2 className="font-display font-semibold">Chat with EvoLegal Expert <span className="text-muted-foreground font-normal text-xs">· Human Review Mode</span></h2>
+            <p className="text-xs text-muted-foreground">Your conversation is reviewed by a real expert for precision and accuracy</p>
           </div>
         </div>
 
