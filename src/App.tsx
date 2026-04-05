@@ -26,6 +26,7 @@ import MyRequests from "./pages/MyRequests";
 import AdminRequests from "./pages/AdminRequests";
 import ExpertDashboard from "./pages/ExpertDashboard";
 import WorkflowGuides from "./pages/WorkflowGuides";
+import SettingsPage from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
