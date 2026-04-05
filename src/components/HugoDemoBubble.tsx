@@ -85,7 +85,7 @@ export function HugoDemoBubble() {
     }
   }, []);
 
-  const EXPERT_TRIGGER_PATTERN = /\b(connect\s*(me\s*)?(to\s*)?(an?\s*)?expert|talk\s*to\s*(an?\s*)?expert|need\s*(an?\s*)?expert|speak\s*(to|with)\s*(an?\s*)?expert)/i;
+  const EXPERT_TRIGGER_PATTERN = /\b(connect\s*(me\s*)?(to\s*)?(an?\s*)?expert|talk\s*to\s*(an?\s*)?expert|need\s*(an?\s*)?expert|speak\s*(to|with)\s*(an?\s*)?expert|more\s*precise\s*help|review\s*by\s*expert|human\s*review)/i;
 
   const handleSend = async () => {
     const text = input.trim();
