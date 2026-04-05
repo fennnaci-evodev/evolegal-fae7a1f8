@@ -57,22 +57,22 @@ export function InitialLoader({ onComplete }: { onComplete: () => void }) {
             {/* Main E: rotates from 90° (upright) → -33° (slanted left) */}
             <motion.div
               style={{ willChange: "transform, opacity, filter" }}
-              initial={{ rotate: 90, scale: 0.9, opacity: 0 }}
+              initial={{ rotate: 90, scale: 0.95, opacity: 0 }}
               animate={{
                 rotate: -33,
                 scale: 1,
                 opacity: 1,
                 filter: [
-                  "drop-shadow(0 0 0px hsla(186,100%,50%,0)) drop-shadow(0 0 0px hsla(270,80%,75%,0))",
-                  "drop-shadow(0 0 12px hsla(186,100%,50%,0.6)) drop-shadow(0 0 24px hsla(270,80%,75%,0.3))",
-                  "drop-shadow(0 0 8px hsla(186,100%,50%,0.5)) drop-shadow(0 0 16px hsla(270,80%,75%,0.2))",
+                  "drop-shadow(0 0 0px hsla(186,100%,50%,0))",
+                  "drop-shadow(0 0 10px hsla(186,100%,50%,0.5)) drop-shadow(0 0 20px hsla(270,80%,75%,0.25))",
+                  "drop-shadow(0 0 8px hsla(186,100%,50%,0.4)) drop-shadow(0 0 14px hsla(270,80%,75%,0.15))",
                 ],
               }}
               transition={{
-                rotate: { duration: 1.2, ease: [0.25, 0.1, 0.25, 1], delay: 0.6 },
-                scale: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
-                opacity: { duration: 0.4 },
-                filter: { duration: 1.8, ease: "easeOut", times: [0, 0.6, 1] },
+                rotate: { duration: 1.4, ease: [0.16, 1, 0.3, 1], delay: 0.3 },
+                scale: { duration: 0.8, ease: [0.16, 1, 0.3, 1] },
+                opacity: { duration: 0.5, ease: "easeOut" },
+                filter: { duration: 1.6, ease: "easeOut", times: [0, 0.5, 1] },
               }}
             >
               <svg width={140} height={140} viewBox="0 0 100 100" fill="none">
@@ -87,35 +87,22 @@ export function InitialLoader({ onComplete }: { onComplete: () => void }) {
                   </linearGradient>
                 </defs>
 
-                {reducedMotion ? (
-                  <path d={E_PATH} fill="url(#il-grad)" />
-                ) : (
-                  <>
-                    {/* Stroke-by-stroke segment reveal */}
-                    {E_SEGMENTS.map((seg, i) => (
-                      <motion.path
-                        key={i}
-                        d={seg}
-                        fill="url(#il-grad)"
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{
-                          delay: 0.15 + i * 0.18,
-                          duration: 0.4,
-                          ease: [0.22, 1, 0.36, 1],
-                        }}
-                        style={{ transformOrigin: "center", willChange: "opacity, transform" }}
-                      />
-                    ))}
-                    {/* Full E rim overlay fades in after segments */}
-                    <motion.path
-                      d={E_PATH}
-                      fill="url(#il-rim)"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.8, duration: 0.5 }}
-                    />
-                  </>
+                {/* Solid E letter */}
+                <motion.path
+                  d={E_PATH}
+                  fill="url(#il-grad)"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.5, ease: "easeOut" }}
+                />
+                {!reducedMotion && (
+                  <motion.path
+                    d={E_PATH}
+                    fill="url(#il-rim)"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.4, duration: 0.6 }}
+                  />
                 )}
               </svg>
 
