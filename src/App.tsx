@@ -59,6 +59,7 @@ const App = () => {
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/dashboard/chat" element={<ExpertChat />} />
+                <Route path="/dashboard/chat/:requestId" element={<UserChat />} />
                 <Route path="/dashboard/library" element={<Library />} />
                 <Route path="/dashboard/submit" element={<SubmitRequest />} />
                 <Route path="/dashboard/requests" element={<MyRequests />} />
