@@ -41,7 +41,7 @@ const MyRequests = () => {
     const fetchRequests = async () => {
       const { data, error } = await supabase
         .from("legal_requests" as any)
-        .select("id, created_at, status, topic, title, description")
+        .select("id, created_at, status, topic, title, description, state, facts, admin_response, responded_at")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
 
