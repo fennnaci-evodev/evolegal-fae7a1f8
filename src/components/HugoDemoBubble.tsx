@@ -301,7 +301,7 @@ export function HugoDemoBubble() {
                       aria-label="Connect with an EvoLegal Expert"
                     >
                       <Users className="h-4 w-4" style={{ color: "hsl(270, 95%, 75%)" }} />
-                      Connect EvoLegal Expert
+                      Get Precise Help from EvoLegal Expert
                       <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
                     </button>
                   </div>
