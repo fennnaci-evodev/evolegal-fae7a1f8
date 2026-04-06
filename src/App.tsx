@@ -40,6 +40,7 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
+        <AdminModeProvider>
         <LoadingProvider>
           <TooltipProvider>
             <Toaster />
