@@ -5,7 +5,6 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { ScalesOfJustice } from "@/components/ScalesOfJustice";
 import { HugoAvatar } from "@/components/HugoAvatar";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Send, User, Info, Mic, MicOff } from "lucide-react";
 import { isRateLimited } from "@/lib/security";
 import { InlineELoader } from "@/components/InlineELoader";
@@ -48,11 +47,20 @@ const ExpertChat = () => {
   const [loading, setLoading] = useState(false);
   const [listening, setListening] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const recognitionRef = useRef<any>(null);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [messages, loading]);
+
+  // Auto-resize textarea
+  useEffect(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = Math.min(el.scrollHeight, 120) + "px";
+  }, [input]);
 
   const streamChat = useCallback(async (allMessages: Message[]) => {
     const apiMessages = allMessages.map(m => ({ role: m.role, content: m.content }));
@@ -207,7 +215,7 @@ const ExpertChat = () => {
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto space-y-4 pr-2 mb-4">
+        <div className="flex-1 overflow-y-auto space-y-4 pr-2 mb-4" style={{ overflowAnchor: "none" }}>
           {messages.length === 0 && !loading && (
             <div className="flex flex-col items-center justify-center h-full text-center space-y-6">
               <ScalesOfJustice />
@@ -278,7 +286,7 @@ const ExpertChat = () => {
         </div>
 
         {/* Input */}
-        <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="glass-strong p-3 flex gap-3" style={{ borderRadius: "1rem" }}>
+        <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="glass-strong p-3 flex items-end gap-3" style={{ borderRadius: "1rem" }}>
           <Button
             type="button"
             size="icon"
@@ -289,13 +297,17 @@ const ExpertChat = () => {
           >
             {listening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
           </Button>
-          <Input
+          <textarea
+            ref={textareaRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
             placeholder="Ask Hugo about a legal topic..."
-            className="bg-transparent border-0 focus-visible:ring-0"
+            className="chat-input-plain flex-1 bg-transparent border-0 resize-none text-sm placeholder:text-muted-foreground focus:outline-none leading-relaxed"
             disabled={loading}
             aria-label="Message input"
+            rows={1}
+            style={{ maxHeight: 120, minHeight: 36 }}
           />
           <Button type="submit" size="icon" disabled={!input.trim() || loading} className="shrink-0" aria-label="Send message">
             <Send className="h-4 w-4" />

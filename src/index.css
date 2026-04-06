@@ -223,8 +223,11 @@
       0 0 0 4px transparent,
       0 0 18px 2px hsla(186, 100%, 50%, 0.18),
       0 0 30px 4px hsla(270, 80%, 75%, 0.10) !important;
-    background-clip: padding-box !important;
     position: relative;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    padding-top: 0.75rem !important;
+    padding-bottom: 0.75rem !important;
   }
 
   input:focus,
@@ -245,6 +248,16 @@
   /* Textareas keep slight rounding instead of full pill */
   textarea:focus {
     border-radius: 1.25rem !important;
+  }
+
+  /* Inputs inside chat forms: no shimmer override (handled by container) */
+  .chat-input-plain:focus {
+    background-image: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    animation: none !important;
+    padding: 0 !important;
   }
 
   @media (prefers-reduced-motion: reduce) {

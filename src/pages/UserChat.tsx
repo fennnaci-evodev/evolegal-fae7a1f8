@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { HugoAvatar } from "@/components/HugoAvatar";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Send, User, Info, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -26,10 +25,19 @@ const UserChat = () => {
   const [sending, setSending] = useState(false);
   const [requestTitle, setRequestTitle] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [messages]);
+
+  // Auto-resize textarea
+  useEffect(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = Math.min(el.scrollHeight, 120) + "px";
+  }, [input]);
 
   // Load request info + messages
   useEffect(() => {
@@ -108,7 +116,7 @@ const UserChat = () => {
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto space-y-4 pr-2 mb-4">
+        <div className="flex-1 overflow-y-auto space-y-4 pr-2 mb-4" style={{ overflowAnchor: "none" }}>
           {messages.length === 0 && (
             <div className="flex flex-col items-center justify-center h-full text-center space-y-4">
               <ShieldCheck className="h-12 w-12 text-muted-foreground/30" />
@@ -166,13 +174,17 @@ const UserChat = () => {
         </div>
 
         {/* Input */}
-        <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="glass-strong p-3 flex gap-3" style={{ borderRadius: "1rem" }}>
-          <Input
+        <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="glass-strong p-3 flex items-end gap-3" style={{ borderRadius: "1rem" }}>
+          <textarea
+            ref={textareaRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
             placeholder="Type your message…"
-            className="bg-transparent border-0 focus-visible:ring-0"
+            className="chat-input-plain flex-1 bg-transparent border-0 resize-none text-sm placeholder:text-muted-foreground focus:outline-none leading-relaxed"
             disabled={sending}
+            rows={1}
+            style={{ maxHeight: 120, minHeight: 36 }}
           />
           <Button type="submit" size="icon" disabled={!input.trim() || sending} className="shrink-0">
             <Send className="h-4 w-4" />
