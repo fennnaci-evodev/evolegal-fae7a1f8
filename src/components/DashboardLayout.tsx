@@ -21,15 +21,24 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { signOut } = useAuth();
-  const { isAdmin } = useAdminRole();
+  const { mode, isAdmin, isMainAdmin } = useAdminMode();
 
-  const allNavItems = isAdmin
+  // In user mode (main admin), show user nav + safety-net Expert Dashboard link
+  // In admin mode, show admin-only nav
+  // Non-admin users get regular nav
+  const allNavItems = isAdmin && mode === "admin"
     ? [
-        ...navItems,
-        { title: "Admin Requests", url: "/dashboard/admin/requests", icon: ShieldCheck },
         { title: "Expert Dashboard", url: "/dashboard/admin/workdesk", icon: LayoutDashboard },
+        { title: "Request Register", url: "/dashboard/admin/requests", icon: ShieldCheck },
+        { title: "Settings", url: "/dashboard/settings", icon: Settings },
       ]
-    : navItems;
+    : [
+        ...navItems,
+        // Main admin in user mode still gets a safety-net link
+        ...(isMainAdmin && mode === "user"
+          ? [{ title: "Expert Dashboard", url: "/dashboard/admin/workdesk", icon: LayoutDashboard }]
+          : []),
+      ];
 
   return (
     <div className="flex min-h-screen w-full">
