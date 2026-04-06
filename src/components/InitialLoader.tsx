@@ -26,7 +26,7 @@ export function InitialLoader({ onComplete }: { onComplete: () => void }) {
       const t = setTimeout(() => {
         setVisible(false);
         onComplete();
-      }, 600);
+      }, 800);
       return () => clearTimeout(t);
     }
   }, [exiting, onComplete]);
@@ -75,7 +75,7 @@ export function InitialLoader({ onComplete }: { onComplete: () => void }) {
                 filter: { duration: 1.6, ease: "easeOut", times: [0, 0.5, 1] },
               }}
             >
-              <svg width={140} height={140} viewBox="0 0 100 100" fill="none">
+              <svg width={160} height={160} viewBox="0 0 100 100" fill="none">
                 <defs>
                   <linearGradient id="il-grad" x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stopColor="hsl(186 100% 58%)" />
