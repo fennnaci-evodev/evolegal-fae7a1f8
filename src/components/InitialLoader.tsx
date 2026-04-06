@@ -64,8 +64,8 @@ export function InitialLoader({ onComplete }: { onComplete: () => void }) {
                 opacity: 1,
                 filter: [
                   "drop-shadow(0 0 0px hsla(186,100%,50%,0))",
-                  "drop-shadow(0 0 10px hsla(186,100%,50%,0.5)) drop-shadow(0 0 20px hsla(270,80%,75%,0.25))",
-                  "drop-shadow(0 0 8px hsla(186,100%,50%,0.4)) drop-shadow(0 0 14px hsla(270,80%,75%,0.15))",
+                  "drop-shadow(0 0 10px hsla(186,100%,50%,0.5)) drop-shadow(0 0 20px hsla(186,100%,50%,0.2)) drop-shadow(0 0 4px hsla(270,80%,75%,0.2))",
+                  "drop-shadow(0 0 8px hsla(186,100%,50%,0.45)) drop-shadow(0 0 16px hsla(186,100%,50%,0.18)) drop-shadow(0 0 3px hsla(270,80%,75%,0.15))",
                 ],
               }}
               transition={{
