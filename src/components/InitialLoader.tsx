@@ -68,8 +68,9 @@ export function InitialLoader({ onComplete }: { onComplete: () => void }) {
     );
   }
 
-  const ghostDriftY = isMobile ? -80 : -140; // px upward toward hero area
-  const ghostScale = isMobile ? 0.35 : 0.28; // shrink toward header logo size
+  // Hero EvoLogo uses 160px SVG at "hero" size — match exactly (scale 1.0 = 160px loader = 160px hero)
+  const ghostDriftY = isMobile ? -60 : -100;
+  const ghostScale = 1.0;
 
   return (
     <AnimatePresence>
