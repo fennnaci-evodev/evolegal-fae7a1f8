@@ -32,13 +32,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
         { title: "Request Register", url: "/dashboard/admin/requests", icon: ShieldCheck },
         { title: "Settings", url: "/dashboard/settings", icon: Settings },
       ]
-    : [
-        ...navItems,
-        // Main admin in user mode still gets a safety-net link
-        ...(isMainAdmin && mode === "user"
-          ? [{ title: "Expert Dashboard", url: "/dashboard/admin/workdesk", icon: LayoutDashboard }]
-          : []),
-      ];
+    : navItems;
 
   return (
     <div className="flex min-h-screen w-full">
