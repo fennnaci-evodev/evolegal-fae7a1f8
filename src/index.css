@@ -87,14 +87,25 @@
     border: 1px solid hsla(0, 0%, 100%, 0.07);
     border-radius: 1.5rem;
     box-shadow: 0 8px 32px hsla(0, 0%, 0%, 0.2);
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.3s ease-out, filter 0.3s ease-out, border-color 0.3s ease-out;
+    will-change: transform;
   }
 
   .glass-card:hover {
-    background: hsla(240, 12%, 100%, 0.08);
     border-color: hsla(186, 100%, 50%, 0.15);
-    box-shadow: 0 12px 40px hsla(0, 0%, 0%, 0.3), 0 0 30px hsla(186, 100%, 50%, 0.05);
-    transform: translateY(-2px);
+    transform: scale(1.03);
+    filter: drop-shadow(0 0 8px hsla(186, 100%, 50%, 0.1));
+  }
+
+  /* Eco-animation: gentle scale + soft cyan glow on hover */
+  .eco-hover {
+    transition: transform 0.3s ease-out, filter 0.3s ease-out, border-color 0.3s ease-out;
+    will-change: transform;
+  }
+  .eco-hover:hover {
+    transform: scale(1.03);
+    border-color: hsla(186, 100%, 50%, 0.15);
+    filter: drop-shadow(0 0 8px hsla(186, 100%, 50%, 0.1));
   }
 
   /* GPU hints for animated elements */
@@ -106,13 +117,29 @@
   /* Reduced motion */
   @media (prefers-reduced-motion: reduce) {
     .glass-card,
-    .glass-card:hover {
+    .glass-card:hover,
+    .eco-hover,
+    .eco-hover:hover {
       transition: none !important;
       transform: none !important;
+      filter: none !important;
     }
     .animate-pulse,
     .pulse-glow {
       animation: none !important;
+    }
+  }
+
+  /* Mobile: subtler eco-animations */
+  @media (max-width: 768px) {
+    .glass-card:hover,
+    .eco-hover:hover {
+      transform: scale(1.015);
+      filter: drop-shadow(0 0 4px hsla(186, 100%, 50%, 0.08));
+    }
+    .glass-card,
+    .eco-hover {
+      transition-duration: 0.2s;
     }
   }
 
