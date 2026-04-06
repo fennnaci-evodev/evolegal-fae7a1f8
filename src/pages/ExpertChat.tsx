@@ -216,7 +216,7 @@ const ExpertChat = () => {
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto space-y-4 pr-2 mb-4">
+        <div className="flex-1 overflow-y-auto space-y-4 pr-2 mb-4" style={{ overflowAnchor: "none" }}>
           {messages.length === 0 && !loading && (
             <div className="flex flex-col items-center justify-center h-full text-center space-y-6">
               <ScalesOfJustice />
