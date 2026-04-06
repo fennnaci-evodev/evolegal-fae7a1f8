@@ -7,7 +7,7 @@ interface EvoLogoProps {
 }
 
 const sizes = {
-  sm: { svg: 32, text: "text-sm", gap: "gap-1" },
+  sm: { svg: 38, text: "text-sm", gap: "gap-1.5" },
   md: { svg: 52, text: "text-lg", gap: "gap-2" },
   lg: { svg: 80, text: "text-2xl", gap: "gap-3" },
   hero: { svg: 160, text: "text-3xl md:text-4xl", gap: "gap-4" },
@@ -37,7 +37,7 @@ export function EvoLogo({ size = "md", animate = true, showText = true }: EvoLog
           xmlns="http://www.w3.org/2000/svg"
           className="relative z-10"
           style={{
-            filter: "drop-shadow(0 0 6px hsla(186, 100%, 50%, 0.4)) drop-shadow(0 0 14px hsla(186, 100%, 50%, 0.15))",
+            filter: "drop-shadow(0 0 8px hsla(186, 100%, 50%, 0.45)) drop-shadow(0 0 16px hsla(186, 100%, 50%, 0.18)) drop-shadow(0 0 3px hsla(270, 80%, 75%, 0.15))",
           }}
         >
           <defs>
