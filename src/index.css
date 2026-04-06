@@ -97,12 +97,10 @@
     filter: drop-shadow(0 0 8px hsla(186, 100%, 50%, 0.1));
   }
 
-  /* Prevent dialogs/modals from jumping on hover */
-  [role="dialog"] .glass-card,
-  [role="dialog"].glass-card,
-  [role="dialog"] .glass-card:hover,
-  [role="dialog"].glass-card:hover {
-    transform: none !important;
+  /* Prevent hover scale on dialog content — keep centering intact */
+  .no-hover-scale.glass-card,
+  .no-hover-scale.glass-card:hover {
+    transform: translate(-50%, -50%) !important;
   }
 
   /* Eco-animation: gentle scale + soft cyan glow on hover */
