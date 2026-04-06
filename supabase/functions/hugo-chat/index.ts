@@ -62,7 +62,20 @@ serve(async (req) => {
   }
 
   try {
-    const { messages } = await req.json();
+    const body = await req.json();
+
+    // Support both { messages: [...] } and { message: "string" } formats
+    let chatMessages: { role: string; content: string }[];
+    if (Array.isArray(body.messages)) {
+      chatMessages = body.messages;
+    } else if (typeof body.message === "string") {
+      chatMessages = [{ role: "user", content: body.message }];
+    } else {
+      return new Response(
+        JSON.stringify({ error: "Invalid request: provide 'messages' array or 'message' string." }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
@@ -79,7 +92,7 @@ serve(async (req) => {
           model: "google/gemini-3-flash-preview",
           messages: [
             { role: "system", content: SYSTEM_PROMPT },
-            ...messages,
+            ...chatMessages,
           ],
           stream: true,
           temperature: 0.7,
