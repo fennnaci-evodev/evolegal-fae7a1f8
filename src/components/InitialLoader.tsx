@@ -82,7 +82,7 @@ export function InitialLoader({ onComplete }: { onComplete: () => void }) {
         // Snap into place with a quick spring-like ease
         return { duration: 0.2, ease: [0.34, 1.56, 0.64, 1] as [number, number, number, number] };
       case "exit":
-        return { duration: 0.25, ease: "easeOut" };
+        return { duration: 0.25, ease: [0.4, 0, 0.2, 1] as [number, number, number, number] };
     }
   };
 
