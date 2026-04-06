@@ -72,18 +72,18 @@ const Index = () => {
     <div className="min-h-screen bg-background overflow-x-hidden relative">
       <ParticleBackground />
       <DisclaimerModal />
-      <Navbar hideLogo />
+      <Navbar />
 
       {/* Hero */}
-      <section className="relative px-6" style={{ paddingTop: "calc(50vh - 120px)", paddingBottom: "2rem" }}>
+      <section className="relative pt-28 pb-20 md:pt-40 md:pb-32 px-6">
         <div className="container mx-auto text-center relative z-10 max-w-4xl">
           <motion.div
             className="relative mb-10"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
+            transition={{ duration: 1 }}
           >
-            <EvoLogo size="hero" animate={false} showText={false} />
+            <EvoLogo size="hero" animate showText={false} />
           </motion.div>
 
           <motion.h1
