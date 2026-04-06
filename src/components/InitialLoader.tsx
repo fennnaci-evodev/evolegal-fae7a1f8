@@ -26,7 +26,7 @@ export function InitialLoader({ onComplete }: { onComplete: () => void }) {
       const t = setTimeout(() => {
         setVisible(false);
         onComplete();
-      }, 600);
+      }, 800);
       return () => clearTimeout(t);
     }
   }, [exiting, onComplete]);
