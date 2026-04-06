@@ -174,7 +174,7 @@ const UserChat = () => {
         </div>
 
         {/* Input */}
-        <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="glass-strong p-3 flex items-end gap-3" style={{ borderRadius: "1rem" }}>
+        <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="glass-strong shimmer-chat-form p-3 flex items-end gap-3">
           <textarea
             ref={textareaRef}
             value={input}

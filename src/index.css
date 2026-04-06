@@ -264,7 +264,7 @@ img,
     border-radius: 1.25rem !important;
   }
 
-  /* Inputs inside chat forms: no shimmer override (handled by container) */
+  /* Inputs inside chat forms: no shimmer on the textarea itself */
   .chat-input-plain:focus {
     background-image: none !important;
     border: none !important;
@@ -273,6 +273,41 @@ img,
     animation: none !important;
     padding: 0 !important;
     transform: none !important;
+  }
+
+  /* Shimmer on chat form containers */
+  .shimmer-chat-form {
+    position: relative;
+    border: 2px solid rgba(255, 255, 255, 0.06);
+    border-radius: 1.25rem !important;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .shimmer-chat-form:focus-within {
+    border-color: transparent !important;
+    background-image:
+      linear-gradient(hsl(var(--background)), hsl(var(--background))),
+      linear-gradient(90deg, #00eaff, #c084fc, #00eaff, #c084fc) !important;
+    background-origin: border-box !important;
+    background-clip: padding-box, border-box !important;
+    background-size: 100% 100%, 400% 100% !important;
+    animation: shimmer-border 5s ease infinite !important;
+    box-shadow:
+      0 0 18px 2px hsla(186, 100%, 50%, 0.12),
+      0 0 30px 4px hsla(270, 80%, 75%, 0.08) !important;
+  }
+
+  .shimmer-chat-form:focus-within:hover {
+    transform: scale(1.02);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .shimmer-chat-form:focus-within {
+      animation: none !important;
+      transform: none !important;
+      box-shadow: 0 0 12px 2px hsla(186, 100%, 50%, 0.15) !important;
+      background-size: 100% 100%, 100% 100% !important;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
