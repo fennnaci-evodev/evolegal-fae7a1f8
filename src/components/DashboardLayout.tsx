@@ -44,9 +44,12 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
     <div className="flex min-h-screen w-full">
       {/* Sidebar */}
       <aside className="hidden md:flex w-64 flex-col glass-strong border-r border-border/30 p-4" style={{ borderRadius: 0 }}>
-        <Link to="/" className="px-3 py-4 mb-6">
-          <EvoLogo size="sm" animate={false} showText />
-        </Link>
+        <div className="flex items-center justify-between px-3 py-4 mb-6">
+          <Link to="/">
+            <EvoLogo size="sm" animate={false} showText />
+          </Link>
+          <AdminModeToggle />
+        </div>
 
         <nav className="flex-1 space-y-1">
           {allNavItems.map((item) => {
