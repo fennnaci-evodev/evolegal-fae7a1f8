@@ -582,7 +582,7 @@ const ExpertDashboard = () => {
                     ))}
                     <span className="text-[10px] text-muted-foreground/30 ml-auto">@Hugo for AI draft</span>
                   </div>
-                  <div className="flex items-end gap-2">
+                  <div className="shimmer-chat-form flex items-end gap-2 p-2 rounded-[1.25rem]">
                     <textarea
                       ref={inputRef}
                       value={draftMsg}
