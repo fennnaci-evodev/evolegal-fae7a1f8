@@ -62,7 +62,7 @@ const Pricing = () => {
             </div>
           </motion.div>
 
-          <div className="overflow-x-auto -mx-6 px-6">
+          <div className="overflow-x-auto overflow-y-visible -mx-6 px-6">
             <div className="min-w-[600px]">
           {/* Plan headers */}
           <motion.div
