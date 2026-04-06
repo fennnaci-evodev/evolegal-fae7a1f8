@@ -37,7 +37,7 @@ export function EvoLogo({ size = "md", animate = true, showText = true }: EvoLog
           xmlns="http://www.w3.org/2000/svg"
           className="relative z-10"
           style={{
-            filter: "drop-shadow(0 0 6px hsla(186, 100%, 50%, 0.4)) drop-shadow(0 0 14px hsla(186, 100%, 50%, 0.15))",
+            filter: "drop-shadow(0 0 8px hsla(186, 100%, 50%, 0.45)) drop-shadow(0 0 16px hsla(186, 100%, 50%, 0.18)) drop-shadow(0 0 3px hsla(270, 80%, 75%, 0.15))",
           }}
         >
           <defs>

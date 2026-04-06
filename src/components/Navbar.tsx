@@ -23,7 +23,7 @@ export function Navbar() {
   return (
     <>
       <nav className="fixed top-0 left-0 right-0 z-50 glass-strong" style={{ borderRadius: 0, borderTop: "none", borderLeft: "none", borderRight: "none" }}>
-        <div className="container mx-auto flex items-center justify-between py-3 px-6">
+        <div className="container mx-auto flex items-center justify-between py-2 px-6">
           <Link to="/" className="flex items-center gap-2 relative z-10">
             <EvoLogo size="sm" animate={false} showText />
           </Link>
