@@ -24,7 +24,7 @@ export function Navbar({ hideLogo = false }: { hideLogo?: boolean }) {
     <>
       <nav className="fixed top-0 left-0 right-0 z-50 glass-strong" style={{ borderRadius: 0, borderTop: "none", borderLeft: "none", borderRight: "none" }}>
         <div className="container mx-auto flex items-center justify-between py-2 px-6">
-          <Link to="/" className="flex items-center gap-2 relative z-10">
+          <Link to="/" className={`flex items-center gap-2 relative z-10 ${hideLogo ? "opacity-0 pointer-events-none" : ""}`}>
             <EvoLogo size="sm" animate={false} showText />
           </Link>
 
