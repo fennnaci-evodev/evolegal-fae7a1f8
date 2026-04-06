@@ -97,12 +97,16 @@
     filter: drop-shadow(0 0 8px hsla(186, 100%, 50%, 0.1));
   }
 
-  /* Prevent dialogs/modals from jumping on hover */
-  [role="dialog"] .glass-card,
-  [role="dialog"].glass-card,
-  [role="dialog"] .glass-card:hover,
-  [role="dialog"].glass-card:hover {
+  /* Prevent hover scale on modals/dialogs */
+  .no-hover-scale,
+  .no-hover-scale:hover {
     transform: none !important;
+  }
+
+  [role="dialog"].glass-card:hover,
+  [role="dialog"] .glass-card:hover {
+    filter: drop-shadow(0 0 8px hsla(186, 100%, 50%, 0.1));
+    border-color: hsla(186, 100%, 50%, 0.15);
   }
 
   /* Eco-animation: gentle scale + soft cyan glow on hover */
