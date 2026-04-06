@@ -287,7 +287,7 @@ const ExpertChat = () => {
         </div>
 
         {/* Input */}
-        <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="glass-strong p-3 flex gap-3" style={{ borderRadius: "1rem" }}>
+        <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="glass-strong p-3 flex items-end gap-3" style={{ borderRadius: "1rem" }}>
           <Button
             type="button"
             size="icon"
@@ -298,13 +298,17 @@ const ExpertChat = () => {
           >
             {listening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
           </Button>
-          <Input
+          <textarea
+            ref={textareaRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
             placeholder="Ask Hugo about a legal topic..."
-            className="bg-transparent border-0 focus-visible:ring-0"
+            className="chat-input-plain flex-1 bg-transparent border-0 resize-none text-sm placeholder:text-muted-foreground focus:outline-none leading-relaxed"
             disabled={loading}
             aria-label="Message input"
+            rows={1}
+            style={{ maxHeight: 120, minHeight: 36 }}
           />
           <Button type="submit" size="icon" disabled={!input.trim() || loading} className="shrink-0" aria-label="Send message">
             <Send className="h-4 w-4" />

@@ -175,13 +175,17 @@ const UserChat = () => {
         </div>
 
         {/* Input */}
-        <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="glass-strong p-3 flex gap-3" style={{ borderRadius: "1rem" }}>
-          <Input
+        <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="glass-strong p-3 flex items-end gap-3" style={{ borderRadius: "1rem" }}>
+          <textarea
+            ref={textareaRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
             placeholder="Type your message…"
-            className="bg-transparent border-0 focus-visible:ring-0"
+            className="chat-input-plain flex-1 bg-transparent border-0 resize-none text-sm placeholder:text-muted-foreground focus:outline-none leading-relaxed"
             disabled={sending}
+            rows={1}
+            style={{ maxHeight: 120, minHeight: 36 }}
           />
           <Button type="submit" size="icon" disabled={!input.trim() || sending} className="shrink-0">
             <Send className="h-4 w-4" />
