@@ -66,7 +66,7 @@ const Pricing = () => {
             <div className="min-w-[600px]">
           {/* Plan headers */}
           <motion.div
-            className="grid grid-cols-4 gap-0 mb-0"
+            className="grid grid-cols-4 gap-0 mb-0 overflow-visible"
             initial="hidden" animate="visible" variants={fadeUp} custom={1}
           >
             <div /> {/* empty corner */}
