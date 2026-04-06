@@ -586,10 +586,16 @@ const ExpertDashboard = () => {
                     <textarea
                       ref={inputRef}
                       value={draftMsg}
-                      onChange={e => setDraftMsg(e.target.value)}
+                      onChange={e => {
+                        setDraftMsg(e.target.value);
+                        const el = e.target;
+                        el.style.height = "auto";
+                        el.style.height = Math.min(el.scrollHeight, 140) + "px";
+                      }}
                       placeholder="Type a message... (Ctrl+Enter to send)"
-                      rows={2}
-                      className="flex-1 bg-transparent border-0 resize-none text-sm placeholder:text-muted-foreground/40 focus:outline-none"
+                      rows={1}
+                      className="chat-input-plain flex-1 bg-transparent border-0 resize-none text-sm placeholder:text-muted-foreground/40 focus:outline-none leading-relaxed"
+                      style={{ maxHeight: 140, minHeight: 36 }}
                       onKeyDown={e => {
                         if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
                           e.preventDefault();
