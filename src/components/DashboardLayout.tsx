@@ -4,7 +4,8 @@ import { Home, PlayCircle, MessageCircle, FileText, BookOpen, Settings, LogOut, 
 import { motion } from "framer-motion";
 import { EvoLogo } from "./EvoLogo";
 import { useAuth } from "@/hooks/useAuth";
-import { useAdminRole } from "@/hooks/useAdminRole";
+import { useAdminMode } from "@/contexts/AdminModeContext";
+import { AdminModeToggle } from "./AdminModeToggle";
 
 const navItems = [
   { title: "Home", url: "/dashboard", icon: Home },
