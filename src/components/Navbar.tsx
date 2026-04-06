@@ -45,6 +45,7 @@ export function Navbar() {
           </div>
 
           <div className="flex items-center gap-3">
+            {!loading && user && <AdminModeToggle />}
             {!loading && user ? (
               <Link to="/dashboard">
                 <Button size="sm" variant="hero">Dashboard</Button>
