@@ -7,7 +7,7 @@ interface EvoLogoProps {
 }
 
 const sizes = {
-  sm: { svg: 32, text: "text-sm", gap: "gap-1" },
+  sm: { svg: 38, text: "text-sm", gap: "gap-1.5" },
   md: { svg: 52, text: "text-lg", gap: "gap-2" },
   lg: { svg: 80, text: "text-2xl", gap: "gap-3" },
   hero: { svg: 160, text: "text-3xl md:text-4xl", gap: "gap-4" },
