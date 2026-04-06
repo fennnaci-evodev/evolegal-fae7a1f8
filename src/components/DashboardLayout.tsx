@@ -4,7 +4,8 @@ import { Home, PlayCircle, MessageCircle, FileText, BookOpen, Settings, LogOut, 
 import { motion } from "framer-motion";
 import { EvoLogo } from "./EvoLogo";
 import { useAuth } from "@/hooks/useAuth";
-import { useAdminRole } from "@/hooks/useAdminRole";
+import { useAdminMode } from "@/contexts/AdminModeContext";
+import { AdminModeToggle } from "./AdminModeToggle";
 
 const navItems = [
   { title: "Home", url: "/dashboard", icon: Home },
@@ -20,23 +21,35 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { signOut } = useAuth();
-  const { isAdmin } = useAdminRole();
+  const { mode, isAdmin, isMainAdmin } = useAdminMode();
 
-  const allNavItems = isAdmin
+  // In user mode (main admin), show user nav + safety-net Expert Dashboard link
+  // In admin mode, show admin-only nav
+  // Non-admin users get regular nav
+  const allNavItems = isAdmin && mode === "admin"
     ? [
-        ...navItems,
-        { title: "Admin Requests", url: "/dashboard/admin/requests", icon: ShieldCheck },
         { title: "Expert Dashboard", url: "/dashboard/admin/workdesk", icon: LayoutDashboard },
+        { title: "Request Register", url: "/dashboard/admin/requests", icon: ShieldCheck },
+        { title: "Settings", url: "/dashboard/settings", icon: Settings },
       ]
-    : navItems;
+    : [
+        ...navItems,
+        // Main admin in user mode still gets a safety-net link
+        ...(isMainAdmin && mode === "user"
+          ? [{ title: "Expert Dashboard", url: "/dashboard/admin/workdesk", icon: LayoutDashboard }]
+          : []),
+      ];
 
   return (
     <div className="flex min-h-screen w-full">
       {/* Sidebar */}
       <aside className="hidden md:flex w-64 flex-col glass-strong border-r border-border/30 p-4" style={{ borderRadius: 0 }}>
-        <Link to="/" className="px-3 py-4 mb-6">
-          <EvoLogo size="sm" animate={false} showText />
-        </Link>
+        <div className="flex items-center justify-between px-3 py-4 mb-6">
+          <Link to="/">
+            <EvoLogo size="sm" animate={false} showText />
+          </Link>
+          <AdminModeToggle />
+        </div>
 
         <nav className="flex-1 space-y-1">
           {allNavItems.map((item) => {

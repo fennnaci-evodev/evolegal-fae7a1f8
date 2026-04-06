@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { EvoLogo } from "./EvoLogo";
 import { useAuth } from "@/hooks/useAuth";
+import { AdminModeToggle } from "./AdminModeToggle";
 
 const links = [
   { label: "How It Works", to: "/how-it-works" },
@@ -44,6 +45,7 @@ export function Navbar() {
           </div>
 
           <div className="flex items-center gap-3">
+            {!loading && user && <AdminModeToggle />}
             {!loading && user ? (
               <Link to="/dashboard">
                 <Button size="sm" variant="hero">Dashboard</Button>

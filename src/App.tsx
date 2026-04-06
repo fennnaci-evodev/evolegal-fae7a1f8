@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { LoadingProvider } from "@/contexts/LoadingContext";
+import { AdminModeProvider } from "@/contexts/AdminModeContext";
 import { LoadingOverlay } from "@/components/LoadingOverlay";
 import { InitialLoader } from "@/components/InitialLoader";
 import Index from "./pages/Index";
@@ -39,6 +40,7 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
+        <AdminModeProvider>
         <LoadingProvider>
           <TooltipProvider>
             <Toaster />
@@ -73,6 +75,7 @@ const App = () => {
             </BrowserRouter>
           </TooltipProvider>
         </LoadingProvider>
+        </AdminModeProvider>
       </AuthProvider>
     </QueryClientProvider>
   );
