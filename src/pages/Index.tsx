@@ -5,7 +5,7 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ParticleBackground } from "@/components/ParticleBackground";
 import { DisclaimerModal } from "@/components/DisclaimerModal";
-import { EvoLogo3D } from "@/components/EvoLogo3D";
+import { EvoLogo } from "@/components/EvoLogo";
 import { HugoDemoBubble } from "@/components/HugoDemoBubble";
 import { ArrowRight, PlayCircle, BookOpen, MessageCircle, Shield, Zap, Globe, Check, ChevronRight } from "lucide-react";
 
@@ -83,7 +83,7 @@ const Index = () => {
             animate={{ opacity: 1 }}
             transition={{ duration: 1 }}
           >
-            <EvoLogo3D />
+            <EvoLogo size="hero" animate showText={false} />
           </motion.div>
 
           <motion.h1
