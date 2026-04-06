@@ -83,7 +83,7 @@ const Index = () => {
             animate={{ opacity: 1 }}
             transition={{ duration: 1 }}
           >
-            <EvoLogo size="hero" animate showText={false} />
+            <EvoLogo3D />
           </motion.div>
 
           <motion.h1
