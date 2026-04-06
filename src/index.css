@@ -203,6 +203,15 @@
   }
 }
 
+/* Crisp rendering for icons and SVGs at all zoom levels */
+svg,
+img,
+[class*="lucide-"] {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  shape-rendering: geometricPrecision;
+}
+
 /* Shimmering oval focus effect for all inputs */
 @layer utilities {
   @keyframes shimmer-border {
@@ -220,29 +229,28 @@
     border-radius: 9999px !important;
     box-shadow:
       0 0 0 2px hsl(var(--background)),
-      0 0 0 4px transparent,
       0 0 18px 2px hsla(186, 100%, 50%, 0.18),
       0 0 30px 4px hsla(270, 80%, 75%, 0.10) !important;
     position: relative;
-    padding-left: 1rem !important;
-    padding-right: 1rem !important;
-    padding-top: 0.75rem !important;
-    padding-bottom: 0.75rem !important;
-  }
-
-  input:focus,
-  textarea:focus,
-  select:focus,
-  [contenteditable="true"]:focus {
+    padding-left: 1.25rem !important;
+    padding-right: 1.25rem !important;
+    padding-top: 0.875rem !important;
+    padding-bottom: 0.875rem !important;
     background-image:
       linear-gradient(hsl(var(--background)), hsl(var(--background))),
       linear-gradient(90deg, #00eaff, #c084fc, #00eaff, #c084fc) !important;
     background-origin: border-box !important;
     background-clip: padding-box, border-box !important;
     border: 2px solid transparent !important;
-    border-radius: 9999px !important;
-    background-size: 100% 100%, 300% 100% !important;
-    animation: shimmer-border 3.5s ease infinite !important;
+    background-size: 100% 100%, 400% 100% !important;
+    animation: shimmer-border 5s ease infinite !important;
+    transition: transform 0.25s ease-out !important;
+  }
+
+  input:focus:hover,
+  textarea:focus:hover,
+  select:focus:hover {
+    transform: scale(1.02);
   }
 
   /* Textareas keep slight rounding instead of full pill */
@@ -258,6 +266,7 @@
     border-radius: 0 !important;
     animation: none !important;
     padding: 0 !important;
+    transform: none !important;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -266,6 +275,7 @@
     select:focus,
     [contenteditable="true"]:focus {
       animation: none !important;
+      transform: none !important;
       box-shadow:
         0 0 0 2px hsl(var(--background)),
         0 0 12px 2px hsla(186, 100%, 50%, 0.15) !important;
