@@ -15,7 +15,7 @@ const links = [
   { label: "Contact", to: "/contact" },
 ];
 
-export function Navbar() {
+export function Navbar({ hideLogo = false }: { hideLogo?: boolean }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
   const { user, loading } = useAuth();
