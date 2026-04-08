@@ -118,16 +118,18 @@ export function EvoLogo({ size = "md", animate = true, showText = true }: EvoLog
       >
         <motion.div
           className="relative"
-          style={{
-            willChange: "transform",
-            transformStyle: "preserve-3d",
-            transform: `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) rotateZ(-33deg)`,
-            transition: reducedMotion ? "none" : undefined,
-          }}
           initial={animate ? { opacity: 0, scale: 0.92 } : false}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
         >
+          <div
+            className="relative"
+            style={{
+              willChange: "transform",
+              transformStyle: "preserve-3d",
+              transform: `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) rotateZ(-33deg)`,
+            }}
+          >
           <svg
             width={s.svg}
             height={s.svg}
