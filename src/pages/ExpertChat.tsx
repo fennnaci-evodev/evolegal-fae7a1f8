@@ -224,25 +224,18 @@ const ExpertChat = () => {
             )}
 
             {!historyLoading && messages.length === 0 && !streaming && (
-              <div className="flex flex-col items-center justify-center h-full text-center space-y-6">
+              <div className="flex flex-col items-center justify-center h-full text-center space-y-5">
                 <ScalesOfJustice />
                 <div>
-                  <h3 className="text-lg font-display font-semibold mb-2">Talk to Hugo</h3>
-                  <p className="text-sm text-muted-foreground max-w-sm">
-                    Ask about legal processes, terms, or concepts. Hugo provides detailed, structured insights with cited sources and resources.
+                  <h3 className="text-lg font-display font-semibold mb-1">Talk to Hugo</h3>
+                  <p className="text-xs text-muted-foreground max-w-sm">
+                    Ask about legal processes, terms, or concepts. Hugo provides detailed, structured insights.
                   </p>
                 </div>
-                <div className="flex flex-wrap gap-2 justify-center max-w-md">
-                  {presets.map((q) => (
-                    <button
-                      key={q}
-                      onClick={() => setInput(q)}
-                      className="glass rounded-full px-4 py-2 text-xs text-muted-foreground hover:text-foreground hover:border-primary/20 transition-all"
-                    >
-                      {q}
-                    </button>
-                  ))}
-                </div>
+                <HugoChatTopicChips onSelect={(q) => setInput(q)} />
+                {chatList.length > 0 && (
+                  <HugoChatRecentTopics chats={chatList} onSelect={handleSelectChat} currentChatId={currentChatId} />
+                )}
               </div>
             )}
 
