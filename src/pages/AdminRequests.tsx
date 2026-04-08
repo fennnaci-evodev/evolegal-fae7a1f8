@@ -347,6 +347,9 @@ const AdminRequests = () => {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                    {req.ticket_number && (
+                      <span className="font-mono text-[10px] text-primary/70 bg-primary/5 px-1.5 py-0.5 rounded">{req.ticket_number}</span>
+                    )}
                     <h3 className="font-display font-semibold text-sm truncate">{req.title || "Untitled"}</h3>
                     <Badge variant="outline" className={`text-[10px] px-2 py-0 ${statusColors[req.status] ?? ""}`}>
                       {req.status}
@@ -357,6 +360,7 @@ const AdminRequests = () => {
                     <span>•</span>
                     <span>{new Date(req.created_at).toLocaleDateString()}</span>
                     {req.state && <><span>•</span><span>{req.state}</span></>}
+                    {req.assigned_to_name && <><span>•</span><span>Expert: {req.assigned_to_name}</span></>}
                   </div>
                 </div>
                 <div className="flex items-center gap-1.5 shrink-0">
