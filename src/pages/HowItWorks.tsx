@@ -77,8 +77,8 @@ const HowItWorks = () => {
             initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={4}
           >
             <h3 className="text-xl font-display font-semibold mb-3">Quality You Can Trust</h3>
-            <p className="text-muted-foreground max-w-lg mx-auto mb-6 whitespace-pre-line">
-              Every response is carefully reviewed by our Experts — structured with Options → Risks → Resources.{"\n"}
+            <p className="text-muted-foreground max-w-lg mx-auto mb-6">
+              Every response is carefully reviewed by our Experts — structured with Options → Risks → Resources.<br />
               We deeply care about accuracy and your legal security.
             </p>
             <Link to="/auth">
