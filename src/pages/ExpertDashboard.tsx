@@ -463,8 +463,8 @@ ${chatContext || "(No messages yet)"}`,
     setAssignOpen(false);
   };
 
-  const activeRequests = requests.filter(r => r.status === "pending" || r.status === "reviewing");
-  const inactiveRequests = requests.filter(r => r.status === "completed" || r.status === "archived");
+  const activeRequests = requests.filter(r => r.status === "pending");
+  const inactiveRequests = requests.filter(r => r.status === "reviewing" || r.status === "completed" || r.status === "archived");
 
   const filteredRequests = (sidebarFilter === "active" ? activeRequests : inactiveRequests)
     .filter(r => {
@@ -570,7 +570,7 @@ ${chatContext || "(No messages yet)"}`,
                         </span>
                       </div>
                       <p className="text-[11px] text-muted-foreground truncate mt-0.5">
-                        {req.ticket_number ? `${req.ticket_number} · ` : ""}{req.title || req.topic}
+                        {req.title || req.topic}
                       </p>
                     </div>
                     {req.status === "pending" && (
@@ -626,9 +626,6 @@ ${chatContext || "(No messages yet)"}`,
                 </div>
               </div>
               <div className="ml-auto flex items-center gap-2">
-                {selected.ticket_number && (
-                  <span className="font-mono text-[10px] text-primary/70 bg-primary/5 px-1.5 py-0.5 rounded">{selected.ticket_number}</span>
-                )}
                 <Badge variant="outline" className={`text-[10px] ${statusColors[selected.status] || ""}`}>
                   {selected.status}
                 </Badge>
