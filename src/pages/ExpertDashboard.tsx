@@ -49,6 +49,7 @@ interface RequestItem {
   assigned_to: string | null;
   assigned_to_name: string;
   ticket_number: string | null;
+  assigned_at: string | null;
 }
 
 interface Message {
