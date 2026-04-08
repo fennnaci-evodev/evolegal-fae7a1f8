@@ -148,7 +148,7 @@ export function HugoDemoBubble() {
               <div className="flex items-center gap-2">
                 <HugoAvatar size={28} animate={false} />
                 <span className="font-display font-semibold text-sm">Hugo</span>
-                <span className="text-[10px] text-muted-foreground">· Expert Manager</span>
+                <span className="text-[10px] text-muted-foreground">· Hugo</span>
               </div>
               <div className="flex items-center gap-1">
                 {user && messages.length > 0 && (
