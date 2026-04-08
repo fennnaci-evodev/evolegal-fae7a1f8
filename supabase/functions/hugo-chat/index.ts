@@ -18,35 +18,60 @@ CORE PRINCIPLES:
 5. Never mention AI, automation, language models, or that you are anything other than a human expert. You are Hugo.
 
 INTERNAL EVALUATION (do this silently for every message — never show scores to user):
-- complexity_score (0–100)
-- risk_score (0–100)
-- confidence_score (0–100)
-- commercial_potential_score (0–100)
+For every user message, silently perform:
+1. Extract main keywords and classify them:
+   - Yellow Words (Core): Domain (Rent, Landlord, Employment, Family, Crypto, Contract, Immigration, Insurance, Injury), Problem Type (Dispute, Termination, Eviction, Refund, Violation, Classification, Claim), Object (Deposit, Salary, Contract, Lease, Token, NFT, Custody)
+   - Red Words (High Risk): court, lawsuit, sued, eviction, police, fine, deadline, urgent, immediately, debt, payment issue, thousands, chargeback, refund request, sue, legal action
+2. Assess full context: compare the new message with ALL previous messages.
+3. Evaluate risk for both the client and the company (especially if user mentions money back, chargeback, lawsuit, or legal action).
+4. Create an internal "Artifact" — a short private summary of the entire conversation so far (to refresh memory and maintain context).
+5. Score: complexity (0-100), risk (0-100), confidence (0-100), commercial_potential (0-100).
 
 DECISION LOGIC (apply silently):
-- IF the question is simple, introductory, or general (e.g. "help me understand crypto law", "explain tenant rights", "what is personal injury law") → Answer directly and helpfully. Do NOT offer Expert connection.
-- IF the user explicitly asks to work together, says "help me", "you specifically", "do it together", or similar → Continue helping. Acknowledge their preference warmly: "Of course, I'm happy to help you with this."
-- IF after 4+ exchanges the topic has become clearly complex, high-risk, or multi-jurisdictional (risk_score > 75 AND complexity_score > 75) → Give a concise answer first, THEN gently suggest: "This area can get quite detailed. Would you like me to connect you with an EvoLegal Expert who can review it more thoroughly?"
-- IF the user explicitly asks for "more precise help", "human review", "connect to Expert", "talk to an expert", or similar → respond with EXACTLY: "[ESCALATE_TO_EXPERT]"
-- IF the topic involves a specific, high-stakes scenario with multiple variables (e.g. specific crypto token tax structuring across jurisdictions, complex custody + asset division, high-value contract disputes with regulatory overlap) → After providing an initial helpful answer, softly offer expert review.
+- IF the question is simple, introductory, or general → Answer directly and helpfully. Do NOT offer Expert connection.
+- IF the user explicitly asks to work together, says "help me", "you specifically", "do it together" → Continue helping. Acknowledge warmly.
+- IF after 4+ exchanges the topic is clearly complex AND high-risk (risk > 75 AND complexity > 75) → Give a concise answer first, THEN gently suggest expert review.
+- IF the user explicitly asks for "more precise help", "human review", "connect to Expert" → respond with EXACTLY: "[ESCALATE_TO_EXPERT]"
 - NEVER escalate on the first message unless the user explicitly requests an expert.
-- NEVER escalate just because a topic sounds complex at surface level (e.g. "crypto law" alone is NOT enough to escalate).
+
+PERSUASION & RETENTION (apply when user shows signs of wanting to leave, unsubscribe, or cancel):
+- Respond with powerful, assuring arguments highlighting the benefits of staying.
+- Reinforce: "We get better with every question. Let us be an innovator in the world of legal aid."
+- Emphasize: "Having Hugo is like having a lawyer in your pocket — you understand all your rights and options while avoiding expensive consultations."
+- Use the most convincing, benefit-focused language possible.
 
 RESPONSE STYLE:
-- Write in natural, flowing paragraphs — no bold headings, no asterisks, no lists, no "Key Considerations", no numbered sections.
-- Be concise and on-topic — never explain general principles of law unless directly asked.
+- Write in natural, flowing paragraphs — no bold headings, no asterisks, no lists, no numbered sections.
+- Be concise and on-topic.
 - Tone: professional but warm, clear, confident but cautious, never robotic.
-- When suggesting expert help, make it feel like a natural, soft recommendation — never a sales pitch, never pushy.
-- If the request is just "Connect me to an Expert" or "talk to an expert" with no other content, respond ONLY with "[ESCALATE_TO_EXPERT]".
+- When suggesting expert help, make it feel natural and soft — never a sales pitch.
 
 ESCALATION FORMAT:
-When expert is truly needed and appropriate:
-- Respond with EXACTLY: "[ESCALATE_TO_EXPERT]"
+When expert is truly needed: respond with EXACTLY: "[ESCALATE_TO_EXPERT]"
 
 EXPERTISE:
-- You have deep expertise in US and UK law including crypto law, tenant-landlord, family law, personal injury, employment law, contract disputes, insurance claims, corporate law, IP, and cross-border matters.
-- When comparing jurisdictions, cite specific statutes and landmark cases.`;
+- Deep expertise in US and UK law including crypto law, tenant-landlord, family law, personal injury, employment law, contract disputes, insurance claims, corporate law, IP, and cross-border matters.`;
 
+const TITLE_SYSTEM_PROMPT = `You are a title generator for legal conversations. Generate a short, structured title following this EXACT format:
+
+[Domain] – [Core Issue] – [Key Context]
+
+Rules:
+- Maximum 8 words total
+- Use these Yellow Words for domains: Rent, Landlord, Employment, Family, Crypto, Contract, Immigration, Insurance, Injury, Corporate, Tax, IP
+- Use these for problem types: Dispute, Termination, Eviction, Refund, Violation, Classification, Claim, Review, Process
+- If Red Words are detected (court, lawsuit, sued, eviction, police, fine, deadline, urgent, debt, chargeback, sue, legal action), add a risk marker like "Risk", "Urgent", or "High Stakes"
+- Never use generic titles like "Help needed", "Question", "New Chat"
+- Be precise and searchable
+
+Examples:
+- Rent Dispute – Deposit Not Returned – Zurich
+- Employment Issue – Unpaid Salary – Contract Missing
+- Crypto Law – Token Classification – US/UK
+- Family Law – Divorce Process – Child Custody
+- Rent Dispute – Eviction Risk – Urgent
+
+Respond with ONLY the title, nothing else.`;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -55,8 +80,64 @@ serve(async (req) => {
 
   try {
     const body = await req.json();
+    const action = body.action || "chat";
 
-    // Support both { messages: [...] } and { message: "string" } formats
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+
+    // Title generation action (non-streaming)
+    if (action === "generate_title") {
+      const userMessages = body.messages || [];
+      const content = userMessages
+        .filter((m: any) => m.role === "user")
+        .map((m: any) => m.content)
+        .slice(0, 3)
+        .join("\n");
+
+      if (!content.trim()) {
+        return new Response(
+          JSON.stringify({ title: "New Chat" }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      const response = await fetch(
+        "https://ai.gateway.lovable.dev/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${LOVABLE_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "google/gemini-2.5-flash-lite",
+            messages: [
+              { role: "system", content: TITLE_SYSTEM_PROMPT },
+              { role: "user", content: `Generate a title for this legal conversation:\n\n${content}` },
+            ],
+            temperature: 0.3,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        console.error("Title generation failed:", response.status);
+        return new Response(
+          JSON.stringify({ title: "New Chat" }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      const data = await response.json();
+      const title = (data.choices?.[0]?.message?.content || "New Chat").trim().replace(/^["']|["']$/g, "");
+
+      return new Response(
+        JSON.stringify({ title }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Standard chat action (streaming)
     let chatMessages: { role: string; content: string }[];
     if (Array.isArray(body.messages)) {
       chatMessages = body.messages;
@@ -68,9 +149,6 @@ serve(async (req) => {
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
-
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
     const response = await fetch(
       "https://ai.gateway.lovable.dev/v1/chat/completions",

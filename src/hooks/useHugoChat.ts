@@ -20,11 +20,31 @@ export interface HugoChat {
   updated_at: string;
 }
 
-/** Generate a short title from the first user message */
-function generateTitle(content: string): string {
-  const clean = content.replace(/[^a-zA-Z0-9\s]/g, "").trim();
-  const words = clean.split(/\s+/).slice(0, 6).join(" ");
-  return words.length > 40 ? words.slice(0, 40) + "…" : words || "New Chat";
+/** Generate a structured title via the AI Title Engine */
+async function generateSmartTitle(messages: { role: string; content: string }[]): Promise<string> {
+  try {
+    const resp = await fetch(CHAT_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      },
+      body: JSON.stringify({ action: "generate_title", messages }),
+    });
+    if (resp.ok) {
+      const data = await resp.json();
+      return data.title || "New Chat";
+    }
+  } catch (e) {
+    console.error("Title generation failed:", e);
+  }
+  // Fallback: extract first few words
+  const firstUser = messages.find(m => m.role === "user");
+  if (firstUser) {
+    const words = firstUser.content.replace(/[^a-zA-Z0-9\s]/g, "").trim().split(/\s+/).slice(0, 5).join(" ");
+    return words || "New Chat";
+  }
+  return "New Chat";
 }
 
 export function useHugoChat(chatId?: string | null) {
@@ -67,12 +87,11 @@ export function useHugoChat(chatId?: string | null) {
   }, [chatId, loadMessages]);
 
   // Create a new chat session
-  const createChat = useCallback(async (firstMessage: string): Promise<string | null> => {
+  const createChat = useCallback(async (): Promise<string | null> => {
     if (!user) return null;
-    const title = generateTitle(firstMessage);
     const { data, error } = await supabase
       .from("hugo_chats" as any)
-      .insert({ user_id: user.id, title } as any)
+      .insert({ user_id: user.id, title: "New Chat" } as any)
       .select("id")
       .single();
 
@@ -101,7 +120,7 @@ export function useHugoChat(chatId?: string | null) {
     return (data as any)?.id ?? null;
   }, []);
 
-  // Update chat title based on first user message
+  // Update chat title
   const updateTitle = useCallback(async (cId: string, title: string) => {
     await supabase
       .from("hugo_chats" as any)
@@ -118,7 +137,7 @@ export function useHugoChat(chatId?: string | null) {
 
     // Create chat if needed
     if (!cId) {
-      cId = await createChat(text);
+      cId = await createChat();
       if (!cId) return;
     }
 
@@ -130,11 +149,6 @@ export function useHugoChat(chatId?: string | null) {
     // Save user message
     const savedId = await saveMessage(cId, "user", text);
     if (savedId) userMsg.id = savedId;
-
-    // If first message, update title
-    if (isFirst) {
-      await updateTitle(cId, generateTitle(text));
-    }
 
     // Stream Hugo's response
     const allMsgs = [...messages, userMsg];
@@ -211,6 +225,17 @@ export function useHugoChat(chatId?: string | null) {
       // Save assistant message
       if (finalContent) {
         await saveMessage(cId, "assistant", finalContent);
+      }
+
+      // Generate smart title after first exchange (user + assistant both exist)
+      if (isFirst && finalContent) {
+        const titleMessages = [
+          { role: "user", content: text },
+          { role: "assistant", content: finalContent },
+        ];
+        generateSmartTitle(titleMessages).then(title => {
+          updateTitle(cId!, title);
+        });
       }
 
       return { escalated: full.includes("[ESCALATE_TO_EXPERT]"), chatId: cId };
