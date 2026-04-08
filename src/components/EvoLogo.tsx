@@ -58,7 +58,7 @@ export function EvoLogo({ size = "md", animate = true, showText = true }: EvoLog
         innerRef.current.style.transform = `rotateX(${nx}deg) rotateY(${ny}deg) rotateZ(-33deg)`;
         const svg = innerRef.current.querySelector("svg");
         if (svg) {
-          (svg as HTMLElement).style.filter =
+          (svg as SVGElement).style.filter =
             `drop-shadow(0 0 8px hsla(186,100%,50%,${bg})) drop-shadow(0 0 16px hsla(186,100%,50%,${og})) drop-shadow(0 0 3px hsla(270,80%,75%,${pg}))`;
         }
       }
