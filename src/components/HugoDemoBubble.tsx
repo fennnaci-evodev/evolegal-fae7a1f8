@@ -168,7 +168,7 @@ export function HugoDemoBubble() {
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-4 space-y-3 min-h-0">
               <div className="glass rounded-xl px-4 py-3 text-sm text-foreground leading-relaxed">
-                Hey there! I'm Hugo, your Expert Manager. Ask me anything about US or UK legal topics — I'm here to help.
+                Hey there! I'm Hugo. Ask me anything about US or UK legal topics — I'm here to help.
               </div>
 
               {messages.map((msg) => (

@@ -6,7 +6,7 @@ interface HugoAvatarProps {
 }
 
 /**
- * Hugo — Expert Manager avatar.
+ * Hugo avatar.
  * Minimalist professional silhouette in a glassmorphic circle with neon cyan outline.
  */
 export function HugoAvatar({ size = 40, animate = true }: HugoAvatarProps) {

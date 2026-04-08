@@ -184,7 +184,7 @@ const UserChat = () => {
         <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/20 mb-3">
           <Info className="h-3 w-3 text-muted-foreground/50 shrink-0" />
           <p className="text-[10px] text-muted-foreground/50">
-            Your conversation is handled by an EvoLegal Expert. For complex personal matters, professional representation may be recommended.
+            Your conversation is handled by {expertName}, your personal Expert. For complex personal matters, professional representation may be recommended.
           </p>
         </div>
 
