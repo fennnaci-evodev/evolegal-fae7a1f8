@@ -270,6 +270,7 @@ export function useHugoChat(chatId?: string | null) {
   // Start a new chat (reset state)
   const startNewChat = useCallback(() => {
     setCurrentChatId(null);
+    setCurrentTitle("New Chat");
     setMessages([]);
   }, []);
 
@@ -280,6 +281,7 @@ export function useHugoChat(chatId?: string | null) {
     loading,
     historyLoading,
     currentChatId,
+    currentTitle,
     sendMessage,
     startNewChat,
     loadMessages,
