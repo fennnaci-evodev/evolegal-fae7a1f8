@@ -27,6 +27,7 @@ const ExpertChat = () => {
     streaming,
     historyLoading,
     currentChatId,
+    currentTitle,
     sendMessage,
     startNewChat,
     setCurrentChatId,
