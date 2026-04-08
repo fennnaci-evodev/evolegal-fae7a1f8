@@ -243,6 +243,7 @@ export function useHugoChat(chatId?: string | null) {
           { role: "assistant", content: finalContent },
         ];
         generateSmartTitle(titleMessages).then(title => {
+          setCurrentTitle(title);
           updateTitle(cId!, title);
         });
       }
