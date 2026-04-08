@@ -42,11 +42,11 @@ const ExpertChat = () => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const recognitionRef = useRef<any>(null);
 
-  // Load chat list
+  // Load/refresh chat list when chatId or title changes
   useEffect(() => {
     if (!user) return;
     fetchHugoChats().then(setChatList);
-  }, [user, currentChatId]);
+  }, [user, currentChatId, currentTitle]);
 
   // Handle bubble history transfer
   useEffect(() => {
