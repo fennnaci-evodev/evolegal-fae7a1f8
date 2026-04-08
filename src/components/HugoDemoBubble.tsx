@@ -148,7 +148,7 @@ export function HugoDemoBubble() {
               <div className="flex items-center gap-2">
                 <HugoAvatar size={28} animate={false} />
                 <span className="font-display font-semibold text-sm">Hugo</span>
-                <span className="text-[10px] text-muted-foreground">· Expert Manager</span>
+                <span className="text-[10px] text-muted-foreground">· Hugo</span>
               </div>
               <div className="flex items-center gap-1">
                 {user && messages.length > 0 && (
@@ -168,7 +168,7 @@ export function HugoDemoBubble() {
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-4 space-y-3 min-h-0">
               <div className="glass rounded-xl px-4 py-3 text-sm text-foreground leading-relaxed">
-                Hey there! I'm Hugo, your Expert Manager. Ask me anything about US or UK legal topics — I'm here to help.
+                Hey there! I'm Hugo. Ask me anything about US or UK legal topics — I'm here to help.
               </div>
 
               {messages.map((msg) => (
