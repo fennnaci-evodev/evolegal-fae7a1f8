@@ -393,8 +393,11 @@ const AdminRequests = () => {
           <DialogHeader>
             <DialogTitle className="font-display">{selected?.title || "Request Details"}</DialogTitle>
             <DialogDescription>
+              {selected?.ticket_number && <span className="font-mono text-primary mr-2">{selected.ticket_number}</span>}
               {selected?.topic} • {selected?.created_at ? new Date(selected.created_at).toLocaleString() : ""}
+              {selected?.assigned_to_name && <> • Expert: {selected.assigned_to_name}</>}
             </DialogDescription>
+          </DialogHeader>
           </DialogHeader>
           {selected && (
             <div className="space-y-4 text-sm">

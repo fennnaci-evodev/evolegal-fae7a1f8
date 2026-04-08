@@ -74,6 +74,7 @@ const App = () => {
                 <Route path="/dashboard/settings" element={<SettingsPage />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
+              <CookieConsent />
             </BrowserRouter>
           </TooltipProvider>
         </LoadingProvider>
