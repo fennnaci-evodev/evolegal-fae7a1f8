@@ -171,6 +171,7 @@ export function EvoLogo({ size = "md", animate = true, showText = true }: EvoLog
               }}
             />
           )}
+          </div>
         </motion.div>
       </div>
 
