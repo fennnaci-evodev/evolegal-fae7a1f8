@@ -82,7 +82,7 @@ const SubmitRequest = () => {
         ? `${description.trim()}\n\n--- Additional context provided ---\n${extraContext}`
         : description.trim();
 
-      const { error } = await supabase.from("legal_requests").insert({
+      const { data: insertedData, error } = await supabase.from("legal_requests").insert({
         user_id: user.id,
         topic: topicLabel,
         title: title.trim() || "Untitled Request",
@@ -90,7 +90,7 @@ const SubmitRequest = () => {
         facts: keyFacts.trim() ? { summary: keyFacts.trim() } : {},
         state: state,
         audit_log: [{ timestamp: new Date().toISOString(), action: "created", actor: "user", note: "Request submitted" }],
-      });
+      }).select("ticket_number").single();
 
       if (error) {
         console.error("Failed to save request:", error);
@@ -98,7 +98,10 @@ const SubmitRequest = () => {
         return;
       }
 
-      toast.success("Your request has been received and is now in the register. Hugo will prepare insights soon.");
+      const ticketNum = (insertedData as any)?.ticket_number;
+      toast.success(ticketNum
+        ? `Request ${ticketNum} submitted! Hugo will prepare insights soon.`
+        : "Your request has been received. Hugo will prepare insights soon.");
       setTopic("");
       setState("");
       setTitle("");
