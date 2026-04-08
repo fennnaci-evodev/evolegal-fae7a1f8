@@ -60,6 +60,14 @@ export function useHugoChat(chatId?: string | null) {
   // Load messages for an existing chat
   const loadMessages = useCallback(async (cId: string) => {
     setHistoryLoading(true);
+    // Load chat title
+    const { data: chatData } = await supabase
+      .from("hugo_chats" as any)
+      .select("title")
+      .eq("id", cId)
+      .single();
+    if (chatData) setCurrentTitle((chatData as any).title || "New Chat");
+
     const { data, error } = await supabase
       .from("hugo_messages" as any)
       .select("id, role, content, created_at")
