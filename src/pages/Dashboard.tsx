@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { PlayCircle, MessageCircle, FileText, ArrowRight, ShieldCheck, Clock } from "lucide-react";
+import { PlayCircle, MessageCircle, FileText, ArrowRight, ShieldCheck, Clock, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { fadeUp } from "@/lib/animations";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
+import { fetchHugoChats, deleteHugoChat, type HugoChat } from "@/hooks/useHugoChat";
+import { HugoAvatar } from "@/components/HugoAvatar";
+import { toast } from "sonner";
 
 const quickActions = [
   { icon: PlayCircle, title: "Video Lectures", desc: "Watch expert explanations", to: "/dashboard/library" },
@@ -51,12 +54,17 @@ const Dashboard = () => {
   const { user } = useAuth();
   const [pendingRequests, setPendingRequests] = useState<RecentRequest[]>([]);
   const [activeChats, setActiveChats] = useState<ChatEntry[]>([]);
+  const [hugoChats, setHugoChats] = useState<HugoChat[]>([]);
 
   useEffect(() => {
     if (!user) return;
 
     const load = async () => {
-      // Fetch all user requests
+      // Fetch Hugo chats
+      const hChats = await fetchHugoChats();
+      setHugoChats(hChats.slice(0, 5));
+
+      // Fetch legal requests
       const { data } = await supabase
         .from("legal_requests" as any)
         .select("id, title, created_at, status, topic, admin_response, responded_at")
@@ -67,7 +75,6 @@ const Dashboard = () => {
       if (!data) return;
       const requests = data as unknown as RecentRequest[];
 
-      // Requests that have been answered (have admin_response or completed/reviewing with messages) go to Chats
       const answered: ChatEntry[] = [];
       const pending: RecentRequest[] = [];
 
@@ -85,7 +92,6 @@ const Dashboard = () => {
         }
       }
 
-      // Also check for requests with expert messages (even if admin_response column is empty)
       const answeredIds = new Set(answered.map((a) => a.id));
       const pendingIds = pending.map((p) => p.id);
       if (pendingIds.length > 0) {
@@ -100,20 +106,14 @@ const Dashboard = () => {
         if (msgData) {
           const msgsByRequest = new Map<string, any>();
           for (const m of msgData as any[]) {
-            if (!msgsByRequest.has(m.request_id)) {
-              msgsByRequest.set(m.request_id, m);
-            }
+            if (!msgsByRequest.has(m.request_id)) msgsByRequest.set(m.request_id, m);
           }
-
-          // Move requests with expert messages to chats
           const stillPending: RecentRequest[] = [];
           for (const req of pending) {
             const expertMsg = msgsByRequest.get(req.id);
             if (expertMsg && !answeredIds.has(req.id)) {
               answered.push({
-                id: req.id,
-                title: req.title || req.topic,
-                topic: req.topic,
+                id: req.id, title: req.title || req.topic, topic: req.topic,
                 responded_at: expertMsg.created_at,
                 lastMessage: expertMsg.content?.slice(0, 80) + (expertMsg.content?.length > 80 ? "…" : ""),
               });
@@ -129,13 +129,23 @@ const Dashboard = () => {
         setPendingRequests([]);
       }
 
-      // Sort chats by most recent activity
       answered.sort((a, b) => new Date(b.responded_at).getTime() - new Date(a.responded_at).getTime());
       setActiveChats(answered.slice(0, 5));
     };
 
     load();
   }, [user]);
+
+  const handleDeleteHugoChat = async (id: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!confirm("Delete this Hugo conversation?")) return;
+    const ok = await deleteHugoChat(id);
+    if (ok) {
+      setHugoChats(prev => prev.filter(c => c.id !== id));
+      toast.success("Chat deleted");
+    }
+  };
 
   return (
     <DashboardLayout>
@@ -162,13 +172,56 @@ const Dashboard = () => {
           ))}
         </div>
 
-        {/* Active Chats with Experts */}
-        {activeChats.length > 0 && (
+        {/* Hugo Chats */}
+        {hugoChats.length > 0 && (
           <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={4}>
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
+                <MessageCircle className="h-4 w-4 text-primary" />
+                <h2 className="text-lg font-display font-semibold">Chats with Hugo</h2>
+              </div>
+              <Link to="/dashboard/chat">
+                <Button variant="ghost" size="sm" className="text-primary">
+                  View all <ArrowRight className="ml-1 h-3 w-3" />
+                </Button>
+              </Link>
+            </div>
+            <div className="space-y-2">
+              {hugoChats.map((chat) => (
+                <Link key={chat.id} to={`/dashboard/hugo/${chat.id}`}>
+                  <div className="glass-card p-4 flex items-center gap-4 hover:border-primary/20 transition-all cursor-pointer group">
+                    <HugoAvatar size={36} animate={false} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium group-hover:text-primary transition-colors truncate">
+                        {chat.title}
+                      </p>
+                      <p className="text-xs text-muted-foreground">{new Date(chat.updated_at).toLocaleDateString()}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="text-[10px] text-primary border-primary/30">
+                        Hugo
+                      </Badge>
+                      <button
+                        onClick={(e) => handleDeleteHugoChat(chat.id, e)}
+                        className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-opacity"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Active Expert Chats */}
+        {activeChats.length > 0 && (
+          <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={5}>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
                 <ShieldCheck className="h-4 w-4" style={{ color: "hsl(270, 95%, 75%)" }} />
-                <h2 className="text-lg font-display font-semibold">Chats</h2>
+                <h2 className="text-lg font-display font-semibold">Expert Chats</h2>
               </div>
             </div>
             <div className="space-y-2">
@@ -179,9 +232,7 @@ const Dashboard = () => {
                       <ShieldCheck className="h-5 w-5" style={{ color: "hsl(270, 95%, 75%)" }} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium group-hover:text-primary transition-colors truncate">
-                        {chat.title}
-                      </p>
+                      <p className="text-sm font-medium group-hover:text-primary transition-colors truncate">{chat.title}</p>
                       <p className="text-xs text-muted-foreground truncate">{chat.lastMessage}</p>
                     </div>
                     <div className="text-right shrink-0">
@@ -197,9 +248,9 @@ const Dashboard = () => {
           </motion.div>
         )}
 
-        {/* Recent Requests (pending / not yet answered) */}
+        {/* Recent Requests */}
         {pendingRequests.length > 0 && (
-          <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={5}>
+          <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={6}>
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4 text-muted-foreground" />
@@ -239,11 +290,7 @@ const Dashboard = () => {
           </div>
           <div className="grid sm:grid-cols-2 gap-3">
             {featuredContent.map((item, i) => (
-              <motion.div
-                key={item.title}
-                initial="hidden" animate="visible" variants={fadeUp} custom={6 + i}
-                className="glass-card p-5 cursor-pointer group"
-              >
+              <motion.div key={item.title} initial="hidden" animate="visible" variants={fadeUp} custom={7 + i} className="glass-card p-5 cursor-pointer group">
                 <div className="flex items-start justify-between mb-3">
                   <span className="text-xs px-2.5 py-1 rounded-full bg-primary/10 text-primary font-medium">{item.type}</span>
                   <span className="text-xs text-muted-foreground">{item.duration}</span>
