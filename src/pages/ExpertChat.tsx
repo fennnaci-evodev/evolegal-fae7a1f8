@@ -12,13 +12,8 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { useHugoChat, fetchHugoChats, deleteHugoChat, type HugoChat } from "@/hooks/useHugoChat";
 import { Skeleton } from "@/components/ui/skeleton";
-
-const presets = [
-  "What are tenant rights in the US?",
-  "UK divorce process overview",
-  "How do personal injury claims work?",
-  "How does crypto regulation work?",
-];
+import { HugoChatTopicChips } from "@/components/HugoChatTopicChips";
+import { HugoChatRecentTopics } from "@/components/HugoChatRecentTopics";
 
 const ExpertChat = () => {
   const { chatId: paramChatId } = useParams<{ chatId?: string }>();
@@ -145,7 +140,7 @@ const ExpertChat = () => {
 
   return (
     <DashboardLayout>
-      <div className="max-w-4xl mx-auto h-[calc(100vh-6rem)] flex gap-4">
+      <div className="max-w-5xl mx-auto h-[calc(100vh-6rem)] flex gap-3">
         {/* Chat History Sidebar - desktop */}
         <div className="hidden md:flex flex-col w-56 shrink-0">
           <Button variant="outline" size="sm" className="mb-3 w-full justify-start gap-2" onClick={handleNewChat}>
@@ -219,7 +214,7 @@ const ExpertChat = () => {
           </AnimatePresence>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto space-y-4 pr-2 mb-4" style={{ overflowAnchor: "none" }}>
+          <div className="flex-1 overflow-y-auto space-y-3 pr-2 mb-3" style={{ overflowAnchor: "none" }}>
             {historyLoading && (
               <div className="space-y-3 p-4">
                 <Skeleton className="h-12 w-3/4" />
@@ -229,25 +224,18 @@ const ExpertChat = () => {
             )}
 
             {!historyLoading && messages.length === 0 && !streaming && (
-              <div className="flex flex-col items-center justify-center h-full text-center space-y-6">
+              <div className="flex flex-col items-center justify-center h-full text-center space-y-5">
                 <ScalesOfJustice />
                 <div>
-                  <h3 className="text-lg font-display font-semibold mb-2">Talk to Hugo</h3>
-                  <p className="text-sm text-muted-foreground max-w-sm">
-                    Ask about legal processes, terms, or concepts. Hugo provides detailed, structured insights with cited sources and resources.
+                  <h3 className="text-lg font-display font-semibold mb-1">Talk to Hugo</h3>
+                  <p className="text-xs text-muted-foreground max-w-sm">
+                    Ask about legal processes, terms, or concepts. Hugo provides detailed, structured insights.
                   </p>
                 </div>
-                <div className="flex flex-wrap gap-2 justify-center max-w-md">
-                  {presets.map((q) => (
-                    <button
-                      key={q}
-                      onClick={() => setInput(q)}
-                      className="glass rounded-full px-4 py-2 text-xs text-muted-foreground hover:text-foreground hover:border-primary/20 transition-all"
-                    >
-                      {q}
-                    </button>
-                  ))}
-                </div>
+                <HugoChatTopicChips onSelect={(q) => setInput(q)} />
+                {chatList.length > 0 && (
+                  <HugoChatRecentTopics chats={chatList} onSelect={handleSelectChat} currentChatId={currentChatId} />
+                )}
               </div>
             )}
 
