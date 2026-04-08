@@ -140,7 +140,7 @@ const ExpertChat = () => {
 
   return (
     <DashboardLayout>
-      <div className="max-w-5xl mx-auto h-[calc(100vh-6rem)] flex gap-3">
+      <div className="h-[calc(100vh-6rem)] flex gap-3">
         {/* Chat History Sidebar - desktop */}
         <div className="hidden md:flex flex-col w-56 shrink-0">
           <Button variant="outline" size="sm" className="mb-3 w-full justify-start gap-2" onClick={handleNewChat}>
