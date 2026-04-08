@@ -41,6 +41,7 @@ interface RequestItem {
   admin_notes: string;
   assigned_to: string | null;
   assigned_to_name: string;
+  ticket_number: string | null;
 }
 
 interface Message {
@@ -479,7 +480,10 @@ const ExpertDashboard = () => {
                   <span className="text-[10px] text-emerald-400">Online</span>
                 </div>
               </div>
-              <div className="ml-auto">
+              <div className="ml-auto flex items-center gap-2">
+                {selected.ticket_number && (
+                  <span className="font-mono text-[10px] text-primary/70 bg-primary/5 px-1.5 py-0.5 rounded">{selected.ticket_number}</span>
+                )}
                 <Badge variant="outline" className={`text-[10px] ${statusColors[selected.status] || ""}`}>
                   {selected.status}
                 </Badge>

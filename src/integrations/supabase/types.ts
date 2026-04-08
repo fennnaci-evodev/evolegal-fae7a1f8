@@ -77,6 +77,7 @@ export type Database = {
         Row: {
           admin_notes: string | null
           admin_response: string | null
+          assigned_at: string | null
           assigned_to: string | null
           assigned_to_name: string | null
           audit_log: Json | null
@@ -88,6 +89,7 @@ export type Database = {
           responded_at: string | null
           state: string | null
           status: Database["public"]["Enums"]["request_status"]
+          ticket_number: string | null
           title: string | null
           topic: string
           updated_at: string
@@ -96,6 +98,7 @@ export type Database = {
         Insert: {
           admin_notes?: string | null
           admin_response?: string | null
+          assigned_at?: string | null
           assigned_to?: string | null
           assigned_to_name?: string | null
           audit_log?: Json | null
@@ -107,6 +110,7 @@ export type Database = {
           responded_at?: string | null
           state?: string | null
           status?: Database["public"]["Enums"]["request_status"]
+          ticket_number?: string | null
           title?: string | null
           topic: string
           updated_at?: string
@@ -115,6 +119,7 @@ export type Database = {
         Update: {
           admin_notes?: string | null
           admin_response?: string | null
+          assigned_at?: string | null
           assigned_to?: string | null
           assigned_to_name?: string | null
           audit_log?: Json | null
@@ -126,6 +131,7 @@ export type Database = {
           responded_at?: string | null
           state?: string | null
           status?: Database["public"]["Enums"]["request_status"]
+          ticket_number?: string | null
           title?: string | null
           topic?: string
           updated_at?: string
@@ -218,6 +224,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_ticket_number: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

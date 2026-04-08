@@ -22,6 +22,8 @@ interface LegalRequest {
   facts: any;
   admin_response: string;
   responded_at: string | null;
+  ticket_number: string | null;
+  assigned_to_name: string | null;
 }
 
 const statusColors: Record<string, string> = {
@@ -41,7 +43,7 @@ const MyRequests = () => {
     const fetchRequests = async () => {
       const { data, error } = await supabase
         .from("legal_requests" as any)
-        .select("id, created_at, status, topic, title, description, state, facts, admin_response, responded_at")
+        .select("id, created_at, status, topic, title, description, state, facts, admin_response, responded_at, ticket_number, assigned_to_name")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
 
@@ -99,6 +101,9 @@ const MyRequests = () => {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
+                    {req.ticket_number && (
+                      <span className="font-mono text-[10px] text-primary/70 bg-primary/5 px-1.5 py-0.5 rounded">{req.ticket_number}</span>
+                    )}
                     <h3 className="font-display font-semibold text-sm truncate">{req.title}</h3>
                     <Badge variant="outline" className={`text-[10px] px-2 py-0 ${statusColors[req.status] ?? ""}`}>
                       {req.status}
@@ -109,6 +114,7 @@ const MyRequests = () => {
                     <span>{req.topic}</span>
                     <span>•</span>
                     <span>{new Date(req.created_at).toLocaleDateString()}</span>
+                    {req.assigned_to_name && <><span>•</span><span>Expert: {req.assigned_to_name}</span></>}
                   </div>
                 </div>
                 {req.status === "completed" && (

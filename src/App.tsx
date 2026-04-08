@@ -30,6 +30,7 @@ import ExpertDashboard from "./pages/ExpertDashboard";
 import WorkflowGuides from "./pages/WorkflowGuides";
 import SettingsPage from "./pages/Settings";
 import NotFound from "./pages/NotFound";
+import { CookieConsent } from "@/components/CookieConsent";
 
 const queryClient = new QueryClient();
 
@@ -73,6 +74,7 @@ const App = () => {
                 <Route path="/dashboard/settings" element={<SettingsPage />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
+              <CookieConsent />
             </BrowserRouter>
           </TooltipProvider>
         </LoadingProvider>
