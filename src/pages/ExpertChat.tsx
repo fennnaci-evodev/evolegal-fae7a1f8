@@ -27,6 +27,7 @@ const ExpertChat = () => {
     streaming,
     historyLoading,
     currentChatId,
+    currentTitle,
     sendMessage,
     startNewChat,
     setCurrentChatId,
@@ -41,11 +42,11 @@ const ExpertChat = () => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const recognitionRef = useRef<any>(null);
 
-  // Load chat list
+  // Load/refresh chat list when chatId or title changes
   useEffect(() => {
     if (!user) return;
     fetchHugoChats().then(setChatList);
-  }, [user, currentChatId]);
+  }, [user, currentChatId, currentTitle]);
 
   // Handle bubble history transfer
   useEffect(() => {
@@ -174,7 +175,10 @@ const ExpertChat = () => {
           <div className="glass-card p-4 mb-4 flex items-center gap-3" style={{ borderRadius: "1rem" }}>
             <HugoAvatar size={44} />
             <div className="flex-1">
-              <h2 className="font-display font-semibold">Chat with Hugo <span className="text-muted-foreground font-normal text-xs">· AI Expert Manager</span></h2>
+              <h2 className="font-display font-semibold">
+                {currentChatId && currentTitle !== "New Chat" ? currentTitle : "Chat with Hugo"}
+                <span className="text-muted-foreground font-normal text-xs ml-2">· AI Expert Manager</span>
+              </h2>
               <p className="text-xs text-muted-foreground">Every response is carefully reviewed by our Experts — structured with Options → Risks → Resources.{"\n"}We deeply care about accuracy and your legal security.</p>
             </div>
             <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setShowSidebar(!showSidebar)}>

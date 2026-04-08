@@ -53,12 +53,21 @@ export function useHugoChat(chatId?: string | null) {
   const [loading, setLoading] = useState(false);
   const [streaming, setStreaming] = useState(false);
   const [currentChatId, setCurrentChatId] = useState<string | null>(chatId ?? null);
+  const [currentTitle, setCurrentTitle] = useState<string>("New Chat");
   const [historyLoading, setHistoryLoading] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
 
   // Load messages for an existing chat
   const loadMessages = useCallback(async (cId: string) => {
     setHistoryLoading(true);
+    // Load chat title
+    const { data: chatData } = await supabase
+      .from("hugo_chats" as any)
+      .select("title")
+      .eq("id", cId)
+      .single();
+    if (chatData) setCurrentTitle((chatData as any).title || "New Chat");
+
     const { data, error } = await supabase
       .from("hugo_messages" as any)
       .select("id, role, content, created_at")
@@ -234,6 +243,7 @@ export function useHugoChat(chatId?: string | null) {
           { role: "assistant", content: finalContent },
         ];
         generateSmartTitle(titleMessages).then(title => {
+          setCurrentTitle(title);
           updateTitle(cId!, title);
         });
       }
@@ -260,6 +270,7 @@ export function useHugoChat(chatId?: string | null) {
   // Start a new chat (reset state)
   const startNewChat = useCallback(() => {
     setCurrentChatId(null);
+    setCurrentTitle("New Chat");
     setMessages([]);
   }, []);
 
@@ -270,6 +281,7 @@ export function useHugoChat(chatId?: string | null) {
     loading,
     historyLoading,
     currentChatId,
+    currentTitle,
     sendMessage,
     startNewChat,
     loadMessages,
