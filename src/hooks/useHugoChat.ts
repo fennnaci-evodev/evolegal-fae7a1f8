@@ -53,6 +53,7 @@ export function useHugoChat(chatId?: string | null) {
   const [loading, setLoading] = useState(false);
   const [streaming, setStreaming] = useState(false);
   const [currentChatId, setCurrentChatId] = useState<string | null>(chatId ?? null);
+  const [currentTitle, setCurrentTitle] = useState<string>("New Chat");
   const [historyLoading, setHistoryLoading] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
 
