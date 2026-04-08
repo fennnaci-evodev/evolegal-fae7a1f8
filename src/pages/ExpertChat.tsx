@@ -177,7 +177,7 @@ const ExpertChat = () => {
             <div className="flex-1">
               <h2 className="font-display font-semibold">
                 {currentChatId && currentTitle !== "New Chat" ? currentTitle : "Chat with Hugo"}
-                <span className="text-muted-foreground font-normal text-xs ml-2">· Hugo</span>
+                <span className="text-muted-foreground font-normal text-xs ml-2">· AI Expert Manager</span>
               </h2>
               <p className="text-xs text-muted-foreground">Every response is carefully reviewed by our Experts — structured with Options → Risks → Resources.{"\n"}We deeply care about accuracy and your legal security.</p>
             </div>

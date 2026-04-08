@@ -17,20 +17,6 @@ interface Message {
   created_at: string;
 }
 
-// GDPR-safe pseudonyms for experts
-const EXPERT_PSEUDONYMS = [
-  "Alexander M.", "Victoria S.", "Daniel K.", "Sophie L.", "Marcus W.",
-  "Elena R.", "Thomas H.", "Natalie B.", "Christian F.", "Laura P.",
-];
-
-function getExpertPseudonym(requestId: string): string {
-  let hash = 0;
-  for (let i = 0; i < requestId.length; i++) {
-    hash = ((hash << 5) - hash + requestId.charCodeAt(i)) | 0;
-  }
-  return EXPERT_PSEUDONYMS[Math.abs(hash) % EXPERT_PSEUDONYMS.length];
-}
-
 const UserChat = () => {
   const { requestId } = useParams<{ requestId: string }>();
   const { user } = useAuth();
@@ -38,7 +24,6 @@ const UserChat = () => {
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [requestTitle, setRequestTitle] = useState("");
-  const expertName = getExpertPseudonym(requestId || "default");
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -124,7 +109,7 @@ const UserChat = () => {
           <div>
             <h2 className="font-display font-semibold text-sm">
               {requestTitle || "Chat with EvoLegal Expert"}
-              <span className="text-muted-foreground font-normal text-xs ml-2">· {expertName}, your personal Expert</span>
+              <span className="text-muted-foreground font-normal text-xs ml-2">· Human Review Mode</span>
             </h2>
             <p className="text-xs text-muted-foreground">Your conversation is reviewed by a real expert for precision</p>
           </div>
@@ -163,7 +148,7 @@ const UserChat = () => {
                   }`}>
                     {!isUser && (
                       <span className="text-[10px] font-medium mb-1 block" style={{ color: isExpert ? "hsl(270, 95%, 75%)" : "hsl(var(--primary))" }}>
-                        {isExpert ? expertName : "Hugo"}
+                        {isExpert ? "EvoLegal Expert" : "Hugo"}
                       </span>
                     )}
                     {msg.content}
@@ -184,7 +169,7 @@ const UserChat = () => {
         <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/20 mb-3">
           <Info className="h-3 w-3 text-muted-foreground/50 shrink-0" />
           <p className="text-[10px] text-muted-foreground/50">
-            Your conversation is handled by {expertName}, your personal Expert. For complex personal matters, professional representation may be recommended.
+            Your conversation is handled by an EvoLegal Expert. For complex personal matters, professional representation may be recommended.
           </p>
         </div>
 

@@ -91,7 +91,7 @@ const Index = () => {
             initial="hidden" animate="visible" variants={fadeUp} custom={1}
           >
             Talk to Hugo —{" "}
-            <span className="text-gradient">Your Hugo for Clear Insights on US & English Law</span>
+            <span className="text-gradient">Your Expert Manager for Clear Insights on US & English Law</span>
           </motion.h1>
 
           <motion.p
