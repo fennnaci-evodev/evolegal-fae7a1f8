@@ -22,6 +22,8 @@ interface LegalRequest {
   facts: any;
   admin_response: string;
   responded_at: string | null;
+  ticket_number: string | null;
+  assigned_to_name: string | null;
 }
 
 const statusColors: Record<string, string> = {
