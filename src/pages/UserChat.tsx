@@ -17,6 +17,20 @@ interface Message {
   created_at: string;
 }
 
+// GDPR-safe pseudonyms for experts
+const EXPERT_PSEUDONYMS = [
+  "Alexander M.", "Victoria S.", "Daniel K.", "Sophie L.", "Marcus W.",
+  "Elena R.", "Thomas H.", "Natalie B.", "Christian F.", "Laura P.",
+];
+
+function getExpertPseudonym(requestId: string): string {
+  let hash = 0;
+  for (let i = 0; i < requestId.length; i++) {
+    hash = ((hash << 5) - hash + requestId.charCodeAt(i)) | 0;
+  }
+  return EXPERT_PSEUDONYMS[Math.abs(hash) % EXPERT_PSEUDONYMS.length];
+}
+
 const UserChat = () => {
   const { requestId } = useParams<{ requestId: string }>();
   const { user } = useAuth();
@@ -24,6 +38,7 @@ const UserChat = () => {
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [requestTitle, setRequestTitle] = useState("");
+  const expertName = getExpertPseudonym(requestId || "default");
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
