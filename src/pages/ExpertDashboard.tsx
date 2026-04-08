@@ -841,6 +841,23 @@ ${chatContext || "(No messages yet)"}`,
               Request Details
             </h4>
             <div className="space-y-3">
+              <DetailField label="Title">
+                <Input
+                  value={selected.title || ""}
+                  onChange={e => {
+                    const newTitle = e.target.value;
+                    setRequests(prev => prev.map(r => r.id === selectedId ? { ...r, title: newTitle } : r));
+                  }}
+                  onBlur={e => {
+                    if (e.target.value !== selected.title) {
+                      updateRequestField("title", e.target.value);
+                    }
+                  }}
+                  className="h-8 text-xs bg-muted/20 border-border/20"
+                  placeholder="Edit title..."
+                />
+              </DetailField>
+
               <DetailField label="Topic">
                 <Select
                   value={selected.topic}
