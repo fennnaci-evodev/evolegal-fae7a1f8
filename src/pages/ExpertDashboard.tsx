@@ -463,8 +463,8 @@ ${chatContext || "(No messages yet)"}`,
     setAssignOpen(false);
   };
 
-  const activeRequests = requests.filter(r => r.status === "pending" || r.status === "reviewing");
-  const inactiveRequests = requests.filter(r => r.status === "completed" || r.status === "archived");
+  const activeRequests = requests.filter(r => r.status === "pending");
+  const inactiveRequests = requests.filter(r => r.status === "reviewing" || r.status === "completed" || r.status === "archived");
 
   const filteredRequests = (sidebarFilter === "active" ? activeRequests : inactiveRequests)
     .filter(r => {
