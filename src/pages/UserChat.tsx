@@ -109,7 +109,7 @@ const UserChat = () => {
           <div>
             <h2 className="font-display font-semibold text-sm">
               {requestTitle || "Chat with EvoLegal Expert"}
-              <span className="text-muted-foreground font-normal text-xs ml-2">· Human Review Mode</span>
+              <span className="text-muted-foreground font-normal text-xs ml-2">· {expertName}, your personal Expert</span>
             </h2>
             <p className="text-xs text-muted-foreground">Your conversation is reviewed by a real expert for precision</p>
           </div>
