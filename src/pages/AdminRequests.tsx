@@ -37,6 +37,9 @@ interface AdminRequest {
   admin_response: string;
   responded_at: string | null;
   file_urls: string[];
+  ticket_number: string | null;
+  assigned_to_name: string | null;
+  assigned_to: string | null;
 }
 
 const statusColors: Record<string, string> = {
