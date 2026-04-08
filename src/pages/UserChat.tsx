@@ -163,7 +163,7 @@ const UserChat = () => {
                   }`}>
                     {!isUser && (
                       <span className="text-[10px] font-medium mb-1 block" style={{ color: isExpert ? "hsl(270, 95%, 75%)" : "hsl(var(--primary))" }}>
-                        {isExpert ? "EvoLegal Expert" : "Hugo"}
+                        {isExpert ? expertName : "Hugo"}
                       </span>
                     )}
                     {msg.content}
