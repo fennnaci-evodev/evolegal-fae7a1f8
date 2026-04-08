@@ -15,8 +15,15 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   Send, Bold, Italic, Underline, Link2, Smile, Pause, X, FileDown,
-  FileText, Clock, LogOut, Search, MessageSquare, ChevronLeft,
+  FileText, Clock, LogOut, Search, MessageSquare, ChevronLeft, Copy, Download, List,
 } from "lucide-react";
 import { toast } from "sonner";
 import { InlineELoader } from "@/components/InlineELoader";
@@ -42,6 +49,7 @@ interface RequestItem {
   assigned_to: string | null;
   assigned_to_name: string;
   ticket_number: string | null;
+  assigned_at: string | null;
 }
 
 interface Message {
@@ -61,6 +69,12 @@ interface Profile {
   created_at: string;
 }
 
+interface Expert {
+  user_id: string;
+  name: string;
+  openCount: number;
+}
+
 const statusColors: Record<string, string> = {
   pending: "bg-yellow-500/20 text-yellow-400",
   reviewing: "bg-blue-500/20 text-blue-400",
@@ -70,7 +84,11 @@ const statusColors: Record<string, string> = {
 
 const topicOptions = [
   "Crypto Law", "Tenant-Landlord", "Family Law",
-  "Personal Injury", "Insurance", "Other",
+  "Personal Injury", "Insurance", "Employment",
+  "Contract", "Immigration", "Tax Law",
+  "Intellectual Property", "Criminal Defense", "Civil Rights",
+  "Corporate Law", "Real Estate", "Bankruptcy",
+  "Estate Planning", "Consumer Protection", "Other",
 ];
 
 const avatarColors = [
@@ -130,6 +148,16 @@ const ExpertDashboard = () => {
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
+  // Modal states
+  const [closeConfirmOpen, setCloseConfirmOpen] = useState(false);
+  const [summaryOpen, setSummaryOpen] = useState(false);
+  const [summaryText, setSummaryText] = useState("");
+  const [summaryLoading, setSummaryLoading] = useState(false);
+  const [logsOpen, setLogsOpen] = useState(false);
+  const [assignOpen, setAssignOpen] = useState(false);
+  const [experts, setExperts] = useState<Expert[]>([]);
+  const [expertsLoading, setExpertsLoading] = useState(false);
+
   const selected = requests.find(r => r.id === selectedId) || null;
   const selectedProfile = selected ? profiles[selected.user_id] : null;
 
@@ -162,7 +190,7 @@ const ExpertDashboard = () => {
     }
   }, [selectedId]);
 
-  // Realtime messages
+  // Realtime messages — also reactivate paused chats
   useEffect(() => {
     if (!selectedId) return;
     const channel = supabase
@@ -173,7 +201,16 @@ const ExpertDashboard = () => {
         table: "request_messages",
         filter: `request_id=eq.${selectedId}`,
       }, (payload) => {
-        setMessages(prev => [...prev, payload.new as Message]);
+        const newMsg = payload.new as Message;
+        setMessages(prev => [...prev, newMsg]);
+        // If a user sends a message on a reviewing (paused) request, reactivate to pending
+        if (newMsg.sender_role === "user") {
+          setRequests(prev => prev.map(r =>
+            r.id === selectedId && r.status === "reviewing"
+              ? { ...r, status: "pending", updated_at: new Date().toISOString() }
+              : r
+          ));
+        }
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
@@ -212,7 +249,6 @@ const ExpertDashboard = () => {
     const reqs = (data || []) as unknown as RequestItem[];
     setRequests(reqs);
 
-    // Load profiles for all unique user_ids
     const userIds = [...new Set(reqs.map(r => r.user_id))];
     if (userIds.length > 0) {
       const { data: profileData } = await supabase
@@ -245,7 +281,6 @@ const ExpertDashboard = () => {
     if (!draftMsg.trim() || !selectedId || !user || sending) return;
     setSending(true);
 
-    // Check for @Hugo mention
     const mentionsHugo = /@hugo/i.test(draftMsg);
 
     const { error } = await supabase
@@ -267,7 +302,6 @@ const ExpertDashboard = () => {
     setDraftMsg("");
     inputRef.current?.focus();
 
-    // If @Hugo, generate AI response
     if (mentionsHugo && selected) {
       try {
         const { data: fnData, error: fnError } = await supabase.functions.invoke("hugo-chat", {
@@ -317,6 +351,118 @@ const ExpertDashboard = () => {
     setSavingNotes(false);
   };
 
+  const handleClose = async () => {
+    await updateRequestField("status", "completed");
+    setCloseConfirmOpen(false);
+    toast.success("Request closed — marked as completed");
+  };
+
+  const handlePause = async () => {
+    await updateRequestField("status", "reviewing");
+    toast.success("Request paused — will reactivate when user replies");
+  };
+
+  const handleSummarize = async () => {
+    if (!selected) return;
+    setSummaryLoading(true);
+    setSummaryOpen(true);
+    setSummaryText("");
+
+    try {
+      // Build conversation context
+      const chatContext = messages.map(m => {
+        const role = m.sender_role === "admin" ? "Expert" : m.sender_role === "hugo" ? "Hugo" : "User";
+        return `${role}: ${m.content}`;
+      }).join("\n");
+
+      const { data } = await supabase.functions.invoke("hugo-chat", {
+        body: {
+          message: `You are summarizing a legal case for an expert review. Provide a clear, concise summary with these sections:
+
+**Key Points Discussed:**
+**Main User Concerns:**
+**Important Context:**
+**Expert Insights:**
+
+Topic: ${selected.topic}
+Original Request: ${selected.description}
+${selected.state ? `Jurisdiction: ${selected.state}` : ""}
+
+Conversation:
+${chatContext || "(No messages yet)"}`,
+        },
+      });
+
+      setSummaryText(data?.reply || "Unable to generate summary.");
+    } catch {
+      setSummaryText("Failed to generate summary. Please try again.");
+    }
+    setSummaryLoading(false);
+  };
+
+  const handleAssignOpen = async () => {
+    setAssignOpen(true);
+    setExpertsLoading(true);
+    try {
+      const { data: roles } = await supabase
+        .from("user_roles")
+        .select("user_id")
+        .eq("role", "admin");
+
+      if (roles && roles.length > 0) {
+        const ids = roles.map(r => r.user_id);
+        const { data: profilesData } = await supabase
+          .from("profiles")
+          .select("*")
+          .in("id", ids);
+
+        // Count open requests per expert
+        const { data: reqData } = await supabase
+          .from("legal_requests")
+          .select("assigned_to")
+          .in("status", ["pending", "reviewing"]);
+
+        const countMap: Record<string, number> = {};
+        (reqData || []).forEach((r: any) => {
+          if (r.assigned_to) countMap[r.assigned_to] = (countMap[r.assigned_to] || 0) + 1;
+        });
+
+        const expertList: Expert[] = ids.map(id => {
+          const p = (profilesData as unknown as Profile[] || []).find(pr => pr.id === id);
+          const name = p ? `${p.first_name || ""} ${p.last_name || ""}`.trim() || "Expert" : "Expert";
+          return { user_id: id, name, openCount: countMap[id] || 0 };
+        });
+
+        setExperts(expertList.sort((a, b) => a.openCount - b.openCount));
+      }
+    } catch {
+      toast.error("Failed to load experts");
+    }
+    setExpertsLoading(false);
+  };
+
+  const handleAssignTo = async (expert: Expert) => {
+    if (!selectedId) return;
+    const updates: any = {
+      assigned_to: expert.user_id,
+      assigned_to_name: expert.name,
+      assigned_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+    const { error } = await supabase
+      .from("legal_requests")
+      .update(updates)
+      .eq("id", selectedId);
+
+    if (error) {
+      toast.error("Failed to assign");
+    } else {
+      setRequests(prev => prev.map(r => r.id === selectedId ? { ...r, ...updates } : r));
+      toast.success(`Assigned to ${expert.name}`);
+    }
+    setAssignOpen(false);
+  };
+
   const activeRequests = requests.filter(r => r.status === "pending" || r.status === "reviewing");
   const inactiveRequests = requests.filter(r => r.status === "completed" || r.status === "archived");
 
@@ -325,9 +471,11 @@ const ExpertDashboard = () => {
       if (!searchTerm) return true;
       const p = profiles[r.user_id];
       const name = `${p?.first_name || ""} ${p?.last_name || ""}`.toLowerCase();
+      const ticket = r.ticket_number?.toLowerCase() || "";
       return name.includes(searchTerm.toLowerCase()) ||
         r.topic.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        r.title?.toLowerCase().includes(searchTerm.toLowerCase());
+        r.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        ticket.includes(searchTerm.toLowerCase());
     });
 
   if (roleLoading) return (
@@ -341,7 +489,6 @@ const ExpertDashboard = () => {
     <div className="flex h-screen w-full bg-background overflow-hidden">
       {/* LEFT SIDEBAR - Request List */}
       <aside className="w-80 flex-shrink-0 border-r border-border/30 flex flex-col glass-strong" style={{ borderRadius: 0 }}>
-        {/* Header */}
         <div className="p-4 border-b border-border/20 flex items-center gap-3">
           <button onClick={() => navigate("/dashboard")} className="hover:opacity-70 transition-opacity">
             <EvoLogo size="sm" animate={false} showText={false} />
@@ -355,20 +502,18 @@ const ExpertDashboard = () => {
           </Button>
         </div>
 
-        {/* Search */}
         <div className="p-3 border-b border-border/10">
           <div className="relative">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
             <Input
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
-              placeholder="Search requests..."
+              placeholder="Search requests or tickets..."
               className="pl-8 h-8 text-xs bg-muted/20 border-border/30"
             />
           </div>
         </div>
 
-        {/* Filter tabs */}
         <div className="flex border-b border-border/10">
           <button
             onClick={() => setSidebarFilter("active")}
@@ -388,7 +533,6 @@ const ExpertDashboard = () => {
           </button>
         </div>
 
-        {/* Request list */}
         <ScrollArea className="flex-1">
           {loading ? (
             <div className="p-6 text-center">
@@ -426,7 +570,7 @@ const ExpertDashboard = () => {
                         </span>
                       </div>
                       <p className="text-[11px] text-muted-foreground truncate mt-0.5">
-                        {req.title || req.topic}
+                        {req.ticket_number ? `${req.ticket_number} · ` : ""}{req.title || req.topic}
                       </p>
                     </div>
                     {req.status === "pending" && (
@@ -439,7 +583,6 @@ const ExpertDashboard = () => {
           )}
         </ScrollArea>
 
-        {/* Bottom */}
         <div className="p-3 border-t border-border/20">
           <Button
             variant="ghost"
@@ -476,8 +619,10 @@ const ExpertDashboard = () => {
                   {selectedProfile ? `${selectedProfile.first_name || ""} ${selectedProfile.last_name || ""}`.trim() : "User"}
                 </h3>
                 <div className="flex items-center gap-1.5">
-                  <div className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                  <span className="text-[10px] text-emerald-400">Online</span>
+                  <div className={`h-1.5 w-1.5 rounded-full ${selected.status === "completed" || selected.status === "archived" ? "bg-muted-foreground" : "bg-emerald-400"}`} />
+                  <span className={`text-[10px] ${selected.status === "completed" || selected.status === "archived" ? "text-muted-foreground" : "text-emerald-400"}`}>
+                    {selected.status === "completed" ? "Closed" : selected.status === "archived" ? "Archived" : "Online"}
+                  </span>
                 </div>
               </div>
               <div className="ml-auto flex items-center gap-2">
@@ -498,7 +643,6 @@ const ExpertDashboard = () => {
                 </div>
               ) : (
                 <div className="space-y-4 max-w-3xl mx-auto">
-                  {/* Initial request as first message */}
                   <div className="flex items-center justify-center">
                     <span className="text-[10px] text-muted-foreground/40 bg-muted/20 px-3 py-1 rounded-full">
                       {isToday(selected.created_at) ? "Today" : new Date(selected.created_at).toLocaleDateString()}
@@ -526,26 +670,26 @@ const ExpertDashboard = () => {
 
                   {/* Chat messages */}
                   {messages.map(msg => {
-                    const isAdmin = msg.sender_role === "admin";
+                    const isAdminMsg = msg.sender_role === "admin";
                     const isHugo = msg.sender_role === "hugo";
-                    const isRight = isAdmin || isHugo;
+                    const isRight = isAdminMsg || isHugo;
 
                     return (
                       <div key={msg.id} className={`flex gap-3 ${isRight ? "flex-row-reverse" : ""}`}>
                         <Avatar className="h-7 w-7 mt-1 shrink-0">
                           <AvatarFallback className={`text-[10px] font-semibold ${
                             isHugo ? "bg-primary/30 text-primary" :
-                            isAdmin ? "bg-secondary/30 text-secondary" :
+                            isAdminMsg ? "bg-secondary/30 text-secondary" :
                             getAvatarColor(msg.sender_id)
                           }`}>
-                            {isHugo ? "H" : isAdmin ? "A" : getInitials(profiles[msg.sender_id])}
+                            {isHugo ? "H" : isAdminMsg ? "A" : getInitials(profiles[msg.sender_id])}
                           </AvatarFallback>
                         </Avatar>
                         <div className={`max-w-[70%]`}>
                           <div className={`rounded-2xl px-4 py-2.5 text-sm ${
                             isHugo
                               ? "bg-primary/10 border border-primary/20 rounded-tr-md"
-                              : isAdmin
+                              : isAdminMsg
                               ? "bg-secondary/10 border border-secondary/20 rounded-tr-md"
                               : "bg-muted/30 rounded-tl-md"
                           }`}>
@@ -559,6 +703,16 @@ const ExpertDashboard = () => {
                       </div>
                     );
                   })}
+
+                  {/* Closed banner */}
+                  {(selected.status === "completed" || selected.status === "archived") && (
+                    <div className="flex items-center justify-center py-4">
+                      <span className="text-[11px] text-muted-foreground bg-muted/30 px-4 py-2 rounded-full border border-border/20">
+                        This request has been closed. No further messages can be sent.
+                      </span>
+                    </div>
+                  )}
+
                   {sending && (
                     <div className="flex gap-3 flex-row-reverse items-center">
                       <div className="h-7 w-7" />
@@ -573,53 +727,58 @@ const ExpertDashboard = () => {
               )}
             </ScrollArea>
 
-            {/* Input area */}
-            <div className="border-t border-border/20 p-4 shrink-0">
-              <div className="max-w-3xl mx-auto">
-                <div className="glass rounded-xl p-3" style={{ borderRadius: "0.75rem" }}>
-                  {/* Toolbar */}
-                  <div className="flex items-center gap-1 mb-2 pb-2 border-b border-border/10">
-                    {[Bold, Italic, Underline, Link2, Smile].map((Icon, i) => (
-                      <button key={i} className="h-7 w-7 flex items-center justify-center rounded text-muted-foreground/50 hover:text-foreground hover:bg-muted/30 transition-colors">
-                        <Icon className="h-3.5 w-3.5" />
-                      </button>
-                    ))}
-                    <span className="text-[10px] text-muted-foreground/30 ml-auto">@Hugo for AI draft</span>
-                  </div>
-                  <div className="shimmer-chat-form flex items-end gap-2 p-2 rounded-[1.25rem]">
-                    <textarea
-                      ref={inputRef}
-                      value={draftMsg}
-                      onChange={e => {
-                        setDraftMsg(e.target.value);
-                        const el = e.target;
-                        el.style.height = "auto";
-                        el.style.height = Math.min(el.scrollHeight, 140) + "px";
-                      }}
-                      placeholder="Type a message... (Ctrl+Enter to send)"
-                      rows={1}
-                      className="chat-input-plain flex-1 bg-transparent border-0 resize-none text-sm placeholder:text-muted-foreground/40 focus:outline-none leading-relaxed"
-                      style={{ maxHeight: 140, minHeight: 36 }}
-                      onKeyDown={e => {
-                        if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
-                          e.preventDefault();
-                          handleSendMessage();
-                        }
-                      }}
-                    />
-                    <Button
-                      size="icon"
-                      variant="default"
-                      className="h-8 w-8 shrink-0 rounded-lg"
-                      onClick={handleSendMessage}
-                      disabled={!draftMsg.trim() || sending}
-                    >
-                      <Send className="h-3.5 w-3.5" />
-                    </Button>
+            {/* Input area - disabled if completed/archived */}
+            {selected.status !== "completed" && selected.status !== "archived" ? (
+              <div className="border-t border-border/20 p-4 shrink-0">
+                <div className="max-w-3xl mx-auto">
+                  <div className="glass rounded-xl p-3" style={{ borderRadius: "0.75rem" }}>
+                    <div className="flex items-center gap-1 mb-2 pb-2 border-b border-border/10">
+                      {[Bold, Italic, Underline, Link2, Smile].map((Icon, i) => (
+                        <button key={i} className="h-7 w-7 flex items-center justify-center rounded text-muted-foreground/50 hover:text-foreground hover:bg-muted/30 transition-colors">
+                          <Icon className="h-3.5 w-3.5" />
+                        </button>
+                      ))}
+                      <span className="text-[10px] text-muted-foreground/30 ml-auto">@Hugo for AI draft</span>
+                    </div>
+                    <div className="shimmer-chat-form flex items-end gap-2 p-2 rounded-[1.25rem]">
+                      <textarea
+                        ref={inputRef}
+                        value={draftMsg}
+                        onChange={e => {
+                          setDraftMsg(e.target.value);
+                          const el = e.target;
+                          el.style.height = "auto";
+                          el.style.height = Math.min(el.scrollHeight, 140) + "px";
+                        }}
+                        placeholder="Type a message... (Ctrl+Enter to send)"
+                        rows={1}
+                        className="chat-input-plain flex-1 bg-transparent border-0 resize-none text-sm placeholder:text-muted-foreground/40 focus:outline-none leading-relaxed"
+                        style={{ maxHeight: 140, minHeight: 36 }}
+                        onKeyDown={e => {
+                          if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+                            e.preventDefault();
+                            handleSendMessage();
+                          }
+                        }}
+                      />
+                      <Button
+                        size="icon"
+                        variant="default"
+                        className="h-8 w-8 shrink-0 rounded-lg"
+                        onClick={handleSendMessage}
+                        disabled={!draftMsg.trim() || sending}
+                      >
+                        <Send className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div className="border-t border-border/20 p-4 shrink-0 text-center">
+                <p className="text-xs text-muted-foreground">This request is closed. The user must create a new request for further assistance.</p>
+              </div>
+            )}
           </>
         )}
       </main>
@@ -637,19 +796,20 @@ const ExpertDashboard = () => {
                 selectedProfile ? `${selectedProfile.first_name || ""} ${selectedProfile.last_name || ""}`.trim() || "—" : "—"
               } />
               <InfoRow label="Phone" value={selectedProfile?.phone || "—"} />
+              <InfoRow label="Ticket" value={selected.ticket_number || "—"} mono />
               <InfoRow label="User ID" value={selected.user_id.slice(0, 8) + "..."} mono />
               <InfoRow label="Joined" value={selectedProfile ? new Date(selectedProfile.created_at).toLocaleDateString() : "—"} />
               <div className="flex items-center justify-between">
                 <span className="text-[11px] text-muted-foreground/60">Status</span>
-                <Badge variant="outline" className="text-[10px] bg-emerald-500/10 text-emerald-400 border-emerald-500/20">
-                  Active
+                <Badge variant="outline" className={`text-[10px] ${statusColors[selected.status] || "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"}`}>
+                  {selected.status.charAt(0).toUpperCase() + selected.status.slice(1)}
                 </Badge>
               </div>
             </div>
 
             {/* Notes */}
             <div className="mt-4">
-              <label className="text-[11px] text-muted-foreground/60 block mb-1.5">Notes</label>
+              <label className="text-[11px] text-muted-foreground/60 block mb-1.5">Internal Notes</label>
               <Textarea
                 value={notes}
                 onChange={e => setNotes(e.target.value)}
@@ -708,12 +868,14 @@ const ExpertDashboard = () => {
               </DetailField>
 
               <DetailField label="Assignee">
-                <Input
-                  value={selected.assigned_to_name || ""}
-                  onChange={e => updateRequestField("assigned_to_name", e.target.value)}
-                  placeholder="Assign to..."
-                  className="h-8 text-xs bg-muted/20 border-border/20"
-                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full h-8 text-xs justify-start bg-muted/20 border-border/20"
+                  onClick={handleAssignOpen}
+                >
+                  {selected.assigned_to_name || "Click to assign..."}
+                </Button>
               </DetailField>
 
               <DetailField label="State/Jurisdiction">
@@ -747,7 +909,8 @@ const ExpertDashboard = () => {
               variant="outline"
               size="sm"
               className="text-[10px] h-8"
-              onClick={() => updateRequestField("status", "completed")}
+              onClick={() => setCloseConfirmOpen(true)}
+              disabled={selected.status === "completed" || selected.status === "archived"}
             >
               <X className="h-3 w-3 mr-1" /> Close
             </Button>
@@ -755,7 +918,8 @@ const ExpertDashboard = () => {
               variant="outline"
               size="sm"
               className="text-[10px] h-8"
-              onClick={() => updateRequestField("status", "reviewing")}
+              onClick={handlePause}
+              disabled={selected.status === "completed" || selected.status === "archived"}
             >
               <Pause className="h-3 w-3 mr-1" /> Pause
             </Button>
@@ -776,6 +940,13 @@ const ExpertDashboard = () => {
                   adminResponse: selected.admin_response,
                   createdAt: selected.created_at,
                   respondedAt: selected.responded_at,
+                  ticketNumber: selected.ticket_number || undefined,
+                  assignedExpert: selected.assigned_to_name || undefined,
+                  chatHistory: messages.map(m => ({
+                    sender_role: m.sender_role,
+                    content: m.content,
+                    created_at: m.created_at,
+                  })),
                 });
                 toast.success("PDF downloaded");
               }}
@@ -786,47 +957,184 @@ const ExpertDashboard = () => {
               variant="outline"
               size="sm"
               className="text-[10px] h-8 col-span-2"
-              onClick={async () => {
-                if (!selected) return;
-                setSending(true);
-                try {
-                  const { data } = await supabase.functions.invoke("hugo-chat", {
-                    body: { message: `Summarize this legal request concisely. Topic: ${selected.topic}. Description: ${selected.description}. State: ${selected.state || "not specified"}.` },
-                  });
-                  if (data?.reply) {
-                    await supabase.from("request_messages").insert({
-                      request_id: selected.id,
-                      sender_id: "00000000-0000-0000-0000-000000000000",
-                      sender_role: "hugo",
-                      content: data.reply,
-                    } as any);
-                    toast.success("Hugo summarized the request");
-                  }
-                } catch {
-                  toast.error("Failed to summarize");
-                }
-                setSending(false);
-              }}
+              onClick={handleSummarize}
+              disabled={summaryLoading}
             >
-              Summarize
+              {summaryLoading ? "Generating..." : "Summarize"}
             </Button>
             <Button
               variant="outline"
               size="sm"
               className="text-[10px] h-8"
-              onClick={() => {
-                if (selected?.audit_log?.length) {
-                  toast.info(`${selected.audit_log.length} audit entries`);
-                } else {
-                  toast.info("No audit logs yet");
-                }
-              }}
+              onClick={() => setLogsOpen(true)}
             >
-              Logs
+              <List className="h-3 w-3 mr-1" /> Logs
             </Button>
           </div>
         </aside>
       )}
+
+      {/* CLOSE CONFIRMATION */}
+      <AlertDialog open={closeConfirmOpen} onOpenChange={setCloseConfirmOpen}>
+        <AlertDialogContent className="glass-strong border-border/30">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Close this request?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will mark the request as resolved. The user will no longer be able to reply and must create a new request for further assistance. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleClose}>Close Request</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* SUMMARY MODAL */}
+      <Dialog open={summaryOpen} onOpenChange={setSummaryOpen}>
+        <DialogContent className="glass-strong border-border/30 max-w-lg max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-display">Case Summary</DialogTitle>
+            <DialogDescription>
+              {selected?.ticket_number || "AI-generated summary"} · {selected?.topic}
+            </DialogDescription>
+          </DialogHeader>
+          {summaryLoading ? (
+            <div className="flex items-center justify-center py-8 gap-3">
+              <InlineELoader size={28} />
+              <span className="text-sm text-muted-foreground">Generating summary...</span>
+            </div>
+          ) : (
+            <div className="text-sm whitespace-pre-wrap text-foreground/90 leading-relaxed">
+              {summaryText}
+            </div>
+          )}
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                navigator.clipboard.writeText(summaryText);
+                toast.success("Copied to clipboard");
+              }}
+              disabled={!summaryText}
+            >
+              <Copy className="h-3.5 w-3.5 mr-1.5" /> Copy
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                if (!selected || !summaryText) return;
+                generateCasePdf({
+                  requestId: selected.id,
+                  title: selected.title,
+                  topic: selected.topic,
+                  description: selected.description,
+                  status: selected.status,
+                  state: selected.state,
+                  facts: selected.facts,
+                  adminResponse: summaryText,
+                  createdAt: selected.created_at,
+                  respondedAt: selected.responded_at,
+                  ticketNumber: selected.ticket_number || undefined,
+                  assignedExpert: selected.assigned_to_name || undefined,
+                  chatHistory: messages.map(m => ({
+                    sender_role: m.sender_role,
+                    content: m.content,
+                    created_at: m.created_at,
+                  })),
+                });
+                toast.success("Summary PDF downloaded");
+              }}
+              disabled={!summaryText}
+            >
+              <Download className="h-3.5 w-3.5 mr-1.5" /> Download PDF
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* LOGS MODAL */}
+      <Dialog open={logsOpen} onOpenChange={setLogsOpen}>
+        <DialogContent className="glass-strong border-border/30 max-w-md max-h-[70vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-display">Audit Log</DialogTitle>
+            <DialogDescription>{selected?.ticket_number || "Request"} activity</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            {/* Built-in status entries */}
+            {selected && (
+              <div className="text-xs text-muted-foreground border-l-2 border-primary/30 pl-3 py-1">
+                <span className="font-medium text-foreground">Created</span> — {new Date(selected.created_at).toLocaleString()}
+              </div>
+            )}
+            {selected?.assigned_at && (
+              <div className="text-xs text-muted-foreground border-l-2 border-blue-400/30 pl-3 py-1">
+                <span className="font-medium text-foreground">Assigned to {selected.assigned_to_name}</span> — {new Date(selected.assigned_at as string).toLocaleString()}
+              </div>
+            )}
+            {selected?.audit_log && Array.isArray(selected.audit_log) && selected.audit_log.map((entry: any, i: number) => (
+              <div key={i} className="text-xs text-muted-foreground border-l-2 border-border/40 pl-3 py-1">
+                <span className="font-medium text-foreground">{entry.action || entry.type || "Event"}</span>
+                {entry.timestamp && <span> — {new Date(entry.timestamp).toLocaleString()}</span>}
+                {entry.details && <p className="text-muted-foreground/70 mt-0.5">{entry.details}</p>}
+              </div>
+            ))}
+            {(!selected?.audit_log || (Array.isArray(selected.audit_log) && selected.audit_log.length === 0)) && (
+              <p className="text-xs text-muted-foreground/50 text-center py-4">No additional audit entries</p>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ASSIGN MODAL */}
+      <Dialog open={assignOpen} onOpenChange={setAssignOpen}>
+        <DialogContent className="glass-strong border-border/30 max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="font-display">Assign Expert</DialogTitle>
+            <DialogDescription>Select an expert to handle this request</DialogDescription>
+          </DialogHeader>
+          {expertsLoading ? (
+            <div className="flex items-center justify-center py-6 gap-3">
+              <InlineELoader size={24} />
+              <span className="text-sm text-muted-foreground">Loading experts...</span>
+            </div>
+          ) : (
+            <div className="space-y-1.5">
+              {experts.map(exp => (
+                <button
+                  key={exp.user_id}
+                  className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors hover:bg-muted/30 border border-transparent ${
+                    selected?.assigned_to === exp.user_id ? "border-primary/30 bg-primary/5" : ""
+                  }`}
+                  onClick={() => handleAssignTo(exp)}
+                >
+                  <Avatar className="h-8 w-8">
+                    <AvatarFallback className={`text-xs font-semibold ${getAvatarColor(exp.user_id)}`}>
+                      {exp.name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{exp.name}</p>
+                    <p className="text-[10px] text-muted-foreground">{exp.openCount} open tickets</p>
+                  </div>
+                  <Badge variant="outline" className={`text-[9px] ${
+                    exp.openCount === 0 ? "text-emerald-400 border-emerald-500/20" :
+                    exp.openCount < 5 ? "text-amber-400 border-amber-500/20" :
+                    "text-rose-400 border-rose-500/20"
+                  }`}>
+                    {exp.openCount === 0 ? "Available" : exp.openCount < 5 ? "Active" : "Busy"}
+                  </Badge>
+                </button>
+              ))}
+              {experts.length === 0 && (
+                <p className="text-xs text-muted-foreground text-center py-4">No experts found</p>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
