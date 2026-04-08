@@ -398,7 +398,6 @@ const AdminRequests = () => {
               {selected?.assigned_to_name && <> • Expert: {selected.assigned_to_name}</>}
             </DialogDescription>
           </DialogHeader>
-          </DialogHeader>
           {selected && (
             <div className="space-y-4 text-sm">
               <div>

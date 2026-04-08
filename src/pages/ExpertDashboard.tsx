@@ -41,6 +41,7 @@ interface RequestItem {
   admin_notes: string;
   assigned_to: string | null;
   assigned_to_name: string;
+  ticket_number: string | null;
 }
 
 interface Message {
