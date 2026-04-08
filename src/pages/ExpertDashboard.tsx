@@ -570,7 +570,7 @@ ${chatContext || "(No messages yet)"}`,
                         </span>
                       </div>
                       <p className="text-[11px] text-muted-foreground truncate mt-0.5">
-                        {req.ticket_number ? `${req.ticket_number} · ` : ""}{req.title || req.topic}
+                        {req.title || req.topic}
                       </p>
                     </div>
                     {req.status === "pending" && (
