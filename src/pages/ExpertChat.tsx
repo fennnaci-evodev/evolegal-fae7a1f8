@@ -12,13 +12,8 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { useHugoChat, fetchHugoChats, deleteHugoChat, type HugoChat } from "@/hooks/useHugoChat";
 import { Skeleton } from "@/components/ui/skeleton";
-
-const presets = [
-  "What are tenant rights in the US?",
-  "UK divorce process overview",
-  "How do personal injury claims work?",
-  "How does crypto regulation work?",
-];
+import { HugoChatTopicChips } from "@/components/HugoChatTopicChips";
+import { HugoChatRecentTopics } from "@/components/HugoChatRecentTopics";
 
 const ExpertChat = () => {
   const { chatId: paramChatId } = useParams<{ chatId?: string }>();
