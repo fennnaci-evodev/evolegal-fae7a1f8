@@ -200,16 +200,25 @@ const ExpertDashboard = () => {
         schema: "public",
         table: "request_messages",
         filter: `request_id=eq.${selectedId}`,
-      }, (payload) => {
+      }, async (payload) => {
         const newMsg = payload.new as Message;
         setMessages(prev => [...prev, newMsg]);
         // If a user sends a message on a reviewing (paused) request, reactivate to pending
         if (newMsg.sender_role === "user") {
-          setRequests(prev => prev.map(r =>
-            r.id === selectedId && r.status === "reviewing"
-              ? { ...r, status: "pending", updated_at: new Date().toISOString() }
-              : r
-          ));
+          const req = requests.find(r => r.id === selectedId);
+          if (req && req.status === "reviewing") {
+            const { error } = await supabase
+              .from("legal_requests")
+              .update({ status: "pending" as any, updated_at: new Date().toISOString() })
+              .eq("id", selectedId);
+            if (!error) {
+              setRequests(prev => prev.map(r =>
+                r.id === selectedId
+                  ? { ...r, status: "pending", updated_at: new Date().toISOString() }
+                  : r
+              ));
+            }
+          }
         }
       })
       .subscribe();
