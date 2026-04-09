@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -23,8 +23,15 @@ const Auth = () => {
   const [submitting, setSubmitting] = useState(false);
   const [forgotMode, setForgotMode] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
-  const { signUp, signIn } = useAuth();
+  const { user, loading, signUp, signIn } = useAuth();
   const navigate = useNavigate();
+
+  // Redirect authenticated users to dashboard
+  useEffect(() => {
+    if (!loading && user) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [user, loading, navigate]);
 
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
