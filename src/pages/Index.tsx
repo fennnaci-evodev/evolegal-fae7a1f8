@@ -87,19 +87,23 @@ const Index = () => {
           </motion.div>
 
           <motion.h1
-            className="text-3xl md:text-5xl lg:text-6xl font-display font-bold leading-tight mb-5"
+            className="text-3xl md:text-5xl lg:text-6xl font-display font-bold leading-tight mb-6 hero-headline-glow"
             initial="hidden" animate="visible" variants={fadeUp} custom={1}
           >
-            Talk to Hugo —{" "}
-            <span className="text-gradient">Your Expert Manager for Clear Insights on US & English Law</span>
+            <span className="hero-neon-cycle">EVOLEGAL — THE FUTURE OF LEGAL INTELLIGENCE</span>
           </motion.h1>
 
-          <motion.p
-            className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed"
+          <motion.div
+            className="max-w-2xl mx-auto mb-10 space-y-3"
             initial="hidden" animate="visible" variants={fadeUp} custom={2}
           >
-            We're here to help you understand your options clearly — video lectures, guides & expert support for Americans nationwide.
-          </motion.p>
+            <p className="text-base md:text-lg font-display font-medium hero-sub-glow leading-relaxed">
+              Talk to Hugo — Your Expert Manager for Clear Insights on US & English Law.
+            </p>
+            <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
+              We're here to help you understand your options clearly — video lectures, guides & expert support for Americans nationwide.
+            </p>
+          </motion.div>
 
           <motion.div
             className="flex flex-col sm:flex-row gap-3 justify-center mb-6"
