@@ -29,11 +29,20 @@ const Auth = () => {
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
     try {
-      const { error } = await lovable.auth.signInWithOAuth("google", {
+      const result = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: window.location.origin,
       });
-      if (error) {
-        toast.error(error instanceof Error ? error.message : "Google sign-in failed.");
+
+      if (result.redirected) {
+        // Browser is redirecting – nothing more to do
+        return;
+      }
+
+      if (result.error) {
+        toast.error(result.error instanceof Error ? result.error.message : "Google sign-in failed.");
+      } else {
+        // Tokens received, session set → navigate
+        navigate("/dashboard");
       }
     } catch (err: any) {
       toast.error(err.message || "Google sign-in failed.");
@@ -150,6 +159,16 @@ const Auth = () => {
               </svg>
               {googleLoading ? "Connecting…" : `${isSignUp ? "Sign up" : "Sign in"} with Google`}
             </Button>
+
+            {googleLoading && (
+              <button
+                type="button"
+                onClick={() => setGoogleLoading(false)}
+                className="w-full mt-2 text-xs text-muted-foreground hover:text-foreground transition-colors py-1"
+              >
+                Cancel
+              </button>
+            )}
 
             <div className="flex items-center gap-3 my-5">
               <div className="flex-1 h-px bg-border/40" />
