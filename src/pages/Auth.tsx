@@ -160,6 +160,16 @@ const Auth = () => {
               {googleLoading ? "Connecting…" : `${isSignUp ? "Sign up" : "Sign in"} with Google`}
             </Button>
 
+            {googleLoading && (
+              <button
+                type="button"
+                onClick={() => setGoogleLoading(false)}
+                className="w-full mt-2 text-xs text-muted-foreground hover:text-foreground transition-colors py-1"
+              >
+                Cancel
+              </button>
+            )}
+
             <div className="flex items-center gap-3 my-5">
               <div className="flex-1 h-px bg-border/40" />
               <span className="text-xs text-muted-foreground/60">or continue with email</span>
