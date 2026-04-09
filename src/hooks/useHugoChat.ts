@@ -303,8 +303,20 @@ export async function fetchHugoChats(): Promise<HugoChat[]> {
   return (data as any[]) ?? [];
 }
 
-/** Delete a Hugo chat */
+/** Delete a Hugo chat (messages first, then chat) */
 export async function deleteHugoChat(chatId: string): Promise<boolean> {
+  // Delete messages first (FK constraint)
+  const { error: msgErr } = await supabase
+    .from("hugo_messages" as any)
+    .delete()
+    .eq("chat_id", chatId);
+
+  if (msgErr) {
+    console.error("Failed to delete chat messages:", msgErr);
+    toast.error("Failed to delete chat");
+    return false;
+  }
+
   const { error } = await supabase
     .from("hugo_chats" as any)
     .delete()
