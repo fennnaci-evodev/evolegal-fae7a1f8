@@ -23,8 +23,15 @@ const Auth = () => {
   const [submitting, setSubmitting] = useState(false);
   const [forgotMode, setForgotMode] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
-  const { signUp, signIn } = useAuth();
+  const { user, loading, signUp, signIn } = useAuth();
   const navigate = useNavigate();
+
+  // Redirect authenticated users to dashboard
+  useEffect(() => {
+    if (!loading && user) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [user, loading, navigate]);
 
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
