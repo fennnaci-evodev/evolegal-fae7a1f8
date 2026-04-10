@@ -46,7 +46,9 @@ export function Navbar() {
 
           <div className="flex items-center gap-3">
             {!loading && user && <AdminModeToggle />}
-            {!loading && user ? (
+            {loading ? (
+              <div className="w-[100px]" />
+            ) : user ? (
               <Link to="/dashboard">
                 <Button size="sm" variant="hero">Dashboard</Button>
               </Link>
