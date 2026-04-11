@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { EvoLogo } from "@/components/EvoLogo";
-import { Mail, Lock, User, Phone, Eye, EyeOff } from "lucide-react";
+import { Mail, Lock, User, Phone, Eye, EyeOff, ChevronLeft } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
@@ -117,13 +117,16 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 relative">
-      <button
+      <motion.button
+        initial={{ opacity: 0, x: -10 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
         onClick={() => navigate("/")}
-        className="absolute top-5 left-5 z-20 flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        className="absolute top-6 left-6 z-20 flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium text-muted-foreground hover:text-foreground bg-muted/40 hover:bg-muted/70 backdrop-blur-sm border border-border/30 hover:border-border/60 transition-all duration-300"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        <ChevronLeft className="h-3.5 w-3.5" />
         Back
-      </button>
+      </motion.button>
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/3 w-96 h-96 rounded-full bg-primary/5 blur-3xl" />
         <div className="absolute bottom-1/4 right-1/3 w-80 h-80 rounded-full bg-accent/5 blur-3xl" />
