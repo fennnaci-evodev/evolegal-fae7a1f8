@@ -41,6 +41,9 @@ const ExpertChat = () => {
   const [listening, setListening] = useState(false);
   const [chatList, setChatList] = useState<HugoChat[]>([]);
   const [showSidebar, setShowSidebar] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(() => {
+    try { return localStorage.getItem("evo_chatlist_open") !== "false"; } catch { return true; }
+  });
   const [headerExpanded, setHeaderExpanded] = useState(false);
   const [showDocFactory, setShowDocFactory] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
