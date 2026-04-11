@@ -117,16 +117,13 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 relative">
-      <motion.button
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.6 }}
+      <button
         onClick={() => navigate("/")}
-        className="absolute top-6 left-6 z-20 flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium text-muted-foreground hover:text-foreground bg-muted/40 hover:bg-muted/70 backdrop-blur-sm border border-border/30 hover:border-border/60 transition-all duration-300"
+        className="absolute top-6 left-6 z-20 flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium text-muted-foreground hover:text-foreground bg-muted/40 hover:bg-muted/70 backdrop-blur-sm border border-border/30 hover:border-border/60 transition-colors duration-300"
       >
         <ChevronLeft className="h-3.5 w-3.5" />
         Back
-      </motion.button>
+      </button>
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/3 w-96 h-96 rounded-full bg-primary/5 blur-3xl" />
         <div className="absolute bottom-1/4 right-1/3 w-80 h-80 rounded-full bg-accent/5 blur-3xl" />
