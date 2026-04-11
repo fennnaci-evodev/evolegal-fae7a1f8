@@ -80,6 +80,39 @@ export type Database = {
         }
         Relationships: []
       }
+      hugo_feedback: {
+        Row: {
+          chat_id: string
+          comment: string | null
+          created_at: string
+          id: string
+          message_id: string
+          rating: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          chat_id: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          message_id: string
+          rating: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          chat_id?: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          message_id?: string
+          rating?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       hugo_messages: {
         Row: {
           chat_id: string
