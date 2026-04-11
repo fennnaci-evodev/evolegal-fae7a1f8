@@ -173,7 +173,7 @@ export function useHugoChat(chatId?: string | null) {
           "Content-Type": "application/json",
           Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
-        body: JSON.stringify({ messages: apiMessages }),
+        body: JSON.stringify({ messages: apiMessages, chat_id: cId, user_id: user.id }),
         signal: controller.signal,
       });
 
