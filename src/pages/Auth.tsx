@@ -118,9 +118,9 @@ const Auth = () => {
   return (
     <div className="min-h-screen flex items-center justify-center px-4 relative">
       <motion.button
-        initial={{ opacity: 0, x: -10 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6 }}
         onClick={() => navigate("/")}
         className="absolute top-6 left-6 z-20 flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium text-muted-foreground hover:text-foreground bg-muted/40 hover:bg-muted/70 backdrop-blur-sm border border-border/30 hover:border-border/60 transition-all duration-300"
       >
