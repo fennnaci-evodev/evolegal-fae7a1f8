@@ -5,7 +5,7 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { ScalesOfJustice } from "@/components/ScalesOfJustice";
 import { HugoAvatar } from "@/components/HugoAvatar";
 import { Button } from "@/components/ui/button";
-import { Send, User, Info, Mic, MicOff, Plus, Trash2, MessageCircle, FileText, ChevronDown } from "lucide-react";
+import { Send, User, Info, Mic, MicOff, Plus, Trash2, MessageCircle, FileText, ChevronDown, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { HugoFeedbackButtons } from "@/components/HugoFeedbackButtons";
 import { DocumentFactoryButton } from "@/components/DocumentFactoryButton";
 import { isRateLimited } from "@/lib/security";
