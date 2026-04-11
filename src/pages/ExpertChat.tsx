@@ -176,20 +176,36 @@ const ExpertChat = () => {
 
         {/* Main chat area */}
         <div className="flex-1 flex flex-col min-w-0">
-          {/* Header */}
-          <div className="glass-card p-4 mb-4 flex items-center gap-3" style={{ borderRadius: "1rem" }}>
-            <HugoAvatar size={44} />
-            <div className="flex-1">
-              <h2 className="font-display font-semibold">
+          {/* Collapsible Header */}
+          <button
+            onClick={() => setHeaderExpanded(!headerExpanded)}
+            className="glass-card px-4 py-2.5 mb-3 flex items-center gap-3 w-full text-left transition-all"
+            style={{ borderRadius: "1rem" }}
+          >
+            <HugoAvatar size={isMobile ? 28 : 36} />
+            <div className="flex-1 min-w-0">
+              <p className="font-display font-semibold text-sm truncate">
                 {currentChatId && currentTitle !== "New Chat" ? currentTitle : "Chat with Hugo"}
-                <span className="text-muted-foreground font-normal text-xs ml-2">· Hugo</span>
-              </h2>
-              <p className="text-xs text-muted-foreground">Every response is carefully reviewed by our Experts — structured with Options → Risks → Resources.{"\n"}We deeply care about accuracy and your legal security.</p>
+                <span className="text-muted-foreground font-normal text-xs ml-1.5">· Hugo</span>
+              </p>
+              <AnimatePresence>
+                {(headerExpanded || !isMobile) && (
+                  <motion.p
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className="text-[10px] text-muted-foreground leading-relaxed overflow-hidden"
+                  >
+                    Every response is carefully reviewed by our Experts — structured with Options → Risks → Resources. We deeply care about accuracy and your legal security.
+                  </motion.p>
+                )}
+              </AnimatePresence>
             </div>
-            <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setShowSidebar(!showSidebar)}>
+            <ChevronDown className={`h-3.5 w-3.5 text-muted-foreground shrink-0 transition-transform md:hidden ${headerExpanded ? "rotate-180" : ""}`} />
+            <Button variant="ghost" size="icon" className="md:hidden shrink-0" onClick={(e) => { e.stopPropagation(); setShowSidebar(!showSidebar); }}>
               <MessageCircle className="h-4 w-4" />
             </Button>
-          </div>
+          </button>
 
           {/* Mobile sidebar overlay */}
           <AnimatePresence>
@@ -285,29 +301,12 @@ const ExpertChat = () => {
             <div ref={bottomRef} />
           </div>
 
-          {/* Document Factory + Disclaimer */}
-          <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-muted/20 mb-3">
-            <div className="flex-1 flex items-center gap-2">
-              <Info className="h-3 w-3 text-muted-foreground/50 shrink-0" />
-              <p className="text-[10px] text-muted-foreground/50">
-                Hugo works hard on every response. For complex personal matters, professional representation may be recommended.
-              </p>
-            </div>
-            {messages.length >= 2 && currentTitle && (
-              <DocumentFactoryButton
-                topic={currentTitle}
-                chatId={currentChatId}
-                conversationContext={messages.slice(-4).map(m => m.content).join("\n")}
-              />
-            )}
-          </div>
-
           {/* Input */}
-          <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="glass-strong shimmer-chat-form p-3 flex items-end gap-3">
+          <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="glass-strong shimmer-chat-form p-2.5 flex items-end gap-2 relative">
             <Button
               type="button" size="icon" variant="ghost"
               onClick={toggleVoice}
-              className={`shrink-0 ${listening ? "text-primary" : "text-muted-foreground"}`}
+              className={`shrink-0 h-8 w-8 ${listening ? "text-primary" : "text-muted-foreground"}`}
             >
               {listening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
             </Button>
@@ -322,10 +321,34 @@ const ExpertChat = () => {
               rows={1}
               style={{ maxHeight: 120, minHeight: 36 }}
             />
-            <Button type="submit" size="icon" disabled={!input.trim() || streaming} className="shrink-0">
+            {messages.length >= 2 && currentTitle && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    type="button" size="icon" variant="ghost"
+                    className="shrink-0 h-8 w-8 text-muted-foreground hover:text-primary"
+                    onClick={() => setShowDocFactory(true)}
+                  >
+                    <FileText className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="top">Generate Document</TooltipContent>
+              </Tooltip>
+            )}
+            <Button type="submit" size="icon" disabled={!input.trim() || streaming} className="shrink-0 h-8 w-8">
               <Send className="h-4 w-4" />
             </Button>
           </form>
+          {/* Document Factory Modal (triggered by icon) */}
+          {showDocFactory && currentTitle && (
+            <DocumentFactoryButton
+              topic={currentTitle}
+              chatId={currentChatId}
+              conversationContext={messages.slice(-4).map(m => m.content).join("\n")}
+              autoOpen
+              onClose={() => setShowDocFactory(false)}
+            />
+          )}
         </div>
       </div>
     </DashboardLayout>
