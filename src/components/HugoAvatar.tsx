@@ -37,8 +37,8 @@ export function HugoAvatar({ size = 40, animate = true, talking = false }: HugoA
       <motion.img
         src={hugoPhoto}
         alt="Hugo · Expert Manager"
-        className="absolute inset-[2px] rounded-full object-cover"
-        style={{ width: size - 4, height: size - 4, transformOrigin: "50% 60%" }}
+        className="absolute rounded-full object-cover"
+        style={{ width: size - 4, height: size - 4, top: 2, left: 2, imageRendering: "auto", transformOrigin: "50% 60%" }}
         draggable={false}
         animate={
           talking
