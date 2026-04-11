@@ -174,11 +174,11 @@ const UserChat = () => {
                   className={`flex gap-3 ${isUser ? "justify-end" : ""}`}
                 >
                   {isExpert && (
-                    <div className="h-11 w-11 rounded-full flex items-center justify-center shrink-0 mt-1" style={{ background: "hsla(270, 95%, 75%, 0.15)" }}>
-                       <ShieldCheck className="h-5 w-5" style={{ color: "hsl(270, 95%, 75%)" }} />
+                    <div className="h-12 w-12 rounded-full flex items-center justify-center shrink-0 mt-1" style={{ background: "hsla(270, 95%, 75%, 0.15)", imageRendering: "auto" }}>
+                       <ShieldCheck className="h-6 w-6" style={{ color: "hsl(270, 95%, 75%)" }} />
                      </div>
                   )}
-                  {!isUser && !isExpert && <HugoAvatar size={45} animate={false} />}
+                  {!isUser && !isExpert && <HugoAvatar size={48} animate={false} />}
                   <div className={`max-w-[85%] rounded-2xl px-5 py-4 text-sm whitespace-pre-wrap leading-relaxed ${
                     isUser
                       ? "bg-primary text-primary-foreground rounded-br-md"
@@ -192,8 +192,8 @@ const UserChat = () => {
                     {msg.content}
                   </div>
                   {isUser && (
-                    <div className="h-11 w-11 rounded-full bg-accent/10 flex items-center justify-center shrink-0 mt-1">
-                      <User className="h-5 w-5 text-accent" />
+                    <div className="h-12 w-12 rounded-full bg-accent/10 flex items-center justify-center shrink-0 mt-1" style={{ imageRendering: "auto" }}>
+                      <User className="h-6 w-6 text-accent" />
                     </div>
                   )}
                 </motion.div>
