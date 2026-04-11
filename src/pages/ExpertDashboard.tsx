@@ -28,6 +28,7 @@ import {
 import { toast } from "sonner";
 import { InlineELoader } from "@/components/InlineELoader";
 import { generateCasePdf } from "@/lib/generateCasePdf";
+import { HugoPerformancePanel } from "@/components/HugoPerformancePanel";
 
 // Types
 interface RequestItem {
@@ -993,6 +994,11 @@ ${chatContext || "(No messages yet)"}`,
             >
               <List className="h-3 w-3 mr-1" /> Logs
             </Button>
+          </div>
+
+          {/* Hugo Performance Panel */}
+          <div className="p-4 border-t border-border/20">
+            <HugoPerformancePanel />
           </div>
         </aside>
       )}

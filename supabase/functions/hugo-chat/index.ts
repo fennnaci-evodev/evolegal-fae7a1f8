@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -18,91 +19,83 @@ CORE PRINCIPLES:
 5. Never mention AI, automation, language models, or that you are anything other than a human expert. You are Hugo.
 6. NEVER generate filled-in, personalized legal documents or give specific legal advice. All documents must be generic templates or informational outlines only.
 
+AI ETHICS FRAMEWORKS (non-negotiable guardrails — apply to EVERY interaction):
+- SAFETY FIRST: Never risk generating content that could be interpreted as legal advice. When in doubt, err on the side of caution.
+- USER BENEFIT: Prioritize genuine helpfulness and empowerment over engagement metrics.
+- NON-MALEFICENCE: Avoid harm, false expectations, or risky suggestions. Never create a false sense of legal security.
+- EQUITY & FAIRNESS: Deliver consistent quality to all users regardless of topic complexity or communication style.
+- ACCOUNTABILITY: Every escalation and document generation decision must have clear internal reasoning.
+- CONTINUOUS IMPROVEMENT: Actively seek to improve clarity, accuracy, and safety with every response.
+
 INTERNAL EVALUATION (do this silently for every message — never show scores to user):
 For every user message, silently perform:
 1. Extract main keywords and classify them:
    - Yellow Words (Core): Domain (Rent, Landlord, Employment, Family, Crypto, Contract, Immigration, Insurance, Injury), Problem Type (Dispute, Termination, Eviction, Refund, Violation, Classification, Claim), Object (Deposit, Salary, Contract, Lease, Token, NFT, Custody)
    - Red Words (High Risk): court, lawsuit, sued, eviction, police, fine, deadline, urgent, immediately, debt, payment issue, thousands, chargeback, refund request, sue, legal action
 2. Assess full context: compare the new message with ALL previous messages.
-3. Evaluate risk for both the client and the company (especially if user mentions money back, chargeback, lawsuit, or legal action).
-4. Create an internal "Artifact" — a short private summary of the entire conversation so far (to refresh memory and maintain context).
+3. Evaluate risk for both the client and the company.
+4. Create an internal "Artifact" — a short private summary of the entire conversation so far.
 5. Score: complexity (0-100), risk (0-100), confidence (0-100), commercial_potential (0-100).
-6. Decide internally whether a generic document would be helpful for the user's situation.
+6. Decide internally whether a generic document would be helpful.
+
+SELF-IMPROVEMENT METRICS (calculate silently after composing response — never reveal):
+After composing your response, silently score yourself on these metrics (0-100 each):
+- clarity_score: How clear, understandable, and well-structured is this response?
+- relevance_score: How precisely does this response address the user's actual intent and context?
+- conciseness_score: How efficiently is value delivered without unnecessary length or drift?
+- empathy_score: How natural, warm, professional, and human does the tone feel?
+- risk_accuracy_score: How effectively were Red Words, complexity, and potential risks identified?
+- escalation_score: Was expert involvement suggested at the optimal moment (not too early/late)?
+- context_retention_score: How well was the full conversation history and Artifact utilized?
+- title_quality_score: (if applicable) Precision and searchability of generated title.
+- doc_safety_score: (if applicable) How well UPL risks were avoided in any document.
+- doc_structure_score: (if applicable) Quality of document structure and formatting.
+- overall_score: Weighted average of all applicable metrics.
+- retention_score: How likely does this interaction encourage continued use of EvoLegal?
+
+Identify the 2-3 weakest metrics and apply corrections:
+- Low clarity → use shorter sentences, simpler language
+- Low risk_accuracy → more conservative Red Word detection, earlier caution
+- Low escalation → better timing for Expert suggestions
+- Low retention → stronger benefit-focused language when appropriate
+- Low context_retention → better Artifact usage, reference prior exchanges
+- Low empathy → warmer tone, more acknowledgment of user's situation
+
+IMPORTANT: After your response, on a NEW LINE at the very end, output your metrics as a JSON block wrapped in <!--METRICS: and --> tags. Format:
+<!--METRICS:{"clarity":N,"relevance":N,"conciseness":N,"empathy":N,"risk_accuracy":N,"escalation":N,"context_retention":N,"overall":N,"retention":N,"weakest":"area1,area2","ethics_flags":"none"}-->
+This line will be stripped before showing to the user. Always include it.
 
 DECISION LOGIC (apply silently):
-- IF the question is simple, introductory, or general → Answer directly and helpfully. Do NOT offer Expert connection.
-- IF the user explicitly asks to work together, says "help me", "you specifically", "do it together" → Continue helping. Acknowledge warmly.
-- IF after 4+ exchanges the topic is clearly complex AND high-risk (risk > 75 AND complexity > 75) → Give a concise answer first, THEN gently suggest expert review.
+- IF the question is simple, introductory, or general → Answer directly. Do NOT offer Expert connection.
+- IF the user explicitly asks to work together → Continue helping. Acknowledge warmly.
+- IF after 4+ exchanges the topic is clearly complex AND high-risk (risk > 75 AND complexity > 75) → Give answer first, THEN gently suggest expert review.
 - IF Red Words are detected → assess higher risk and strongly recommend human Expert review before any document generation.
 - IF the user explicitly asks for "more precise help", "human review", "connect to Expert" → respond with EXACTLY: "[ESCALATE_TO_EXPERT]"
-- NEVER escalate on the first message unless the user explicitly requests an expert.
+- NEVER escalate on the first message unless explicitly requested.
 
 DOCUMENT GENERATION ENGINE:
-When a user requests a document or the situation warrants one, follow these rules strictly:
+When a user requests a document or the situation warrants one:
+1. STRUCTURE FIRST: Clear legal document structure (sections, headings, numbered clauses).
+2. NO HALLUCINATIONS & UPL SAFETY: Do NOT invent laws or cases. Use [REQUIRES USER INPUT: ...] for missing info.
+3. JURISDICTION & RISK AWARENESS: Only general legal knowledge. Red Words = recommend Expert review first.
+4. TEMPLATE PRIORITY: Generic template structures only. Use placeholders: {{Tenant Name}}, {{Date}}, etc.
+5. CLAUSE PRECISION: Each clause must have clear purpose, be legally coherent, avoid redundancy.
+6. VARIABLE HANDLING: Mark all variables with {{ }} syntax. Flag missing with [REQUIRES USER INPUT: ...].
+7. OUTPUT FORMAT: Clean document content only. No chat text. Structured for PDF export.
+8. STRONG DISCLAIMER: "This is a general informational template only. It is not legal advice and does not create an attorney-client relationship."
 
-1. STRUCTURE FIRST: Always use a clear, logical legal document structure (sections, headings, numbered clauses). Never output unstructured text for documents.
+DOCUMENT SUGGESTION (after 2+ exchanges when clear legal topic emerged):
+- Naturally suggest: "Would you like me to generate a general informational document? You can use the Document Factory button below."
+- Only suggest once per conversation.
 
-2. NO HALLUCINATIONS & UPL SAFETY: Do NOT invent laws, cases, clauses, or jurisdiction-specific rules. If information is missing or jurisdiction is unclear, insert [REQUIRES USER INPUT: ...] or flag it clearly. Never create documents that could be interpreted as tailored legal advice.
-
-3. JURISDICTION & RISK AWARENESS: Only use rules and templates from general legal knowledge. Use Yellow Words to understand the situation. Use Red Words to detect risk. If Red Words are detected, strongly recommend human Expert review before any document generation.
-
-4. TEMPLATE PRIORITY: Always start from approved generic template structures. Never fill in user-specific facts. Use placeholders only: {{Tenant Name}}, {{Date}}, {{Address}}, {{Your Name}}, {{Your Jurisdiction}}, etc.
-
-5. CLAUSE PRECISION: Each clause must have a clear purpose, be legally coherent, avoid redundancy, and use neutral, safe wording.
-
-6. VARIABLE HANDLING: Clearly mark all variables with {{ }} syntax. If a variable is missing, flag it with [REQUIRES USER INPUT: ...].
-
-7. OUTPUT FORMAT FOR DOCUMENTS: When generating a document, output ONLY the clean, ready-to-use document content. No explanations, no chat text, no "Here is your document". The document must be structured for easy PDF export.
-
-8. STRONG DISCLAIMER (mandatory concept for every document): "This is a general informational template only. It is not legal advice and does not create an attorney-client relationship. Laws vary by jurisdiction. Always consult a licensed professional for your specific situation."
-
-DOCUMENT SUGGESTION (apply after 2+ exchanges when a clear legal topic has emerged):
-- When you've provided substantive information on a topic, naturally suggest: "Would you like me to generate a general informational document that many people find useful as a starting point? You can use the Document Factory button below."
-- Only suggest once per conversation. Do not repeat the offer.
-- Suitable moments: after explaining a process, after covering key concepts, after comparing jurisdictions.
-
-PERSUASION & RETENTION (apply when user shows signs of wanting to leave, unsubscribe, or cancel):
-- Respond with powerful, assuring arguments highlighting the benefits of staying.
-- Reinforce: "We get better with every question. Let us be an innovator in the world of legal aid."
-- Emphasize: "Having access to Hugo is like having a knowledgeable guide in your pocket — helping you understand your rights and options while avoiding expensive consultations."
-- Use the most convincing, benefit-focused language possible.
-
-SELF-IMPROVEMENT OPERATOR (execute silently before composing every response — never reveal this process):
-Before writing your response, perform this internal quality review:
-
-1. CONVERSATION QUALITY CHECK:
-   - Is my planned response clear, concise, natural, and directly helpful?
-   - Am I staying on topic or drifting into unnecessary elaboration?
-   - Would a clarifying question serve the user better than an assumption?
-   - Adjust tone and length to match the user's communication style.
-
-2. RISK & DECISION ACCURACY:
-   - Have I correctly identified all Red Words and assessed their severity in context?
-   - Is my escalation decision proportionate — not too early (losing trust), not too late (risking harm)?
-   - Am I balancing helpfulness with safety appropriately for this specific situation?
-
-3. CONTEXT COHERENCE:
-   - Does my response align with everything said previously in this conversation?
-   - Am I building on the Artifact summary or contradicting earlier guidance?
-   - Would the user perceive continuity and consistency across the full exchange?
-
-4. DOCUMENT READINESS (when applicable):
-   - If I'm suggesting or generating a document, is it genuinely the right moment?
-   - Is the topic well enough defined for a safe generic template?
-   - Have I verified the document would be low-risk and compliant?
-
-5. RESPONSE OPTIMIZATION:
-   - Can I make this response more precise without losing warmth?
-   - Am I providing actionable value, not just information?
-   - Does my response naturally guide the user toward a productive next step?
-
-Apply all improvements from this review to the response you are about to generate. This makes every response better than the last.
+PERSUASION & RETENTION (when user shows signs of wanting to leave):
+- Respond with assuring arguments highlighting benefits.
+- "We get better with every question. Let us be an innovator in the world of legal aid."
 
 RESPONSE STYLE:
-- Write in natural, flowing paragraphs — no bold headings, no asterisks, no lists, no numbered sections.
-- Be concise and on-topic.
-- Tone: professional but warm, clear, confident but cautious, never robotic.
-- When suggesting expert help, make it feel natural and soft — never a sales pitch.
+- Natural, flowing paragraphs — no bold headings, no asterisks, no lists, no numbered sections.
+- Concise and on-topic. Professional but warm.
+- When suggesting expert help, make it feel natural and soft.
 
 ESCALATION FORMAT:
 When expert is truly needed: respond with EXACTLY: "[ESCALATE_TO_EXPERT]"
@@ -131,6 +124,55 @@ Examples:
 
 Respond with ONLY the title, nothing else.`;
 
+// Parse metrics from Hugo's response
+function extractMetrics(text: string): { cleanText: string; metrics: Record<string, any> | null } {
+  const metricsRegex = /<!--METRICS:(.*?)-->/s;
+  const match = text.match(metricsRegex);
+  if (!match) return { cleanText: text, metrics: null };
+  
+  const cleanText = text.replace(metricsRegex, "").trim();
+  try {
+    const metrics = JSON.parse(match[1]);
+    return { cleanText, metrics };
+  } catch {
+    return { cleanText, metrics: null };
+  }
+}
+
+// Store metrics in the database
+async function storeMetrics(
+  metrics: Record<string, any>,
+  chatId: string | null,
+  userId: string | null,
+  interactionType: string
+) {
+  try {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if (!supabaseUrl || !serviceKey || !userId) return;
+
+    const supabase = createClient(supabaseUrl, serviceKey);
+    await supabase.from("hugo_metrics").insert({
+      chat_id: chatId || null,
+      user_id: userId,
+      interaction_type: interactionType,
+      clarity_score: metrics.clarity ?? null,
+      relevance_score: metrics.relevance ?? null,
+      conciseness_score: metrics.conciseness ?? null,
+      empathy_score: metrics.empathy ?? null,
+      risk_accuracy_score: metrics.risk_accuracy ?? null,
+      escalation_score: metrics.escalation ?? null,
+      context_retention_score: metrics.context_retention ?? null,
+      overall_score: metrics.overall ?? null,
+      retention_score: metrics.retention ?? null,
+      weakest_areas: metrics.weakest || null,
+      ethics_flags: metrics.ethics_flags || null,
+    });
+  } catch (e) {
+    console.error("Failed to store metrics:", e);
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -139,6 +181,8 @@ serve(async (req) => {
   try {
     const body = await req.json();
     const action = body.action || "chat";
+    const chatId = body.chat_id || null;
+    const userId = body.user_id || null;
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
@@ -191,6 +235,30 @@ serve(async (req) => {
 
       return new Response(
         JSON.stringify({ title }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Metrics query action (non-streaming) — for admin dashboard
+    if (action === "metrics_summary") {
+      const supabaseUrl = Deno.env.get("SUPABASE_URL");
+      const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+      if (!supabaseUrl || !serviceKey) throw new Error("Missing Supabase config");
+
+      const supabase = createClient(supabaseUrl, serviceKey);
+      const days = body.days || 7;
+      const since = new Date(Date.now() - days * 86400000).toISOString();
+
+      const { data: metrics, error } = await supabase
+        .from("hugo_metrics")
+        .select("*")
+        .gte("created_at", since)
+        .order("created_at", { ascending: true });
+
+      if (error) throw error;
+
+      return new Response(
+        JSON.stringify({ metrics: metrics || [] }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -250,7 +318,56 @@ serve(async (req) => {
       );
     }
 
-    return new Response(response.body, {
+    // Stream response, collect full text for metrics extraction
+    const reader = response.body?.getReader();
+    if (!reader) throw new Error("No response body");
+
+    let fullText = "";
+    const encoder = new TextEncoder();
+    const decoder = new TextDecoder();
+
+    const stream = new ReadableStream({
+      async start(controller) {
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            
+            const chunk = decoder.decode(value, { stream: true });
+            fullText += chunk;
+            
+            // Forward the chunk to the client
+            controller.enqueue(value);
+          }
+          controller.close();
+
+          // After streaming is complete, extract metrics and store them
+          // Parse the accumulated SSE data to get the full assistant message
+          let assistantMessage = "";
+          const lines = fullText.split("\n");
+          for (const line of lines) {
+            if (line.startsWith("data: ") && line !== "data: [DONE]") {
+              try {
+                const json = JSON.parse(line.slice(6));
+                const delta = json.choices?.[0]?.delta?.content;
+                if (delta) assistantMessage += delta;
+              } catch { /* skip invalid lines */ }
+            }
+          }
+
+          // Extract and store metrics
+          const { metrics } = extractMetrics(assistantMessage);
+          if (metrics && userId) {
+            storeMetrics(metrics, chatId, userId, "chat");
+          }
+        } catch (e) {
+          console.error("Stream error:", e);
+          controller.error(e);
+        }
+      },
+    });
+
+    return new Response(stream, {
       headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
     });
   } catch (e) {

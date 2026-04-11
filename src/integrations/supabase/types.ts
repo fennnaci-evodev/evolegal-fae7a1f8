@@ -112,6 +112,90 @@ export type Database = {
           },
         ]
       }
+      hugo_metrics: {
+        Row: {
+          chat_id: string | null
+          clarity_score: number | null
+          conciseness_score: number | null
+          context_retention_score: number | null
+          created_at: string
+          doc_safety_score: number | null
+          doc_structure_score: number | null
+          document_id: string | null
+          empathy_score: number | null
+          escalation_score: number | null
+          ethics_flags: string | null
+          id: string
+          interaction_type: string
+          overall_score: number | null
+          relevance_score: number | null
+          retention_score: number | null
+          risk_accuracy_score: number | null
+          title_quality_score: number | null
+          user_id: string
+          weakest_areas: string | null
+        }
+        Insert: {
+          chat_id?: string | null
+          clarity_score?: number | null
+          conciseness_score?: number | null
+          context_retention_score?: number | null
+          created_at?: string
+          doc_safety_score?: number | null
+          doc_structure_score?: number | null
+          document_id?: string | null
+          empathy_score?: number | null
+          escalation_score?: number | null
+          ethics_flags?: string | null
+          id?: string
+          interaction_type?: string
+          overall_score?: number | null
+          relevance_score?: number | null
+          retention_score?: number | null
+          risk_accuracy_score?: number | null
+          title_quality_score?: number | null
+          user_id: string
+          weakest_areas?: string | null
+        }
+        Update: {
+          chat_id?: string | null
+          clarity_score?: number | null
+          conciseness_score?: number | null
+          context_retention_score?: number | null
+          created_at?: string
+          doc_safety_score?: number | null
+          doc_structure_score?: number | null
+          document_id?: string | null
+          empathy_score?: number | null
+          escalation_score?: number | null
+          ethics_flags?: string | null
+          id?: string
+          interaction_type?: string
+          overall_score?: number | null
+          relevance_score?: number | null
+          retention_score?: number | null
+          risk_accuracy_score?: number | null
+          title_quality_score?: number | null
+          user_id?: string
+          weakest_areas?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hugo_metrics_chat_id_fkey"
+            columns: ["chat_id"]
+            isOneToOne: false
+            referencedRelation: "hugo_chats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hugo_metrics_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "generated_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       legal_requests: {
         Row: {
           admin_notes: string | null
