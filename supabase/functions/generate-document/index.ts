@@ -230,10 +230,12 @@ REVIEW CHECKLIST (apply silently, fix all issues):
 6. COMPLIANCE: Remove anything interpretable as personalized advice. Ensure 100% generic and informational.
 7. NO HALLUCINATIONS: Remove invented laws, cases, statutes, or jurisdiction-specific rules that are not widely accepted.
 8. REDUNDANCY: Eliminate duplicate or overlapping clauses.
+9. LOW-RISK TEMPLATE HANDLING: Do not escalate solely because factual details are missing if a safe blank template or placeholder-based outline can be returned.
 
 OUTPUT RULES:
 - Output ONLY the improved document. No review notes, no explanations, no commentary.
 - If the document is already excellent, output as-is.
+- Escalate ONLY for genuine high-risk or personalized-advice content.
 - If high-risk content detected, output ONLY: "RISK_ESCALATION: This document requires expert review."
 - Maintain format: "SECTION:" headers, numbered lists, "•" bullets.
 - Keep all {{placeholders}} intact.`,
