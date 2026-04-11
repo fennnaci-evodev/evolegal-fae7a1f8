@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import hugoPhoto from "@/assets/hugo-avatar.png";
 
 interface HugoAvatarProps {
@@ -9,63 +8,55 @@ interface HugoAvatarProps {
 
 /**
  * Hugo — Expert Manager avatar.
- * Professional photo with a crisp neon cyan ring.
- * When `talking` is true, a smooth breathing + gentle nod animation plays.
+ * Static, high-definition photo avatar with a crisp glassmorphic ring.
  */
-export function HugoAvatar({ size = 40, animate = true, talking = false }: HugoAvatarProps) {
-  const border = Math.max(2, Math.round(size * 0.045));
-  const imgSize = size - border * 2;
+export function HugoAvatar({ size = 40 }: HugoAvatarProps) {
+  const frameSize = Math.round(size * 1.12);
+  const ringSize = Math.max(3, Math.round(frameSize * 0.06));
+  const imageSize = frameSize - ringSize * 2;
 
   return (
-    <motion.div
-      className="relative flex items-center justify-center shrink-0"
+    <div
+      className="relative flex shrink-0 items-center justify-center rounded-full"
       style={{
-        width: size,
-        height: size,
-        borderRadius: "50%",
-        background: talking
-          ? "conic-gradient(from 180deg, hsla(186, 100%, 50%, 0.8), hsla(270, 80%, 75%, 0.5), hsla(186, 100%, 50%, 0.8))"
-          : "conic-gradient(from 180deg, hsla(186, 100%, 50%, 0.6), hsla(270, 80%, 75%, 0.35), hsla(186, 100%, 50%, 0.6))",
-        padding: border,
-        boxShadow: talking
-          ? "0 0 18px hsla(186, 100%, 50%, 0.4), 0 0 6px hsla(270, 80%, 75%, 0.2)"
-          : "0 0 12px hsla(186, 100%, 50%, 0.25)",
-        transition: "box-shadow 0.4s ease, background 0.4s ease",
+        width: frameSize,
+        height: frameSize,
+        padding: ringSize,
+        border: "1px solid transparent",
+        background:
+          "linear-gradient(hsl(var(--background) / 0.88), hsl(var(--background) / 0.72)) padding-box, conic-gradient(from 190deg, hsl(var(--primary) / 0.95), hsl(var(--accent) / 0.52), hsl(var(--primary) / 0.95)) border-box",
+        boxShadow:
+          "0 0 0 1px hsl(var(--border) / 0.45) inset, 0 0 18px hsl(var(--primary) / 0.22), 0 0 28px hsl(var(--accent) / 0.12)",
+        backdropFilter: "blur(12px)",
+        WebkitBackdropFilter: "blur(12px)",
+        transform: "translateZ(0)",
+        backfaceVisibility: "hidden",
       }}
-      initial={animate ? { scale: 0.9, opacity: 0 } : false}
-      animate={animate ? { scale: 1, opacity: 1 } : false}
-      transition={{ duration: 0.5, ease: "easeOut" }}
     >
-      <motion.img
-        src={hugoPhoto}
-        alt="Hugo · Expert Manager"
-        className="block rounded-full object-cover"
+      <div
+        className="overflow-hidden rounded-full"
         style={{
-          width: imgSize,
-          height: imgSize,
-          imageRendering: "auto",
-          transformOrigin: "50% 55%",
-          willChange: talking ? "transform" : "auto",
+          width: imageSize,
+          height: imageSize,
+          boxShadow: "0 0 0 1px hsl(var(--border) / 0.35) inset",
+          transform: "translateZ(0)",
+          backfaceVisibility: "hidden",
         }}
-        draggable={false}
-        animate={
-          talking
-            ? {
-                scale: [1, 1.02, 1, 1.015, 1],
-                translateY: [0, -0.5, 0.3, -0.2, 0],
-              }
-            : { scale: 1, translateY: 0 }
-        }
-        transition={
-          talking
-            ? {
-                duration: 1.6,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }
-            : { duration: 0.4, ease: "easeOut" }
-        }
-      />
-    </motion.div>
+      >
+        <img
+          src={hugoPhoto}
+          alt="Hugo · Expert Manager"
+          className="block h-full w-full rounded-full object-cover select-none"
+          style={{
+            imageRendering: "crisp-edges",
+            objectPosition: "center 22%",
+            transform: "translateZ(0)",
+            backfaceVisibility: "hidden",
+            filter: "contrast(1.04) saturate(1.02)",
+          }}
+          draggable={false}
+        />
+      </div>
+    </div>
   );
 }
