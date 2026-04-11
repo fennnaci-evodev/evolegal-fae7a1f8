@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
-import { TrendingUp, TrendingDown, Activity, Shield, Brain, MessageCircle, FileText, Target } from "lucide-react";
+import { TrendingUp, TrendingDown, Activity, Shield, Brain, MessageCircle, FileText, Target, ThumbsUp, ThumbsDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface MetricRow {
@@ -200,10 +200,25 @@ export function HugoPerformancePanel() {
             <ScoreBar label="Context Retention" score={current.context_retention} icon={Brain} />
           </div>
 
-          {/* Business */}
+          {/* Business & Feedback */}
           <div className="glass rounded-xl p-3 space-y-2.5">
-            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Business & Retention</p>
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Business & Feedback</p>
             <ScoreBar label="Retention Potential" score={current.retention} icon={TrendingUp} />
+            {feedbackStats.total > 0 && (
+              <div className="flex items-center gap-3 mt-2 pt-2 border-t border-border/30">
+                <div className="flex items-center gap-1 text-xs">
+                  <ThumbsUp className="h-3 w-3 text-green-400" />
+                  <span className="text-muted-foreground">{feedbackStats.positive}</span>
+                </div>
+                <div className="flex items-center gap-1 text-xs">
+                  <ThumbsDown className="h-3 w-3 text-red-400" />
+                  <span className="text-muted-foreground">{feedbackStats.negative}</span>
+                </div>
+                <span className="text-[10px] text-muted-foreground/50 ml-auto">
+                  {feedbackStats.total > 0 ? Math.round((feedbackStats.positive / feedbackStats.total) * 100) : 0}% satisfaction
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Weakest Areas */}
