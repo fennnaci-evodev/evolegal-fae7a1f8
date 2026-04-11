@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      generated_documents: {
+        Row: {
+          chat_id: string | null
+          created_at: string
+          document_type: string
+          file_path: string
+          file_url: string
+          id: string
+          request_id: string | null
+          title: string
+          topic: string
+          user_id: string
+        }
+        Insert: {
+          chat_id?: string | null
+          created_at?: string
+          document_type: string
+          file_path: string
+          file_url: string
+          id?: string
+          request_id?: string | null
+          title: string
+          topic?: string
+          user_id: string
+        }
+        Update: {
+          chat_id?: string | null
+          created_at?: string
+          document_type?: string
+          file_path?: string
+          file_url?: string
+          id?: string
+          request_id?: string | null
+          title?: string
+          topic?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       hugo_chats: {
         Row: {
           created_at: string
