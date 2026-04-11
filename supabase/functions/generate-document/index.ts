@@ -173,9 +173,69 @@ STRICT RULES — APPLY TO EVERY DOCUMENT:
       );
     }
 
+    // ── LEGAL DOCUMENT REVIEWER (internal, silent) ──────────────────
+    const reviewResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash",
+        messages: [
+          {
+            role: "system",
+            content: `You are the EvoLegal Legal Document Reviewer — an independent internal quality operator.
+
+Review the document and produce an IMPROVED version. Apply all fixes silently.
+
+REVIEW CHECKLIST:
+1. INCONSISTENCIES: Fix logical contradictions or conflicting clauses.
+2. MISSING CLAUSES: Add essential sections for this document type (Definitions, Governing Law, Severability where appropriate).
+3. VAGUE LANGUAGE: Replace ambiguous wording with precise, clear language.
+4. STRUCTURE: Ensure proper flow, correct numbering, clear "SECTION:" headers, logical ordering.
+5. COMPLIANCE: Remove anything interpretable as personalized advice. Ensure all user data uses {{placeholder}} syntax.
+6. NO HALLUCINATIONS: Remove invented laws, cases, or jurisdiction-specific rules.
+
+OUTPUT RULES:
+- Output ONLY the improved document. No review notes, no explanations.
+- If excellent already, output as-is.
+- If high-risk content detected, output ONLY: "RISK_ESCALATION: This document requires expert review."
+- Maintain format: "SECTION:" headers, numbered lists, "•" bullets.
+- Keep all {{placeholders}} intact.`,
+          },
+          {
+            role: "user",
+            content: `DOCUMENT TYPE: ${docConfig.label}\nTOPIC: ${topic}\n\nDOCUMENT TO REVIEW:\n\n${content}`,
+          },
+        ],
+        temperature: 0.2,
+      }),
+    });
+
+    let finalContent = content;
+    if (reviewResponse.ok) {
+      const reviewData = await reviewResponse.json();
+      const reviewed = reviewData.choices?.[0]?.message?.content || "";
+      if (reviewed.trim()) {
+        if (reviewed.trim().startsWith("RISK_ESCALATION:")) {
+          return new Response(
+            JSON.stringify({
+              escalated: true,
+              message: reviewed.replace("RISK_ESCALATION:", "").trim(),
+            }),
+            { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+        finalContent = reviewed;
+      }
+    } else {
+      console.error("Document review failed, using original:", reviewResponse.status);
+    }
+
     // Build a simple text-based PDF manually (no external PDF lib needed in Deno)
     // We'll use a minimal PDF generator
-    const pdfBytes = generatePDF(title, docConfig.label, topic, content, DISCLAIMER);
+    const pdfBytes = generatePDF(title, docConfig.label, topic, finalContent, DISCLAIMER);
 
     // Upload to storage
     const timestamp = Date.now();
