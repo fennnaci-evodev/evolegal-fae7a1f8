@@ -129,19 +129,42 @@ export function DocumentFactoryButton({ topic, chatId, requestId, conversationCo
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <Button asChild className="flex-1 gap-2" variant="hero">
-                      <a href={generatedUrl} target="_blank" rel="noopener noreferrer">
-                        <Download className="h-4 w-4" />
-                        Download PDF
-                      </a>
+                    <Button
+                      className="flex-1 gap-2"
+                      variant="hero"
+                      onClick={() => {
+                        const link = document.createElement("a");
+                        link.href = generatedUrl!;
+                        link.target = "_blank";
+                        link.rel = "noopener noreferrer";
+                        link.setAttribute("download", generatedTitle || "EvoLegal_Document.pdf");
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                      }}
+                    >
+                      <Download className="h-4 w-4" />
+                      Download PDF
                     </Button>
                     <Button
                       variant="outline"
-                      onClick={() => { setGeneratedUrl(null); setGeneratedTitle(""); }}
+                      onClick={() => {
+                        navigator.clipboard.writeText(generatedUrl!);
+                        toast.success("Download link copied to clipboard!");
+                      }}
+                      title="Copy download link"
                     >
-                      Generate Another
+                      Copy Link
                     </Button>
                   </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full mt-2 text-xs"
+                    onClick={() => { setGeneratedUrl(null); setGeneratedTitle(""); }}
+                  >
+                    Generate Another
+                  </Button>
                 </div>
               ) : (
                 <div className="grid gap-2">
