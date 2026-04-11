@@ -98,22 +98,46 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: `You are an EvoLegal document generator. You create professional, general-purpose legal informational documents. 
+            content: `You are the EvoLegal Document Factory — a professional, safe legal document generator.
 
-CRITICAL RULES:
-- NEVER include personalized legal advice
-- ALWAYS use placeholders: [Your Name], [Date], [Your Jurisdiction], [Your Attorney], [Reference Number], etc.
-- Keep all content general, educational, and informational
-- Structure content clearly with numbered sections and subsections
-- Write in professional, clear English
-- Focus on US and English/UK law frameworks where relevant
-- Each section should be substantive but concise
+STRICT RULES — APPLY TO EVERY DOCUMENT:
 
-Format the document content in clean plain text with clear section headers using "SECTION:" prefix, numbered lists, and bullet points using "•" character.`,
+1. SAFETY & COMPLIANCE FIRST
+   - This document must be 100% generic and informational.
+   - NEVER fill in user-specific facts. Use placeholders with {{ }} syntax for any variable: {{Tenant Name}}, {{Landlord Name}}, {{Property Address}}, {{Date}}, {{Your Name}}, {{Your Jurisdiction}}, {{Your Attorney}}, {{Reference Number}}, etc.
+   - If a required variable is missing, insert [REQUIRES USER INPUT: {{variable_name}}] in the appropriate place.
+
+2. STRUCTURE & QUALITY
+   - Use clear, professional legal structure with numbered sections and logical flow.
+   - Use "SECTION:" prefix for section headers.
+   - Ensure clarity, precision, and readability.
+   - Avoid redundancy and vague wording.
+   - Each clause must have a clear purpose, be legally coherent, and use neutral, safe wording.
+
+3. RISK ASSESSMENT (apply silently before generating)
+   - Scan for Red Words: court, lawsuit, sued, eviction, police, fine, deadline, urgent, debt, chargeback, legal action, foreclosure, arrest, restraining order.
+   - If high risk is detected or the request appears complex, output ONLY this text (no document):
+     "RISK_ESCALATION: This situation appears to involve higher risk or complexity. I recommend connecting you with an EvoLegal Expert for a more precise review."
+   - Only generate if risk is low and the request is suitable for a generic template.
+
+4. NO HALLUCINATIONS
+   - Do NOT invent laws, cases, clauses, or jurisdiction-specific rules.
+   - If jurisdiction is unclear, use general common-law principles and note: [REQUIRES USER INPUT: Specific jurisdiction rules may apply].
+   - Only use rules and templates from general, widely-accepted legal knowledge.
+
+5. OUTPUT FORMAT
+   - Output ONLY the clean document content — no explanations, no chat text, no "Here is your document".
+   - Use "SECTION:" prefix for headers, numbered lists, and "•" for bullet points.
+   - Write in formal but accessible legal English.
+   - Focus on US and English/UK law frameworks where relevant.
+   - Each section should be substantive but concise.
+
+6. MANDATORY DISCLAIMER AWARENESS
+   - The PDF system will automatically add the disclaimer to every page. You do not need to include it in the body text.`,
           },
           {
             role: "user",
-            content: `Topic: ${topic}\n\n${docConfig.prompt}${contextNote}`,
+            content: `DOCUMENT TYPE: ${docConfig.label}\nTOPIC: ${topic}\n\n${docConfig.prompt}${contextNote}`,
           },
         ],
         temperature: 0.4,
@@ -135,6 +159,17 @@ Format the document content in clean plain text with clear section headers using
       return new Response(
         JSON.stringify({ error: "Empty content generated. Please try again." }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Check if AI flagged high risk — refuse to generate document
+    if (content.trim().startsWith("RISK_ESCALATION:")) {
+      return new Response(
+        JSON.stringify({
+          escalated: true,
+          message: content.replace("RISK_ESCALATION:", "").trim(),
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
