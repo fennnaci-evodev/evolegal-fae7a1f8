@@ -146,7 +146,7 @@ export function HugoDemoBubble() {
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-border/20 shrink-0">
               <div className="flex items-center gap-2">
-                <HugoAvatar size={36} animate={false} talking={streaming} />
+                <HugoAvatar size={28} animate={false} talking={streaming} />
                 <span className="font-display font-semibold text-sm">Hugo</span>
                 <span className="text-[10px] text-muted-foreground">· Expert Manager</span>
               </div>
