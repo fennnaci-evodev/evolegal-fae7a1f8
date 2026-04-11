@@ -202,7 +202,7 @@ const WorkflowGuides = () => {
       <div className="max-w-3xl mx-auto h-[calc(100vh-6rem)] flex flex-col">
         {/* Header */}
         <div className="glass-card p-4 mb-4 flex items-center gap-3" style={{ borderRadius: "1rem" }}>
-          <HugoAvatar size={40} />
+          <HugoAvatar size={52} />
           <div className="flex-1">
             <h2 className="font-display font-semibold text-sm">{activeWorkflow.title}</h2>
             <p className="text-xs text-muted-foreground">Guided by Hugo · step-by-step</p>
@@ -222,7 +222,7 @@ const WorkflowGuides = () => {
                 animate={{ opacity: 1, y: 0 }}
                 className={`flex gap-3 ${msg.role === "user" ? "justify-end" : ""}`}
               >
-                {msg.role === "assistant" && <HugoAvatar size={28} animate={false} talking={loading && msg === messages[messages.length - 1]} />}
+                {msg.role === "assistant" && <HugoAvatar size={36} animate={false} talking={loading && msg === messages[messages.length - 1]} />}
                 <div className={`max-w-[85%] rounded-2xl px-5 py-4 text-sm whitespace-pre-wrap leading-relaxed ${
                   msg.role === "user"
                     ? "bg-primary text-primary-foreground rounded-br-md"
@@ -236,7 +236,7 @@ const WorkflowGuides = () => {
 
           {loading && (messages.length === 0 || messages[messages.length - 1]?.role === "user") && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex gap-3 items-center">
-              <HugoAvatar size={28} animate={false} talking />
+              <HugoAvatar size={36} animate={false} talking />
               <div className="glass rounded-2xl rounded-bl-md px-4 py-3 flex items-center gap-2">
                 <InlineELoader size={22} />
                 <span className="text-xs text-muted-foreground/60">Hugo is preparing the next step…</span>

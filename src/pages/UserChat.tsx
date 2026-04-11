@@ -178,7 +178,7 @@ const UserChat = () => {
                       <ShieldCheck className="h-4 w-4" style={{ color: "hsl(270, 95%, 75%)" }} />
                     </div>
                   )}
-                  {!isUser && !isExpert && <HugoAvatar size={32} animate={false} />}
+                  {!isUser && !isExpert && <HugoAvatar size={42} animate={false} />}
                   <div className={`max-w-[85%] rounded-2xl px-5 py-4 text-sm whitespace-pre-wrap leading-relaxed ${
                     isUser
                       ? "bg-primary text-primary-foreground rounded-br-md"

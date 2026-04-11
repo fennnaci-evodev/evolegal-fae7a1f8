@@ -190,7 +190,7 @@ const Dashboard = () => {
               {hugoChats.map((chat) => (
                 <Link key={chat.id} to={`/dashboard/hugo/${chat.id}`}>
                   <div className="glass-card p-4 flex items-center gap-4 hover:border-primary/20 transition-all cursor-pointer group">
-                    <HugoAvatar size={36} animate={false} />
+                    <HugoAvatar size={47} animate={false} />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium group-hover:text-primary transition-colors truncate">
                         {chat.title}
