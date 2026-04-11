@@ -222,14 +222,18 @@ export function useHugoChat(chatId?: string | null) {
         }
       }
 
+      // Strip metrics tags from response (internal Hugo metrics, not shown to user)
+      let finalContent = full.replace(/<!--METRICS:.*?-->/s, "").trim();
+      
       // Handle escalation markers
-      let finalContent = full;
-      if (full.includes("[ESCALATE_TO_EXPERT]")) {
-        finalContent = full.replace(/\[ESCALATE_TO_EXPERT\]/g, "").trim() || "Let me connect you with an EvoLegal Expert right away.";
-        setMessages(prev => prev.map((m, i) =>
-          i === prev.length - 1 ? { ...m, content: finalContent } : m
-        ));
+      if (finalContent.includes("[ESCALATE_TO_EXPERT]")) {
+        finalContent = finalContent.replace(/\[ESCALATE_TO_EXPERT\]/g, "").trim() || "Let me connect you with an EvoLegal Expert right away.";
       }
+      
+      // Update displayed message with cleaned content
+      setMessages(prev => prev.map((m, i) =>
+        i === prev.length - 1 && m.role === "assistant" ? { ...m, content: finalContent } : m
+      ));
 
       // Save assistant message
       if (finalContent) {
