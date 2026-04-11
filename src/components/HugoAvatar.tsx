@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import hugoPhoto from "@/assets/hugo-avatar.png";
 
 interface HugoAvatarProps {
   size?: number;
@@ -7,7 +8,7 @@ interface HugoAvatarProps {
 
 /**
  * Hugo — Expert Manager avatar.
- * Minimalist professional silhouette in a glassmorphic circle with neon cyan outline.
+ * Professional photo with a glassmorphic neon cyan ring.
  */
 export function HugoAvatar({ size = 40, animate = true }: HugoAvatarProps) {
   return (
@@ -30,32 +31,14 @@ export function HugoAvatar({ size = 40, animate = true }: HugoAvatarProps) {
           WebkitMaskComposite: "xor",
         }}
       />
-      {/* Glass background */}
-      <div
-        className="absolute inset-[2px] rounded-full"
-        style={{
-          background: "hsla(186 100% 50% / 0.08)",
-          backdropFilter: "blur(8px)",
-        }}
+      {/* Photo */}
+      <img
+        src={hugoPhoto}
+        alt="Hugo · Expert Manager"
+        className="absolute inset-[2px] rounded-full object-cover"
+        style={{ width: size - 4, height: size - 4 }}
+        draggable={false}
       />
-      {/* Silhouette icon */}
-      <svg
-        width={size * 0.5}
-        height={size * 0.5}
-        viewBox="0 0 24 24"
-        fill="none"
-        className="relative z-10"
-      >
-        <circle cx="12" cy="8" r="4" fill="hsl(186 100% 55%)" opacity="0.9" />
-        <path
-          d="M4 20c0-4 3.6-7 8-7s8 3 8 7"
-          stroke="hsl(186 100% 55%)"
-          strokeWidth="2"
-          strokeLinecap="round"
-          fill="none"
-          opacity="0.7"
-        />
-      </svg>
     </motion.div>
   );
 }
