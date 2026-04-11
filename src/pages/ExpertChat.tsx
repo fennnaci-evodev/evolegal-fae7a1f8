@@ -6,6 +6,7 @@ import { ScalesOfJustice } from "@/components/ScalesOfJustice";
 import { HugoAvatar } from "@/components/HugoAvatar";
 import { Button } from "@/components/ui/button";
 import { Send, User, Info, Mic, MicOff, Plus, Trash2, MessageCircle } from "lucide-react";
+import { DocumentFactoryButton } from "@/components/DocumentFactoryButton";
 import { isRateLimited } from "@/lib/security";
 import { InlineELoader } from "@/components/InlineELoader";
 import { toast } from "sonner";
@@ -280,12 +281,21 @@ const ExpertChat = () => {
             <div ref={bottomRef} />
           </div>
 
-          {/* Disclaimer */}
-          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/20 mb-3">
-            <Info className="h-3 w-3 text-muted-foreground/50 shrink-0" />
-            <p className="text-[10px] text-muted-foreground/50">
-              Hugo works hard on every response. For complex personal matters, professional representation may be recommended.
-            </p>
+          {/* Document Factory + Disclaimer */}
+          <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-muted/20 mb-3">
+            <div className="flex-1 flex items-center gap-2">
+              <Info className="h-3 w-3 text-muted-foreground/50 shrink-0" />
+              <p className="text-[10px] text-muted-foreground/50">
+                Hugo works hard on every response. For complex personal matters, professional representation may be recommended.
+              </p>
+            </div>
+            {messages.length >= 2 && currentTitle && (
+              <DocumentFactoryButton
+                topic={currentTitle}
+                chatId={currentChatId}
+                conversationContext={messages.slice(-4).map(m => m.content).join("\n")}
+              />
+            )}
           </div>
 
           {/* Input */}
