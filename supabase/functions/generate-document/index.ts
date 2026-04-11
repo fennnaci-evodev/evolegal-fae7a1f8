@@ -162,6 +162,17 @@ STRICT RULES — APPLY TO EVERY DOCUMENT:
       );
     }
 
+    // Check if AI flagged high risk — refuse to generate document
+    if (content.trim().startsWith("RISK_ESCALATION:")) {
+      return new Response(
+        JSON.stringify({
+          escalated: true,
+          message: content.replace("RISK_ESCALATION:", "").trim(),
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // Build a simple text-based PDF manually (no external PDF lib needed in Deno)
     // We'll use a minimal PDF generator
     const pdfBytes = generatePDF(title, docConfig.label, topic, content, DISCLAIMER);
