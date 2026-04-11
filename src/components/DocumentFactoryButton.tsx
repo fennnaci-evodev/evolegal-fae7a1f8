@@ -59,6 +59,13 @@ export function DocumentFactoryButton({ topic, chatId, requestId, conversationCo
         return;
       }
 
+      // Handle risk escalation — AI refused to generate
+      if (data.escalated) {
+        toast.info(data.message || "This topic requires expert review. Please connect with an EvoLegal Expert.");
+        setOpen(false);
+        return;
+      }
+
       setGeneratedUrl(data.file_url);
       setGeneratedTitle(data.title);
       toast.success("Document generated successfully!");
