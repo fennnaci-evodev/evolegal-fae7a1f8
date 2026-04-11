@@ -108,6 +108,7 @@ function ScoreBar({ label, score, icon: Icon }: { label: string; score: number; 
 export function HugoPerformancePanel() {
   const [metrics7d, setMetrics7d] = useState<AggregatedMetrics | null>(null);
   const [metrics30d, setMetrics30d] = useState<AggregatedMetrics | null>(null);
+  const [feedbackStats, setFeedbackStats] = useState<{ positive: number; negative: number; total: number }>({ positive: 0, negative: 0, total: 0 });
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState<7 | 30>(7);
 
@@ -122,13 +123,21 @@ export function HugoPerformancePanel() {
       const since7 = new Date(now.getTime() - 7 * 86400000).toISOString();
       const since30 = new Date(now.getTime() - 30 * 86400000).toISOString();
 
-      const [res7, res30] = await Promise.all([
+      const [res7, res30, feedbackRes] = await Promise.all([
         supabase.from("hugo_metrics").select("*").gte("created_at", since7).order("created_at", { ascending: true }),
         supabase.from("hugo_metrics").select("*").gte("created_at", since30).order("created_at", { ascending: true }),
+        supabase.from("hugo_feedback" as any).select("rating").gte("created_at", since30),
       ]);
 
       setMetrics7d(aggregate((res7.data as any) || []));
       setMetrics30d(aggregate((res30.data as any) || []));
+
+      const fb = (feedbackRes.data as any[]) || [];
+      setFeedbackStats({
+        positive: fb.filter(f => f.rating === "positive").length,
+        negative: fb.filter(f => f.rating === "negative").length,
+        total: fb.length,
+      });
     } catch (e) {
       console.error("Failed to load metrics:", e);
     }
