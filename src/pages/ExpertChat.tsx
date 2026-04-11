@@ -274,12 +274,17 @@ const ExpertChat = () => {
                   className={`flex gap-3 ${msg.role === "user" ? "justify-end" : ""}`}
                 >
                   {msg.role === "assistant" && <HugoAvatar size={32} animate={false} />}
-                  <div className={`max-w-[85%] rounded-2xl px-5 py-4 text-sm whitespace-pre-wrap leading-relaxed ${
-                    msg.role === "user"
-                      ? "bg-primary text-primary-foreground rounded-br-md"
-                      : "glass rounded-bl-md"
-                  }`}>
-                    {msg.content}
+                  <div className="flex flex-col">
+                    <div className={`max-w-[85%] rounded-2xl px-5 py-4 text-sm whitespace-pre-wrap leading-relaxed ${
+                      msg.role === "user"
+                        ? "bg-primary text-primary-foreground rounded-br-md"
+                        : "glass rounded-bl-md"
+                    }`}>
+                      {msg.content}
+                    </div>
+                    {msg.role === "assistant" && user && currentChatId && (
+                      <HugoFeedbackButtons messageId={msg.id} chatId={currentChatId} userId={user.id} />
+                    )}
                   </div>
                   {msg.role === "user" && (
                     <div className="h-8 w-8 rounded-full bg-accent/10 flex items-center justify-center shrink-0 mt-1">
