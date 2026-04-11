@@ -5,7 +5,7 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { ScalesOfJustice } from "@/components/ScalesOfJustice";
 import { HugoAvatar } from "@/components/HugoAvatar";
 import { Button } from "@/components/ui/button";
-import { Send, User, Info, Mic, MicOff, Plus, Trash2, MessageCircle, FileText, ChevronDown } from "lucide-react";
+import { Send, User, Info, Mic, MicOff, Plus, Trash2, MessageCircle, FileText, ChevronDown, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { HugoFeedbackButtons } from "@/components/HugoFeedbackButtons";
 import { DocumentFactoryButton } from "@/components/DocumentFactoryButton";
 import { isRateLimited } from "@/lib/security";
@@ -41,6 +41,9 @@ const ExpertChat = () => {
   const [listening, setListening] = useState(false);
   const [chatList, setChatList] = useState<HugoChat[]>([]);
   const [showSidebar, setShowSidebar] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(() => {
+    try { return localStorage.getItem("evo_chatlist_open") !== "false"; } catch { return true; }
+  });
   const [headerExpanded, setHeaderExpanded] = useState(false);
   const [showDocFactory, setShowDocFactory] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -147,32 +150,61 @@ const ExpertChat = () => {
 
   return (
     <DashboardLayout>
-      <div className="h-[calc(100vh-6rem)] flex gap-3">
-        {/* Chat History Sidebar - desktop */}
-        <div className="hidden md:flex flex-col w-56 shrink-0">
-          <Button variant="outline" size="sm" className="mb-3 w-full justify-start gap-2" onClick={handleNewChat}>
-            <Plus className="h-3.5 w-3.5" /> New Chat
-          </Button>
-          <div className="flex-1 overflow-y-auto space-y-1">
-            {chatList.map(chat => (
-              <div
-                key={chat.id}
-                onClick={() => handleSelectChat(chat.id)}
-                className={`group flex items-center gap-2 rounded-lg px-3 py-2 text-xs cursor-pointer transition-all hover:bg-muted/30 ${
-                  currentChatId === chat.id ? "bg-primary/10 text-primary" : "text-muted-foreground"
-                }`}
-              >
-                <MessageCircle className="h-3 w-3 shrink-0" />
-                <span className="flex-1 truncate">{chat.title}</span>
-                <button
-                  onClick={(e) => handleDeleteChat(chat.id, e)}
-                  className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-opacity"
-                >
-                  <Trash2 className="h-3 w-3" />
-                </button>
+      <div className="h-[calc(100vh-6rem)] flex">
+        {/* Collapsible Chat History Sidebar - desktop */}
+        <AnimatePresence initial={false}>
+          {sidebarOpen && (
+            <motion.div
+              initial={{ width: 0, opacity: 0 }}
+              animate={{ width: 224, opacity: 1 }}
+              exit={{ width: 0, opacity: 0 }}
+              transition={{ duration: 0.25, ease: "easeInOut" }}
+              className="hidden md:flex flex-col shrink-0 overflow-hidden"
+            >
+              <div className="flex flex-col h-full w-56 pr-3">
+                <Button variant="outline" size="sm" className="mb-3 w-full justify-start gap-2" onClick={handleNewChat}>
+                  <Plus className="h-3.5 w-3.5" /> New Chat
+                </Button>
+                <div className="flex-1 overflow-y-auto space-y-1">
+                  {chatList.map(chat => (
+                    <div
+                      key={chat.id}
+                      onClick={() => handleSelectChat(chat.id)}
+                      className={`group flex items-center gap-2 rounded-lg px-3 py-2 text-xs cursor-pointer transition-all hover:bg-muted/30 ${
+                        currentChatId === chat.id ? "bg-primary/10 text-primary" : "text-muted-foreground"
+                      }`}
+                    >
+                      <MessageCircle className="h-3 w-3 shrink-0" />
+                      <span className="flex-1 truncate">{chat.title}</span>
+                      <button
+                        onClick={(e) => handleDeleteChat(chat.id, e)}
+                        className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-opacity"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
               </div>
-            ))}
-          </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Separator + toggle between sidebar and chat */}
+        <div className="hidden md:flex flex-col items-center shrink-0 mr-3">
+          <div className="flex-1 w-px" style={{ background: "linear-gradient(to bottom, transparent, hsl(var(--border) / 0.6) 15%, hsl(var(--border) / 0.6) 85%, transparent)" }} />
+          <button
+            onClick={() => {
+              const next = !sidebarOpen;
+              setSidebarOpen(next);
+              try { localStorage.setItem("evo_chatlist_open", String(next)); } catch {}
+            }}
+            className="my-2 flex items-center justify-center h-7 w-7 rounded-full border border-border/40 text-muted-foreground hover:text-foreground hover:border-primary/40 transition-all hover:bg-muted/20"
+            aria-label={sidebarOpen ? "Hide chat list" : "Show chat list"}
+          >
+            {sidebarOpen ? <PanelLeftClose className="h-3.5 w-3.5" /> : <PanelLeftOpen className="h-3.5 w-3.5" />}
+          </button>
+          <div className="flex-1 w-px" style={{ background: "linear-gradient(to bottom, transparent, hsl(var(--border) / 0.6) 15%, hsl(var(--border) / 0.6) 85%, transparent)" }} />
         </div>
 
         {/* Main chat area */}
