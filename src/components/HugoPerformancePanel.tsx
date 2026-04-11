@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
-import { TrendingUp, TrendingDown, Activity, Shield, Brain, MessageCircle, FileText, Target } from "lucide-react";
+import { TrendingUp, TrendingDown, Activity, Shield, Brain, MessageCircle, FileText, Target, ThumbsUp, ThumbsDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface MetricRow {
@@ -108,6 +108,7 @@ function ScoreBar({ label, score, icon: Icon }: { label: string; score: number; 
 export function HugoPerformancePanel() {
   const [metrics7d, setMetrics7d] = useState<AggregatedMetrics | null>(null);
   const [metrics30d, setMetrics30d] = useState<AggregatedMetrics | null>(null);
+  const [feedbackStats, setFeedbackStats] = useState<{ positive: number; negative: number; total: number }>({ positive: 0, negative: 0, total: 0 });
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState<7 | 30>(7);
 
@@ -122,13 +123,21 @@ export function HugoPerformancePanel() {
       const since7 = new Date(now.getTime() - 7 * 86400000).toISOString();
       const since30 = new Date(now.getTime() - 30 * 86400000).toISOString();
 
-      const [res7, res30] = await Promise.all([
+      const [res7, res30, feedbackRes] = await Promise.all([
         supabase.from("hugo_metrics").select("*").gte("created_at", since7).order("created_at", { ascending: true }),
         supabase.from("hugo_metrics").select("*").gte("created_at", since30).order("created_at", { ascending: true }),
+        supabase.from("hugo_feedback" as any).select("rating").gte("created_at", since30),
       ]);
 
       setMetrics7d(aggregate((res7.data as any) || []));
       setMetrics30d(aggregate((res30.data as any) || []));
+
+      const fb = (feedbackRes.data as any[]) || [];
+      setFeedbackStats({
+        positive: fb.filter(f => f.rating === "positive").length,
+        negative: fb.filter(f => f.rating === "negative").length,
+        total: fb.length,
+      });
     } catch (e) {
       console.error("Failed to load metrics:", e);
     }
@@ -191,10 +200,25 @@ export function HugoPerformancePanel() {
             <ScoreBar label="Context Retention" score={current.context_retention} icon={Brain} />
           </div>
 
-          {/* Business */}
+          {/* Business & Feedback */}
           <div className="glass rounded-xl p-3 space-y-2.5">
-            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Business & Retention</p>
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Business & Feedback</p>
             <ScoreBar label="Retention Potential" score={current.retention} icon={TrendingUp} />
+            {feedbackStats.total > 0 && (
+              <div className="flex items-center gap-3 mt-2 pt-2 border-t border-border/30">
+                <div className="flex items-center gap-1 text-xs">
+                  <ThumbsUp className="h-3 w-3 text-green-400" />
+                  <span className="text-muted-foreground">{feedbackStats.positive}</span>
+                </div>
+                <div className="flex items-center gap-1 text-xs">
+                  <ThumbsDown className="h-3 w-3 text-red-400" />
+                  <span className="text-muted-foreground">{feedbackStats.negative}</span>
+                </div>
+                <span className="text-[10px] text-muted-foreground/50 ml-auto">
+                  {feedbackStats.total > 0 ? Math.round((feedbackStats.positive / feedbackStats.total) * 100) : 0}% satisfaction
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Weakest Areas */}
