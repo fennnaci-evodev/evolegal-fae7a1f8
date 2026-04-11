@@ -183,7 +183,7 @@ const ExpertChat = () => {
             className="glass-card px-4 py-2.5 mb-3 flex items-center gap-3 w-full text-left transition-all"
             style={{ borderRadius: "1rem" }}
           >
-            <HugoAvatar size={isMobile ? 28 : 36} />
+            <HugoAvatar size={isMobile ? 39 : 50} />
             <div className="flex-1 min-w-0">
               <p className="font-display font-semibold text-sm truncate">
                 {currentChatId && currentTitle !== "New Chat" ? currentTitle : "Chat with Hugo"}
@@ -273,7 +273,7 @@ const ExpertChat = () => {
                   animate={{ opacity: 1, y: 0 }}
                   className={`flex gap-3 ${msg.role === "user" ? "justify-end" : ""}`}
                 >
-                  {msg.role === "assistant" && <HugoAvatar size={32} animate={false} talking={streaming && msg.id === messages[messages.length - 1]?.id} />}
+                  {msg.role === "assistant" && <HugoAvatar size={45} animate={false} talking={streaming && msg.id === messages[messages.length - 1]?.id} />}
                   <div className="flex flex-col">
                     <div className={`max-w-[85%] rounded-2xl px-5 py-4 text-sm whitespace-pre-wrap leading-relaxed ${
                       msg.role === "user"
@@ -287,8 +287,8 @@ const ExpertChat = () => {
                     )}
                   </div>
                   {msg.role === "user" && (
-                    <div className="h-8 w-8 rounded-full bg-accent/10 flex items-center justify-center shrink-0 mt-1">
-                      <User className="h-4 w-4 text-accent" />
+                    <div className="h-11 w-11 rounded-full bg-accent/10 flex items-center justify-center shrink-0 mt-1">
+                      <User className="h-5 w-5 text-accent" />
                     </div>
                   )}
                 </motion.div>
@@ -297,7 +297,7 @@ const ExpertChat = () => {
 
             {streaming && messages[messages.length - 1]?.role === "user" && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex gap-3 items-center">
-                <HugoAvatar size={32} animate={false} talking />
+                <HugoAvatar size={45} animate={false} talking />
                 <div className="glass rounded-2xl rounded-bl-md px-4 py-3 flex items-center gap-2">
                   <InlineELoader size={24} />
                   <span className="text-xs text-muted-foreground/60">Hugo is thinking…</span>
