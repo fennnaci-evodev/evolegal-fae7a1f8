@@ -4,11 +4,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { HugoAvatar } from "@/components/HugoAvatar";
 import { Button } from "@/components/ui/button";
-import { Send, User, Info, ShieldCheck } from "lucide-react";
+import { Send, User, Info, ShieldCheck, FileText, ChevronDown } from "lucide-react";
 import { DocumentFactoryButton } from "@/components/DocumentFactoryButton";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
 interface Message {
   id: string;
@@ -40,9 +42,12 @@ const UserChat = () => {
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [requestTitle, setRequestTitle] = useState("");
+  const [headerExpanded, setHeaderExpanded] = useState(false);
+  const [showDocFactory, setShowDocFactory] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const expertName = requestId ? getExpertPseudonym(requestId) : "Expert";
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
