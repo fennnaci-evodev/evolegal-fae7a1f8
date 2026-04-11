@@ -4,13 +4,15 @@ import hugoPhoto from "@/assets/hugo-avatar.png";
 interface HugoAvatarProps {
   size?: number;
   animate?: boolean;
+  talking?: boolean;
 }
 
 /**
  * Hugo — Expert Manager avatar.
  * Professional photo with a glassmorphic neon cyan ring.
+ * When `talking` is true, a subtle head-bob animation plays.
  */
-export function HugoAvatar({ size = 40, animate = true }: HugoAvatarProps) {
+export function HugoAvatar({ size = 40, animate = true, talking = false }: HugoAvatarProps) {
   return (
     <motion.div
       className="relative flex items-center justify-center shrink-0"
@@ -31,13 +33,30 @@ export function HugoAvatar({ size = 40, animate = true }: HugoAvatarProps) {
           WebkitMaskComposite: "xor",
         }}
       />
-      {/* Photo */}
-      <img
+      {/* Photo with talking animation */}
+      <motion.img
         src={hugoPhoto}
         alt="Hugo · Expert Manager"
         className="absolute inset-[2px] rounded-full object-cover"
-        style={{ width: size - 4, height: size - 4 }}
+        style={{ width: size - 4, height: size - 4, transformOrigin: "50% 60%" }}
         draggable={false}
+        animate={
+          talking
+            ? {
+                rotate: [0, 0.8, -0.5, 0.6, -0.3, 0],
+                scale: [1, 1.008, 0.997, 1.005, 1],
+              }
+            : { rotate: 0, scale: 1 }
+        }
+        transition={
+          talking
+            ? {
+                duration: 0.5,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }
+            : { duration: 0.3 }
+        }
       />
     </motion.div>
   );

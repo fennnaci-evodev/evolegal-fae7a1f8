@@ -273,7 +273,7 @@ const ExpertChat = () => {
                   animate={{ opacity: 1, y: 0 }}
                   className={`flex gap-3 ${msg.role === "user" ? "justify-end" : ""}`}
                 >
-                  {msg.role === "assistant" && <HugoAvatar size={32} animate={false} />}
+                  {msg.role === "assistant" && <HugoAvatar size={32} animate={false} talking={streaming && msg.id === messages[messages.length - 1]?.id} />}
                   <div className="flex flex-col">
                     <div className={`max-w-[85%] rounded-2xl px-5 py-4 text-sm whitespace-pre-wrap leading-relaxed ${
                       msg.role === "user"
@@ -297,7 +297,7 @@ const ExpertChat = () => {
 
             {streaming && messages[messages.length - 1]?.role === "user" && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex gap-3 items-center">
-                <HugoAvatar size={32} animate={false} />
+                <HugoAvatar size={32} animate={false} talking />
                 <div className="glass rounded-2xl rounded-bl-md px-4 py-3 flex items-center gap-2">
                   <InlineELoader size={24} />
                   <span className="text-xs text-muted-foreground/60">Hugo is thinking…</span>
