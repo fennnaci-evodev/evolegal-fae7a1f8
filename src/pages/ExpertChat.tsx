@@ -5,7 +5,7 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { ScalesOfJustice } from "@/components/ScalesOfJustice";
 import { HugoAvatar } from "@/components/HugoAvatar";
 import { Button } from "@/components/ui/button";
-import { Send, User, Info, Mic, MicOff, Plus, Trash2, MessageCircle } from "lucide-react";
+import { Send, User, Info, Mic, MicOff, Plus, Trash2, MessageCircle, FileText, ChevronDown } from "lucide-react";
 import { DocumentFactoryButton } from "@/components/DocumentFactoryButton";
 import { isRateLimited } from "@/lib/security";
 import { InlineELoader } from "@/components/InlineELoader";
@@ -15,7 +15,8 @@ import { useHugoChat, fetchHugoChats, deleteHugoChat, type HugoChat } from "@/ho
 import { Skeleton } from "@/components/ui/skeleton";
 import { HugoChatTopicChips } from "@/components/HugoChatTopicChips";
 import { HugoChatRecentTopics } from "@/components/HugoChatRecentTopics";
-
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 const ExpertChat = () => {
   const { chatId: paramChatId } = useParams<{ chatId?: string }>();
   const [searchParams] = useSearchParams();
@@ -39,9 +40,12 @@ const ExpertChat = () => {
   const [listening, setListening] = useState(false);
   const [chatList, setChatList] = useState<HugoChat[]>([]);
   const [showSidebar, setShowSidebar] = useState(false);
+  const [headerExpanded, setHeaderExpanded] = useState(false);
+  const [showDocFactory, setShowDocFactory] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const recognitionRef = useRef<any>(null);
+  const isMobile = useIsMobile();
 
   // Load/refresh chat list when chatId or title changes
   useEffect(() => {
