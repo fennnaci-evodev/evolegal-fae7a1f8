@@ -9,36 +9,38 @@ interface HugoAvatarProps {
 
 /**
  * Hugo — Expert Manager avatar.
- * Professional photo with a glassmorphic neon cyan ring.
+ * Professional photo with a crisp neon cyan ring.
  * When `talking` is true, a subtle head-bob animation plays.
  */
 export function HugoAvatar({ size = 40, animate = true, talking = false }: HugoAvatarProps) {
+  const border = Math.max(2, Math.round(size * 0.045));
+  const imgSize = size - border * 2;
+
   return (
     <motion.div
       className="relative flex items-center justify-center shrink-0"
-      style={{ width: size, height: size }}
+      style={{
+        width: size,
+        height: size,
+        borderRadius: "50%",
+        background: "conic-gradient(from 180deg, hsla(186, 100%, 50%, 0.6), hsla(270, 80%, 75%, 0.35), hsla(186, 100%, 50%, 0.6))",
+        padding: border,
+        boxShadow: "0 0 12px hsla(186, 100%, 50%, 0.25)",
+      }}
       initial={animate ? { scale: 0.9, opacity: 0 } : false}
       animate={animate ? { scale: 1, opacity: 1 } : false}
       transition={{ duration: 0.5, ease: "easeOut" }}
     >
-      {/* Glow ring */}
-      <div
-        className="absolute inset-0 rounded-full"
-        style={{
-          background: "conic-gradient(from 180deg, hsla(186 100% 50% / 0.5), hsla(270 80% 75% / 0.3), hsla(186 100% 50% / 0.5))",
-          padding: "2px",
-          mask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
-          WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
-          maskComposite: "xor",
-          WebkitMaskComposite: "xor",
-        }}
-      />
-      {/* Photo with talking animation */}
       <motion.img
         src={hugoPhoto}
         alt="Hugo · Expert Manager"
-        className="absolute rounded-full object-cover"
-        style={{ width: size - 4, height: size - 4, top: 2, left: 2, imageRendering: "auto", transformOrigin: "50% 60%" }}
+        className="block rounded-full object-cover"
+        style={{
+          width: imgSize,
+          height: imgSize,
+          imageRendering: "auto",
+          transformOrigin: "50% 60%",
+        }}
         draggable={false}
         animate={
           talking
