@@ -117,7 +117,7 @@ export function DocumentFactoryButton({ topic, chatId, requestId, conversationCo
               className="glass-strong w-full max-w-lg p-6 relative"
             >
               <button
-                onClick={() => { if (!generating) setOpen(false); }}
+                onClick={handleClose}
                 className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors"
               >
                 <X className="h-4 w-4" />
