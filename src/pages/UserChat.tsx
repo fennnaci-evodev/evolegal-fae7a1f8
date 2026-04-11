@@ -4,11 +4,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { HugoAvatar } from "@/components/HugoAvatar";
 import { Button } from "@/components/ui/button";
-import { Send, User, Info, ShieldCheck } from "lucide-react";
+import { Send, User, Info, ShieldCheck, FileText, ChevronDown } from "lucide-react";
 import { DocumentFactoryButton } from "@/components/DocumentFactoryButton";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
 interface Message {
   id: string;
@@ -40,9 +42,12 @@ const UserChat = () => {
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [requestTitle, setRequestTitle] = useState("");
+  const [headerExpanded, setHeaderExpanded] = useState(false);
+  const [showDocFactory, setShowDocFactory] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const expertName = requestId ? getExpertPseudonym(requestId) : "Expert";
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
@@ -118,19 +123,35 @@ const UserChat = () => {
   return (
     <DashboardLayout>
       <div className="max-w-3xl mx-auto h-[calc(100vh-6rem)] flex flex-col">
-        {/* Header */}
-        <div className="glass-card p-4 mb-4 flex items-center gap-3" style={{ borderRadius: "1rem" }}>
-          <div className="h-10 w-10 rounded-full bg-accent/10 flex items-center justify-center">
-            <ShieldCheck className="h-5 w-5" style={{ color: "hsl(270, 95%, 75%)" }} />
+        {/* Collapsible Header */}
+        <button
+          onClick={() => setHeaderExpanded(!headerExpanded)}
+          className="glass-card px-4 py-2.5 mb-3 flex items-center gap-3 w-full text-left transition-all"
+          style={{ borderRadius: "1rem" }}
+        >
+          <div className="h-8 w-8 rounded-full bg-accent/10 flex items-center justify-center shrink-0">
+            <ShieldCheck className="h-4 w-4" style={{ color: "hsl(270, 95%, 75%)" }} />
           </div>
-          <div>
-            <h2 className="font-display font-semibold text-sm">
+          <div className="flex-1 min-w-0">
+            <p className="font-display font-semibold text-sm truncate">
               {requestTitle || "Chat with EvoLegal Expert"}
-              <span className="text-muted-foreground font-normal text-xs ml-2">· {expertName} · Your Personal Expert</span>
-            </h2>
-            <p className="text-xs text-muted-foreground">Your conversation is handled by {expertName} for precision</p>
+              <span className="text-muted-foreground font-normal text-xs ml-1.5">· {expertName}</span>
+            </p>
+            <AnimatePresence>
+              {(headerExpanded || !isMobile) && (
+                <motion.p
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="text-[10px] text-muted-foreground leading-relaxed overflow-hidden"
+                >
+                  Your conversation is handled by {expertName} for precision. For complex personal matters, professional representation may be recommended.
+                </motion.p>
+              )}
+            </AnimatePresence>
           </div>
-        </div>
+          <ChevronDown className={`h-3.5 w-3.5 text-muted-foreground shrink-0 transition-transform md:hidden ${headerExpanded ? "rotate-180" : ""}`} />
+        </button>
 
         {/* Messages */}
         <div className="flex-1 overflow-y-auto space-y-4 pr-2 mb-4" style={{ overflowAnchor: "none" }}>
@@ -182,25 +203,8 @@ const UserChat = () => {
           <div ref={bottomRef} />
         </div>
 
-        {/* Document Factory + Disclaimer */}
-        <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-muted/20 mb-3">
-          <div className="flex-1 flex items-center gap-2">
-            <Info className="h-3 w-3 text-muted-foreground/50 shrink-0" />
-            <p className="text-[10px] text-muted-foreground/50">
-              Your conversation is handled by an EvoLegal Expert. For complex personal matters, professional representation may be recommended.
-            </p>
-          </div>
-          {messages.length >= 2 && requestId && (
-            <DocumentFactoryButton
-              topic={requestTitle || "Legal Topic"}
-              requestId={requestId}
-              conversationContext={messages.slice(-4).map(m => m.content).join("\n")}
-            />
-          )}
-        </div>
-
         {/* Input */}
-        <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="glass-strong shimmer-chat-form p-3 flex items-end gap-3">
+        <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="glass-strong shimmer-chat-form p-2.5 flex items-end gap-2">
           <textarea
             ref={textareaRef}
             value={input}
@@ -212,10 +216,33 @@ const UserChat = () => {
             rows={1}
             style={{ maxHeight: 120, minHeight: 36 }}
           />
-          <Button type="submit" size="icon" disabled={!input.trim() || sending} className="shrink-0">
+          {messages.length >= 2 && requestId && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  type="button" size="icon" variant="ghost"
+                  className="shrink-0 h-8 w-8 text-muted-foreground hover:text-primary"
+                  onClick={() => setShowDocFactory(true)}
+                >
+                  <FileText className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="top">Generate Document</TooltipContent>
+            </Tooltip>
+          )}
+          <Button type="submit" size="icon" disabled={!input.trim() || sending} className="shrink-0 h-8 w-8">
             <Send className="h-4 w-4" />
           </Button>
         </form>
+        {showDocFactory && requestId && (
+          <DocumentFactoryButton
+            topic={requestTitle || "Legal Topic"}
+            requestId={requestId}
+            conversationContext={messages.slice(-4).map(m => m.content).join("\n")}
+            autoOpen
+            onClose={() => setShowDocFactory(false)}
+          />
+        )}
       </div>
     </DashboardLayout>
   );

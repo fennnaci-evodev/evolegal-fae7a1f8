@@ -17,13 +17,22 @@ interface DocumentFactoryProps {
   chatId?: string | null;
   requestId?: string | null;
   conversationContext?: string;
+  autoOpen?: boolean;
+  onClose?: () => void;
 }
 
-export function DocumentFactoryButton({ topic, chatId, requestId, conversationContext }: DocumentFactoryProps) {
-  const [open, setOpen] = useState(false);
+export function DocumentFactoryButton({ topic, chatId, requestId, conversationContext, autoOpen, onClose }: DocumentFactoryProps) {
+  const [open, setOpen] = useState(autoOpen ?? false);
   const [generating, setGenerating] = useState<string | null>(null);
   const [generatedUrl, setGeneratedUrl] = useState<string | null>(null);
   const [generatedTitle, setGeneratedTitle] = useState("");
+
+  const handleClose = () => {
+    if (!generating) {
+      setOpen(false);
+      onClose?.();
+    }
+  };
 
   const handleGenerate = async (docType: string) => {
     setGenerating(docType);
@@ -78,16 +87,18 @@ export function DocumentFactoryButton({ topic, chatId, requestId, conversationCo
 
   return (
     <>
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        onClick={() => setOpen(true)}
-        className="gap-2 text-xs border-primary/30 text-primary hover:bg-primary/10"
-      >
-        <FileText className="h-3.5 w-3.5" />
-        Generate General Document
-      </Button>
+      {!autoOpen && (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => setOpen(true)}
+          className="gap-2 text-xs border-primary/30 text-primary hover:bg-primary/10"
+        >
+          <FileText className="h-3.5 w-3.5" />
+          Generate General Document
+        </Button>
+      )}
 
       <AnimatePresence>
         {open && (
@@ -96,7 +107,7 @@ export function DocumentFactoryButton({ topic, chatId, requestId, conversationCo
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm"
-            onClick={() => { if (!generating) setOpen(false); }}
+            onClick={handleClose}
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
@@ -106,7 +117,7 @@ export function DocumentFactoryButton({ topic, chatId, requestId, conversationCo
               className="glass-strong w-full max-w-lg p-6 relative"
             >
               <button
-                onClick={() => { if (!generating) setOpen(false); }}
+                onClick={handleClose}
                 className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors"
               >
                 <X className="h-4 w-4" />
