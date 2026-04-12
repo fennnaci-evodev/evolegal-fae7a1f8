@@ -191,8 +191,8 @@ function normalizeTextValue(value: unknown): string {
     .trim();
 }
 
-function polishSentenceFlow(text: string): string {
-  return normalizeTextValue(text)
+function polishSentenceFlow(value: unknown): string {
+  return normalizeTextValue(value)
     .replace(/\byou should\b/gi, "it is often appropriate to")
     .replace(/\byou must\b/gi, "it is generally required to")
     .replace(/\bneed to\b/gi, "it is often necessary to")
