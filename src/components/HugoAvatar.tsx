@@ -8,10 +8,10 @@ interface HugoAvatarProps {
 
 /**
  * Hugo — Expert Manager avatar.
- * Crisp photo with an animated rotating neon cyan/purple gradient ring.
+ * Sharp photo with an animated rotating neon gradient ring.
  */
 export function HugoAvatar({ size = 40 }: HugoAvatarProps) {
-  const ringSize = Math.max(2, Math.round(size * 0.05));
+  const ringSize = Math.max(2, Math.round(size * 0.06));
   const imgSize = size - ringSize * 2;
   const id = `hugo-ring-${size}`;
 
@@ -50,7 +50,7 @@ export function HugoAvatar({ size = 40 }: HugoAvatarProps) {
         />
       </svg>
 
-      {/* Photo */}
+      {/* Photo — sharp rendering for small sizes */}
       <div
         className="overflow-hidden rounded-full"
         style={{
@@ -65,11 +65,12 @@ export function HugoAvatar({ size = 40 }: HugoAvatarProps) {
           alt="Hugo · Expert Manager"
           className="block h-full w-full rounded-full object-cover select-none"
           style={{
-            imageRendering: "crisp-edges",
-            objectPosition: "center 22%",
-            transform: "translateZ(0)",
+            objectPosition: "center 20%",
+            transform: "translateZ(0) scale(1.15)",
             backfaceVisibility: "hidden",
-            filter: "contrast(1.04) saturate(1.02)",
+            imageRendering: "auto",
+            filter: "contrast(1.08) saturate(1.05) sharpen(0)",
+            WebkitBackfaceVisibility: "hidden",
           }}
           draggable={false}
         />
