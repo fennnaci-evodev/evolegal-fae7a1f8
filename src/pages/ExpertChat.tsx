@@ -101,7 +101,16 @@ const ExpertChat = () => {
     }
   };
 
-  const handleNewChat = () => {
+  const handleEditLastMessage = async () => {
+    const text = await editLastMessage();
+    if (text) {
+      setInput(text);
+      setEditingMode(true);
+      textareaRef.current?.focus();
+    }
+  };
+
+
     startNewChat();
     navigate("/dashboard/chat", { replace: true });
   };
