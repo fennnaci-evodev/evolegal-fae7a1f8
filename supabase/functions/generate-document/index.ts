@@ -653,6 +653,7 @@ function sanitizeForPdf(text: string): string {
     .replace(/Â /g, " ")
     // Replace any remaining Unicode bullets
     .replace(/^[•●◦▪▸►¢→»]/gm, "-")
+    .replace(/^Date:\s*.*/gm, `Date: ${formatCurrentDate()}`)
     // Clean up excessive newlines
     .replace(/\n{3,}/g, "\n\n");
 }
@@ -664,14 +665,14 @@ interface PdfLine {
   type: "title" | "section" | "subsection" | "body" | "bullet" | "numbered" | "qa-q" | "qa-a" | "blank" | "meta";
 }
 
-function parseLinesFromContent(title: string, docType: string, topic: string, content: string): PdfLine[] {
+function parseLinesFromContent(title: string, docType: string, topic: string, content: string, currentDateLabel: string): PdfLine[] {
   const result: PdfLine[] = [];
 
   result.push({ text: title, type: "title" });
   result.push({ text: "", type: "blank" });
   result.push({ text: `Document Type: ${docType}`, type: "meta" });
   result.push({ text: `Topic: ${topic}`, type: "meta" });
-  result.push({ text: `Generated: ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}`, type: "meta" });
+  result.push({ text: `Date: ${currentDateLabel}`, type: "meta" });
   result.push({ text: "", type: "blank" });
   result.push({ text: "__HR__", type: "blank" });
   result.push({ text: "", type: "blank" });
@@ -734,7 +735,8 @@ function generatePDF(
   docType: string,
   topic: string,
   content: string,
-  disclaimer: string
+  disclaimer: string,
+  currentDateLabel: string
 ): Uint8Array {
   const pdfLines: string[] = [];
   const objects: { offset: number }[] = [];
@@ -773,20 +775,19 @@ function generatePDF(
   const MR = 60;
   const MT = 72;
   const MB = 90; // more room for footer disclaimer
-  const CW = PW - ML - MR;
-  const BODY_CHARS = 82;
+  const BODY_CHARS = 78;
   const BULLET_INDENT = 18;
-  const BULLET_CHARS = 76;
+  const BULLET_CHARS = 72;
   const NUM_INDENT = 22;
-  const NUM_CHARS = 74;
+  const NUM_CHARS = 70;
 
-  const LH_BODY = 15;
-  const LH_SECTION = 28;
-  const LH_SUBSECTION = 22;
-  const LH_BLANK = 10;
-  const LH_META = 14;
+  const LH_BODY = 17;
+  const LH_SECTION = 30;
+  const LH_SUBSECTION = 24;
+  const LH_BLANK = 12;
+  const LH_META = 16;
 
-  const structured = parseLinesFromContent(title, docType, topic, content);
+  const structured = parseLinesFromContent(title, docType, topic, content, currentDateLabel);
 
   interface RenderCmd {
     font: string; size: number; x: number; y: number; text: string;
