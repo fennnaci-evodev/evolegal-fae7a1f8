@@ -245,7 +245,7 @@ const SubmitRequest = () => {
         <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0.5} className="glass rounded-xl px-5 py-3 flex items-start gap-3">
           <Info className="h-4 w-4 text-primary mt-0.5 shrink-0" />
           <p className="text-xs text-muted-foreground leading-relaxed">
-            Hugo and our Experts research your topic thoroughly and deliver detailed, structured insights. Typical turnaround: 4 hours for Pro, 8 hours for Basic.
+            Hugo and our Experts research your topic thoroughly and deliver detailed, structured insights. You will get your answer as soon as possible. It always depends on the complexity of your case. Typical turnaround: 4 hours for Pro, 8 hours for Basic.
           </p>
         </motion.div>
 

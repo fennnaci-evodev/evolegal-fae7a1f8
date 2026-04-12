@@ -77,7 +77,7 @@ export function DocumentFactoryButton({ topic, chatId, requestId, conversationCo
 
       setGeneratedUrl(data.file_url);
       setGeneratedTitle(data.title);
-      toast.success("Document generated successfully!");
+      toast.success("Here is a general informational template that many people find useful as a starting point.");
     } catch (err: any) {
       toast.error(err.message || "Something went wrong.");
     } finally {
@@ -124,9 +124,9 @@ export function DocumentFactoryButton({ topic, chatId, requestId, conversationCo
               </button>
 
               <div className="mb-5">
-                <h3 className="text-lg font-display font-semibold">Document Factory</h3>
+                <h3 className="text-lg font-display font-semibold">Generate Document</h3>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Generate a general informational document about: <span className="text-foreground font-medium">{topic}</span>
+                  Select a document type for: <span className="text-foreground font-medium">{topic}</span>
                 </p>
               </div>
 
