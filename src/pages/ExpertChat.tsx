@@ -5,7 +5,7 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { ScalesOfJustice } from "@/components/ScalesOfJustice";
 import { HugoAvatar } from "@/components/HugoAvatar";
 import { Button } from "@/components/ui/button";
-import { Send, User, Info, Mic, MicOff, Plus, Trash2, MessageCircle, FileText, ChevronDown, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { Send, User, Info, Mic, MicOff, Plus, Trash2, MessageCircle, FileText, ChevronDown, PanelLeftClose, PanelLeftOpen, Pencil } from "lucide-react";
 import { HugoFeedbackButtons } from "@/components/HugoFeedbackButtons";
 import { DocumentFactoryButton } from "@/components/DocumentFactoryButton";
 import { isRateLimited } from "@/lib/security";
@@ -32,12 +32,14 @@ const ExpertChat = () => {
     currentChatId,
     currentTitle,
     sendMessage,
+    editLastMessage,
     startNewChat,
     setCurrentChatId,
     loadMessages,
   } = useHugoChat(paramChatId || null);
 
   const [input, setInput] = useState("");
+  const [editingMode, setEditingMode] = useState(false);
   const [listening, setListening] = useState(false);
   const [chatList, setChatList] = useState<HugoChat[]>([]);
   const [showSidebar, setShowSidebar] = useState(false);
@@ -90,6 +92,7 @@ const ExpertChat = () => {
 
     const text = input;
     setInput("");
+    setEditingMode(false);
     const result = await sendMessage(text);
 
     // Navigate to the chat URL if we just created a new chat
@@ -98,7 +101,16 @@ const ExpertChat = () => {
     }
   };
 
-  const handleNewChat = () => {
+  const handleEditLastMessage = async () => {
+    const text = await editLastMessage();
+    if (text) {
+      setInput(text);
+      setEditingMode(true);
+      textareaRef.current?.focus();
+    }
+  };
+
+
     startNewChat();
     navigate("/dashboard/chat", { replace: true });
   };
@@ -298,12 +310,15 @@ const ExpertChat = () => {
             )}
 
             <AnimatePresence>
-              {messages.map((msg) => (
+              {messages.map((msg, idx) => {
+                const isLastUserMsg = msg.role === "user" && idx === messages.length - 1 ||
+                  (msg.role === "user" && idx === messages.length - 2 && messages[messages.length - 1]?.role === "assistant");
+                return (
                 <motion.div
                   key={msg.id}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className={`flex gap-3 ${msg.role === "user" ? "justify-end" : ""}`}
+                  className={`group/msg flex gap-3 ${msg.role === "user" ? "justify-end" : ""}`}
                 >
                   {msg.role === "assistant" && <HugoAvatar size={48} animate={false} talking={streaming && msg.id === messages[messages.length - 1]?.id} />}
                   <div className="flex flex-col">
@@ -314,6 +329,14 @@ const ExpertChat = () => {
                     }`}>
                       {msg.content}
                     </div>
+                    {msg.role === "user" && isLastUserMsg && !streaming && (
+                      <button
+                        onClick={handleEditLastMessage}
+                        className="self-end mt-1 flex items-center gap-1 text-[10px] text-muted-foreground/50 hover:text-muted-foreground transition-opacity opacity-0 group-hover/msg:opacity-100"
+                      >
+                        <Pencil className="h-3 w-3" /> Edit
+                      </button>
+                    )}
                     {msg.role === "assistant" && user && currentChatId && (
                       <HugoFeedbackButtons messageId={msg.id} chatId={currentChatId} userId={user.id} />
                     )}
@@ -324,7 +347,8 @@ const ExpertChat = () => {
                     </div>
                   )}
                 </motion.div>
-              ))}
+                );
+              })}
             </AnimatePresence>
 
             {streaming && messages[messages.length - 1]?.role === "user" && (
@@ -340,6 +364,13 @@ const ExpertChat = () => {
           </div>
 
           {/* Input */}
+          {editingMode && (
+            <div className="flex items-center gap-2 px-3 py-1.5 text-[11px] text-muted-foreground">
+              <Pencil className="h-3 w-3" />
+              <span>Editing message</span>
+              <button onClick={() => { setEditingMode(false); setInput(""); }} className="ml-auto hover:text-foreground">Cancel</button>
+            </div>
+          )}
           <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="glass-strong shimmer-chat-form p-2.5 flex items-end gap-2 relative">
             <Button
               type="button" size="icon" variant="ghost"
