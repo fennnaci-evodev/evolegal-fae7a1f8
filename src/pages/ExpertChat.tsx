@@ -92,6 +92,7 @@ const ExpertChat = () => {
 
     const text = input;
     setInput("");
+    setEditingMode(false);
     const result = await sendMessage(text);
 
     // Navigate to the chat URL if we just created a new chat
