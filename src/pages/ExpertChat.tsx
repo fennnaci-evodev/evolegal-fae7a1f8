@@ -310,12 +310,15 @@ const ExpertChat = () => {
             )}
 
             <AnimatePresence>
-              {messages.map((msg) => (
+              {messages.map((msg, idx) => {
+                const isLastUserMsg = msg.role === "user" && idx === messages.length - 1 ||
+                  (msg.role === "user" && idx === messages.length - 2 && messages[messages.length - 1]?.role === "assistant");
+                return (
                 <motion.div
                   key={msg.id}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className={`flex gap-3 ${msg.role === "user" ? "justify-end" : ""}`}
+                  className={`group/msg flex gap-3 ${msg.role === "user" ? "justify-end" : ""}`}
                 >
                   {msg.role === "assistant" && <HugoAvatar size={48} animate={false} talking={streaming && msg.id === messages[messages.length - 1]?.id} />}
                   <div className="flex flex-col">
@@ -326,6 +329,14 @@ const ExpertChat = () => {
                     }`}>
                       {msg.content}
                     </div>
+                    {msg.role === "user" && isLastUserMsg && !streaming && (
+                      <button
+                        onClick={handleEditLastMessage}
+                        className="self-end mt-1 flex items-center gap-1 text-[10px] text-muted-foreground/50 hover:text-muted-foreground transition-opacity opacity-0 group-hover/msg:opacity-100"
+                      >
+                        <Pencil className="h-3 w-3" /> Edit
+                      </button>
+                    )}
                     {msg.role === "assistant" && user && currentChatId && (
                       <HugoFeedbackButtons messageId={msg.id} chatId={currentChatId} userId={user.id} />
                     )}
@@ -336,7 +347,8 @@ const ExpertChat = () => {
                     </div>
                   )}
                 </motion.div>
-              ))}
+                );
+              })}
             </AnimatePresence>
 
             {streaming && messages[messages.length - 1]?.role === "user" && (
