@@ -438,7 +438,8 @@ serve(async (req) => {
     }
 
     const docConfig = DOCUMENT_TYPES[document_type];
-    const title = `${docConfig.label}: ${topic}`;
+    const fallbackTitle = `${docConfig.label}: ${topic}`;
+    const currentDateLabel = formatCurrentDate();
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
@@ -455,12 +456,12 @@ serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: DOCUMENT_MODEL,
         messages: [
           { role: "system", content: GENERATOR_SYSTEM },
           {
             role: "user",
-            content: `DOCUMENT TYPE: ${docConfig.label}\nTOPIC: ${topic}\n\n${docConfig.prompt}${contextNote}`,
+            content: `DOCUMENT TYPE: ${docConfig.label}\nTOPIC: ${topic}\nCURRENT DATE: ${currentDateLabel}\n\nRequired document order:\n1. Title\n2. Introduction\n3. Key Concepts\n4. Important Considerations\n5. Common Questions\n6. Further Resources\n7. Prepared By\n8. Date\n\n${docConfig.prompt}${contextNote}`,
           },
         ],
         temperature: 0.25,
@@ -496,9 +497,10 @@ serve(async (req) => {
       );
     }
 
-    if (content.trim().startsWith("RISK_ESCALATION:")) {
+    const generatedPayload = extractStructuredPayload(content, fallbackTitle, currentDateLabel);
+    if (generatedPayload.needsExpertReview) {
       return new Response(
-        JSON.stringify({ escalated: true, message: content.replace("RISK_ESCALATION:", "").trim() }),
+        JSON.stringify({ escalated: true, message: generatedPayload.expertReviewMessage }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -511,40 +513,49 @@ serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: DOCUMENT_MODEL,
         messages: [
           { role: "system", content: REVIEWER_SYSTEM },
           {
             role: "user",
-            content: `DOCUMENT TYPE: ${docConfig.label}\nTOPIC: ${topic}\n\nDOCUMENT TO REVIEW:\n\n${content}`,
+            content: `DOCUMENT TYPE: ${docConfig.label}\nTOPIC: ${topic}\nCURRENT DATE: ${currentDateLabel}\n\nDOCUMENT TO REVIEW:\n\n${JSON.stringify(generatedPayload)}`,
           },
         ],
         temperature: 0.1,
       }),
     });
 
-    let finalContent = content;
+    let finalDocument = generatedPayload.document;
     if (reviewResponse.ok) {
       const reviewData = await reviewResponse.json();
       const reviewed = reviewData.choices?.[0]?.message?.content || "";
       if (reviewed.trim()) {
-        if (reviewed.trim().startsWith("RISK_ESCALATION:")) {
+        const reviewedPayload = extractStructuredPayload(reviewed, fallbackTitle, currentDateLabel);
+        if (reviewedPayload.needsExpertReview) {
           return new Response(
-            JSON.stringify({ escalated: true, message: reviewed.replace("RISK_ESCALATION:", "").trim() }),
+            JSON.stringify({ escalated: true, message: reviewedPayload.expertReviewMessage }),
             { headers: { ...corsHeaders, "Content-Type": "application/json" } }
           );
         }
-        finalContent = reviewed;
+        finalDocument = reviewedPayload.document;
       }
     } else {
       console.error("Document review failed, using original:", reviewResponse.status);
     }
 
     // ── POST-PROCESS ────────────────────────────────────────────────
-    finalContent = sanitizeForPdf(finalContent);
+    if (hasLuxuryQualityIssues(finalDocument, currentDateLabel)) {
+      return new Response(
+        JSON.stringify({ escalated: true, message: EXPERT_REVIEW_MESSAGE }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const finalTitle = finalDocument.title || fallbackTitle;
+    const finalContent = sanitizeForPdf(buildDocumentContent(finalDocument));
 
     // ── BUILD PDF ───────────────────────────────────────────────────
-    const pdfBytes = generatePDF(title, docConfig.label, topic, finalContent, DISCLAIMER);
+    const pdfBytes = generatePDF(finalTitle, docConfig.label, topic, finalContent, DISCLAIMER, currentDateLabel);
 
     // Upload to storage
     const timestamp = Date.now();
@@ -574,7 +585,7 @@ serve(async (req) => {
       chat_id: chat_id || null,
       request_id: request_id || null,
       document_type,
-      title,
+      title: finalTitle,
       topic,
       file_path: filePath,
       file_url: urlData.publicUrl,
@@ -585,7 +596,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         success: true,
-        title,
+        title: finalTitle,
         file_url: urlData.publicUrl,
         document_type: docConfig.label,
       }),
