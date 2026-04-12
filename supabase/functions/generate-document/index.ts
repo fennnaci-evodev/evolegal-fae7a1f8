@@ -153,9 +153,9 @@ CONTENT QUALITY:
 - If data is missing, use {{Placeholder Name}} -- never invent or assume data.
 
 RISK ASSESSMENT:
-- If the topic involves active legal proceedings, imminent deadlines, criminal matters, or requests for specific legal strategy, output ONLY:
-  "RISK_ESCALATION: This topic involves complexity that warrants expert review. We recommend connecting with an EvoLegal Expert."
-- For general informational topics, proceed normally.
+- Almost ALL topics are safe to generate a general informational document about. Proceed normally for any general topic.
+- Output RISK_ESCALATION ONLY if the user explicitly asks you to draft a document for an active court case with real party names and case numbers. General topics like "Ukrainian law", "tenant rights", "crypto regulation", "family law" etc. are NEVER grounds for escalation.
+- When in doubt, ALWAYS proceed with generation. The document is general information, not legal advice.
 
 OUTPUT:
 - Output ONLY the document content. No preamble, no explanation, no commentary.`;
@@ -199,8 +199,8 @@ Your job is to take the document below and produce a polished, final version. Ap
    - Verify each section has substantive content -- no empty or skeleton sections.
 
 6. RISK CHECK:
-   - If the document contains specific legal strategy or advice for a particular case, output ONLY:
-     "RISK_ESCALATION: This document requires expert review."
+   - Almost all documents are safe. Only escalate if the document contains real party names and real case numbers for an active court proceeding.
+   - General informational content is NEVER grounds for escalation. When in doubt, proceed normally.
 
 OUTPUT: The complete, polished document only. No review notes, no commentary, no explanations. Use ONLY plain ASCII characters.`;
 
