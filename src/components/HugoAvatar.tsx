@@ -8,12 +8,12 @@ interface HugoAvatarProps {
 
 /**
  * Hugo — Expert Manager avatar.
- * Crisp photo with a clean neon cyan/purple gradient ring.
- * No outer glow to avoid clipping in scrollable containers.
+ * Crisp photo with an animated rotating neon cyan/purple gradient ring.
  */
 export function HugoAvatar({ size = 40 }: HugoAvatarProps) {
   const ringSize = Math.max(2, Math.round(size * 0.05));
   const imgSize = size - ringSize * 2;
+  const id = `hugo-ring-${size}`;
 
   return (
     <div
@@ -21,14 +21,36 @@ export function HugoAvatar({ size = 40 }: HugoAvatarProps) {
       style={{
         width: size,
         height: size,
-        borderRadius: "50%",
-        background:
-          "linear-gradient(hsl(var(--background)), hsl(var(--background))) padding-box, conic-gradient(from 190deg, hsl(var(--primary) / 0.95), hsl(var(--accent) / 0.52), hsl(var(--primary) / 0.95)) border-box",
-        border: `${ringSize}px solid transparent`,
         transform: "translateZ(0)",
         backfaceVisibility: "hidden",
       }}
     >
+      {/* Rotating gradient ring */}
+      <svg
+        className="absolute inset-0 animate-[hugo-spin_6s_linear_infinite]"
+        width={size}
+        height={size}
+        viewBox={`0 0 ${size} ${size}`}
+        style={{ transform: "translateZ(0)" }}
+      >
+        <defs>
+          <linearGradient id={id} x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="hsl(var(--primary) / 0.95)" />
+            <stop offset="50%" stopColor="hsl(var(--accent) / 0.55)" />
+            <stop offset="100%" stopColor="hsl(var(--primary) / 0.95)" />
+          </linearGradient>
+        </defs>
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={(size - ringSize) / 2}
+          fill="none"
+          stroke={`url(#${id})`}
+          strokeWidth={ringSize}
+        />
+      </svg>
+
+      {/* Photo */}
       <div
         className="overflow-hidden rounded-full"
         style={{

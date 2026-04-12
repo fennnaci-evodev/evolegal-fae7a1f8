@@ -386,3 +386,14 @@ img,
     animation: none;
   }
 }
+
+@keyframes hugo-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-\[hugo-spin_6s_linear_infinite\] {
+    animation: none !important;
+  }
+}
