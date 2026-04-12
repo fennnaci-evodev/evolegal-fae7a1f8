@@ -731,6 +731,16 @@ function pdfEncode(s: string): string {
   return out.replace(/\\/g, "\\\\").replace(/\(/g, "\\(").replace(/\)/g, "\\)");
 }
 
+function pdfHeaderTitle(title: string): string[] {
+  const cleaned = sanitizeForPdf(title).replace(/^TITLE:\s*/i, "").trim();
+  if (!cleaned) return ["Document"];
+  return cleaned.length > 96
+    ? [cleaned.slice(0, 48).trim(), cleaned.slice(48, 96).trim()]
+    : cleaned.length > 48
+      ? [cleaned.slice(0, 48).trim(), cleaned.slice(48).trim()]
+      : [cleaned];
+}
+
 function generatePDF(
   title: string,
   docType: string,
@@ -963,7 +973,7 @@ function generatePDF(
   for (let p = 0; p < totalPages; p++) {
     const page = pages[p];
     let stream = "";
-    const headerTitle = wrapText(title, 52).slice(0, 2);
+    const headerTitle = pdfHeaderTitle(title);
 
     // ── HEADER: Dark band with logo ──────────────────────────────────
     const headerH = 48;
