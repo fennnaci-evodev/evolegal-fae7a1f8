@@ -10,27 +10,28 @@ const corsHeaders = {
 const DISCLAIMER =
   "This is a general informational template only. It is not legal advice and does not create an attorney-client relationship. Laws vary by jurisdiction. Always consult a licensed professional for your specific situation.";
 
+// ── Document type definitions ──────────────────────────────────────
 const DOCUMENT_TYPES: Record<string, { label: string; prompt: string }> = {
   overview: {
     label: "Information Overview",
-    prompt: `Produce a professional Information Overview document. Follow this exact structure:
+    prompt: `Produce a luxury-quality Information Overview document. Follow this exact structure:
 
-TITLE: [Clear, professional title]
+TITLE: [Elegant, precise title — e.g. "Information Overview: [Topic]"]
 
 SECTION: Introduction
-A brief, neutral paragraph introducing the topic and its relevance. State that this is general information only.
+A brief, calm, neutral paragraph introducing the topic and its relevance. State that this document provides general educational information only.
 
-SECTION: Key Concepts and Principles
-Organize into clearly labeled subsections. Each subsection should have a concise heading followed by a well-written paragraph. Use numbered or lettered items only where a true list is appropriate.
+SECTION: Key Concepts
+Organize into clearly labeled subsections using SUBSECTION: prefix. Each subsection should contain well-crafted paragraphs with excellent flow. Cover all essential aspects thoroughly.
 
 SECTION: Important Considerations
-Cover practical factors, common pitfalls, and things to be aware of. Use short, focused paragraphs with clear subheadings.
+Cover practical factors, common pitfalls, and critical nuances. Use focused paragraphs with clear SUBSECTION: headings where appropriate. Use bullet points (with "- " prefix) only where a true list adds clarity.
 
 SECTION: Common Questions
-Present 3-5 frequently asked questions with thoughtful, general answers. Format as "Q:" followed by "A:" paragraphs.
+Present 3-5 thoughtful questions with comprehensive, neutral answers. Format each as "Q:" followed by "A:" paragraphs.
 
 SECTION: Further Resources
-List general categories of resources (not specific URLs) that may be helpful.
+List general categories of resources (not specific URLs) that may be helpful for further research.
 
 SECTION: Prepared By
 EvoLegal Experts
@@ -38,24 +39,24 @@ Date: {{Date}}`,
   },
   checklist: {
     label: "Preparation Checklist",
-    prompt: `Produce a professional Preparation Checklist document. Follow this exact structure:
+    prompt: `Produce a luxury-quality Preparation Checklist document. Follow this exact structure:
 
-TITLE: [Clear, professional title]
+TITLE: [Elegant, precise title]
 
 SECTION: Purpose
-A brief paragraph explaining what this checklist helps prepare for.
+A brief paragraph explaining what this checklist helps prepare for and who would benefit from it.
 
 SECTION: Documents to Gather
-A numbered list of documents or records to collect, with brief descriptions.
+A numbered list of documents or records to collect, each with a brief explanatory note.
 
-SECTION: Steps to Complete
-A numbered sequence of actions to take, each with a one-sentence explanation.
+SECTION: Actions to Complete
+A numbered sequence of actions to take, each with a concise explanation of its purpose.
 
 SECTION: Timeline
-Key milestones with {{Date}} placeholders.
+Key milestones with {{Date}} placeholders where dates would be inserted.
 
 SECTION: Notes
-Space for personal notes: [YOUR NOTES HERE]
+Space for personal notes: [REQUIRES USER INPUT: Your notes here]
 
 SECTION: Prepared By
 EvoLegal Experts
@@ -63,9 +64,9 @@ Date: {{Date}}`,
   },
   template: {
     label: "Template Outline",
-    prompt: `Produce a professional Template Outline document — a blank framework with placeholder fields. Follow this exact structure:
+    prompt: `Produce a luxury-quality Template Outline document — a blank framework with placeholder fields. Follow this exact structure:
 
-TITLE: [Clear, professional title]
+TITLE: [Elegant, precise title]
 
 SECTION: Parties
 {{Party A Full Name}}
@@ -74,10 +75,10 @@ SECTION: Parties
 {{Party B Address}}
 
 SECTION: Background
-[Brief recital of the purpose of this document — keep generic]
+[Brief recital of the purpose of this document — keep generic and neutral]
 
 SECTION: Terms and Provisions
-Numbered sections with clear headings. Each provision should have placeholder fields where specific terms would be inserted.
+Numbered sections with clear headings. Each provision should have placeholder fields using {{Placeholder Name}} syntax where specific terms would be inserted.
 
 SECTION: General Provisions
 Standard protective clauses (Governing Law, Severability, Entire Agreement, Amendments, Notices) with {{Jurisdiction}} placeholders.
@@ -92,33 +93,109 @@ Date: {{Date}}`,
   },
   comparative: {
     label: "Comparative Guide",
-    prompt: `Produce a professional Comparative Guide document. Follow this exact structure:
+    prompt: `Produce a luxury-quality Comparative Guide document. Follow this exact structure:
 
-TITLE: [Clear, professional title]
+TITLE: [Elegant, precise title]
 
 SECTION: Introduction
-A brief paragraph explaining what is being compared and why.
+A brief paragraph explaining what is being compared and why this comparison is valuable.
 
 SECTION: Overview of Approaches
-Describe each approach or framework in its own clearly labeled subsection.
+Describe each approach or framework in its own clearly labeled SUBSECTION:. Provide balanced, thorough coverage.
 
 SECTION: Key Differences
-Organized comparison of the most significant differences, with clear subheadings.
+Organized comparison of the most significant differences, with clear SUBSECTION: headings for each dimension of comparison.
 
 SECTION: Similarities
-Common ground between the approaches.
+Common ground between the approaches, clearly articulated.
 
 SECTION: Practical Considerations
 Guidance on factors that may influence which approach applies, using {{Jurisdiction}} placeholders where relevant.
 
 SECTION: Summary
-A neutral, balanced concluding paragraph.
+A neutral, balanced concluding paragraph synthesizing the key takeaways.
 
 SECTION: Prepared By
 EvoLegal Experts
 Date: {{Date}}`,
   },
 };
+
+// ── System prompts ─────────────────────────────────────────────────
+
+const GENERATOR_SYSTEM = `You are the EvoLegal Document Writer — a senior legal information specialist who produces calm, elegant, trustworthy documents that feel like they come from a premium law firm.
+
+VOICE AND TONE:
+- Write in a calm, confident, professional voice — never energetic, robotic, or overly formal.
+- Every sentence should feel considered and purposeful. Favor clarity over complexity.
+- Use formal but accessible language — a well-educated non-lawyer should understand every paragraph.
+- Aim for the reading experience of a high-end legal briefing, not a textbook.
+
+CRITICAL FORMATTING RULES:
+- Use "SECTION:" prefix for all main section headings.
+- Use "SUBSECTION:" prefix for subsection headings.
+- For numbered items, use "1.", "2.", "3." at the start of lines.
+- For bullet points, use a simple dash "- " at the start of lines.
+- For Q&A, use "Q:" and "A:" prefixes.
+- NEVER use markdown syntax: no **, no *, no #, no __, no backticks.
+- NEVER use special Unicode bullets. Only use "- " for bullets.
+- Write clean plain text with the SECTION:/SUBSECTION: markers only.
+- Do NOT include a disclaimer in the body — the PDF system adds it automatically.
+- Do NOT use the word "step" or "steps" anywhere. Do NOT use "you should", "you must", "need to", "have to".
+
+CONTENT QUALITY:
+- Be thorough but never repetitive. Each paragraph should add distinct value.
+- Use excellent paragraph flow — each section should read like well-crafted prose, not a list.
+- Where lists are used, keep them purposeful and well-explained.
+- Replace all variables with {{Placeholder Name}} syntax.
+- If data is missing, use {{Placeholder Name}} — never invent or assume data.
+
+RISK ASSESSMENT:
+- If the topic involves active legal proceedings, imminent deadlines, criminal matters, or requests for specific legal strategy, output ONLY:
+  "RISK_ESCALATION: This topic involves complexity that warrants expert review. We recommend connecting with an EvoLegal Expert."
+- For general informational topics, proceed normally.
+
+OUTPUT:
+- Output ONLY the document content. No preamble, no explanation, no commentary.`;
+
+const REVIEWER_SYSTEM = `You are the EvoLegal Document Reviewer — an independent senior editor ensuring every document meets luxury publication standards.
+
+Your job is to take the document below and produce a polished, final version. Apply these fixes silently:
+
+1. FORMATTING CLEANUP:
+   - Remove ALL markdown artifacts: **, *, #, __, backticks — replace with clean plain text.
+   - Ensure all section headers use "SECTION:" prefix exactly.
+   - Ensure all subsection headers use "SUBSECTION:" prefix exactly.
+   - Ensure bullet points use only "- " (dash space).
+   - Ensure numbered items use "1.", "2.", "3." format.
+   - Remove any broken characters, encoding artifacts, or Unicode bullets.
+   - Remove any repeated or redundant sections.
+   - Remove the words "step", "steps", "you should", "you must", "need to", "have to" — rephrase naturally.
+
+2. CONTENT QUALITY:
+   - Tighten verbose or repetitive language — every sentence must earn its place.
+   - Ensure smooth logical flow between sections and paragraphs.
+   - Add missing essential content if a section feels thin.
+   - Remove any content that could be interpreted as personalized legal advice.
+   - Verify all placeholders use {{Placeholder Name}} syntax.
+   - Ensure the writing feels calm, confident, and expertly crafted.
+
+3. TONE:
+   - Ensure calm, professional, neutral voice throughout — like a premium law firm overview.
+   - Remove any energetic, chatty, casual, or marketing language.
+   - The document should feel trustworthy and authoritative without being stiff.
+
+4. STRUCTURE CHECK:
+   - Verify sections appear in the correct order: Title, Introduction, Key Concepts/Main Content, Important Considerations, Common Questions (if relevant), Further Resources, Prepared By.
+   - Verify each section has substantive content — no empty or skeleton sections.
+
+5. RISK CHECK:
+   - If the document contains specific legal strategy or advice for a particular case, output ONLY:
+     "RISK_ESCALATION: This document requires expert review."
+
+OUTPUT: The complete, polished document only. No review notes, no commentary, no explanations.`;
+
+// ── Main handler ───────────────────────────────────────────────────
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -185,39 +262,7 @@ serve(async (req) => {
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          {
-            role: "system",
-            content: `You are the EvoLegal Document Writer — a professional legal information writer that produces clean, well-structured general informational documents.
-
-VOICE AND TONE:
-- Write in calm, professional, neutral legal English.
-- Never use exclamation marks, energetic language, or marketing speak.
-- Be concise but thorough. Every sentence should add value.
-- Use formal but accessible language — understandable by non-lawyers.
-
-CRITICAL FORMATTING RULES:
-- Use "SECTION:" prefix for all main section headings (e.g., "SECTION: Introduction").
-- Use "SUBSECTION:" prefix for subsection headings (e.g., "SUBSECTION: Community Property States").
-- For numbered items, use "1.", "2.", "3." at the start of lines.
-- For bullet points, use a simple dash "- " at the start of lines.
-- For Q&A, use "Q:" and "A:" prefixes.
-- NEVER use markdown syntax: no **, no *, no #, no __, no \`\`.
-- NEVER use special Unicode bullets like bullet characters. Only use "- " for bullets.
-- Write clean plain text with the SECTION:/SUBSECTION: markers only.
-- Do NOT include a disclaimer in the body — the PDF system adds it automatically.
-
-PLACEHOLDER RULES:
-- Use {{Placeholder Name}} for all variable fields.
-- If data is missing, use {{Placeholder Name}} — never invent or assume data.
-
-RISK ASSESSMENT:
-- If the topic involves active legal proceedings, imminent deadlines, criminal matters, or requests for specific legal strategy, output ONLY:
-  "RISK_ESCALATION: This topic involves complexity that warrants expert review. We recommend connecting with an EvoLegal Expert."
-- For general informational topics, proceed normally.
-
-OUTPUT:
-- Output ONLY the document content. No preamble, no explanation, no commentary.`,
-          },
+          { role: "system", content: GENERATOR_SYSTEM },
           {
             role: "user",
             content: `DOCUMENT TYPE: ${docConfig.label}\nTOPIC: ${topic}\n\n${docConfig.prompt}${contextNote}`,
@@ -258,10 +303,7 @@ OUTPUT:
 
     if (content.trim().startsWith("RISK_ESCALATION:")) {
       return new Response(
-        JSON.stringify({
-          escalated: true,
-          message: content.replace("RISK_ESCALATION:", "").trim(),
-        }),
+        JSON.stringify({ escalated: true, message: content.replace("RISK_ESCALATION:", "").trim() }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -276,38 +318,7 @@ OUTPUT:
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          {
-            role: "system",
-            content: `You are the EvoLegal Document Reviewer — an independent quality editor.
-
-Your job is to take the document below and produce a polished, final version. Apply these fixes silently:
-
-1. FORMATTING CLEANUP:
-   - Remove ALL markdown artifacts: **, *, #, __, \`\` — replace with clean plain text.
-   - Ensure all section headers use "SECTION:" prefix.
-   - Ensure all subsection headers use "SUBSECTION:" prefix.
-   - Ensure bullet points use only "- " (dash space).
-   - Ensure numbered items use "1.", "2.", "3." format.
-   - Remove any broken characters, encoding artifacts, or Unicode bullets.
-   - Remove any repeated or redundant sections.
-
-2. CONTENT QUALITY:
-   - Tighten verbose or repetitive language.
-   - Ensure logical flow between sections.
-   - Add missing essential content if a section feels thin.
-   - Remove any content that could be interpreted as personalized legal advice.
-   - Verify all placeholders use {{Placeholder}} syntax.
-
-3. TONE:
-   - Ensure calm, professional, neutral voice throughout.
-   - Remove any energetic, chatty, or marketing language.
-
-4. RISK CHECK:
-   - If the document contains specific legal strategy or advice for a particular case, output ONLY:
-     "RISK_ESCALATION: This document requires expert review."
-
-OUTPUT: The complete, polished document only. No review notes, no commentary.`,
-          },
+          { role: "system", content: REVIEWER_SYSTEM },
           {
             role: "user",
             content: `DOCUMENT TYPE: ${docConfig.label}\nTOPIC: ${topic}\n\nDOCUMENT TO REVIEW:\n\n${content}`,
@@ -324,10 +335,7 @@ OUTPUT: The complete, polished document only. No review notes, no commentary.`,
       if (reviewed.trim()) {
         if (reviewed.trim().startsWith("RISK_ESCALATION:")) {
           return new Response(
-            JSON.stringify({
-              escalated: true,
-              message: reviewed.replace("RISK_ESCALATION:", "").trim(),
-            }),
+            JSON.stringify({ escalated: true, message: reviewed.replace("RISK_ESCALATION:", "").trim() }),
             { headers: { ...corsHeaders, "Content-Type": "application/json" } }
           );
         }
@@ -337,7 +345,7 @@ OUTPUT: The complete, polished document only. No review notes, no commentary.`,
       console.error("Document review failed, using original:", reviewResponse.status);
     }
 
-    // ── POST-PROCESS: strip any remaining markdown ──────────────────
+    // ── POST-PROCESS ────────────────────────────────────────────────
     finalContent = stripMarkdown(finalContent);
 
     // ── BUILD PDF ───────────────────────────────────────────────────
@@ -350,10 +358,7 @@ OUTPUT: The complete, polished document only. No review notes, no commentary.`,
 
     const { error: uploadError } = await supabase.storage
       .from("generated-documents")
-      .upload(filePath, pdfBytes, {
-        contentType: "application/pdf",
-        upsert: false,
-      });
+      .upload(filePath, pdfBytes, { contentType: "application/pdf", upsert: false });
 
     if (uploadError) {
       console.error("Upload error:", uploadError);
@@ -363,9 +368,7 @@ OUTPUT: The complete, polished document only. No review notes, no commentary.`,
       );
     }
 
-    const { data: urlData } = supabase.storage
-      .from("generated-documents")
-      .getPublicUrl(filePath);
+    const { data: urlData } = supabase.storage.from("generated-documents").getPublicUrl(filePath);
 
     const userClient = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!, {
       global: { headers: { Authorization: `Bearer ${token}` } },
@@ -382,9 +385,7 @@ OUTPUT: The complete, polished document only. No review notes, no commentary.`,
       file_url: urlData.publicUrl,
     });
 
-    if (insertError) {
-      console.error("Insert error:", insertError);
-    }
+    if (insertError) console.error("Insert error:", insertError);
 
     return new Response(
       JSON.stringify({
@@ -407,24 +408,19 @@ OUTPUT: The complete, polished document only. No review notes, no commentary.`,
 // ── Markdown stripper ──────────────────────────────────────────────
 function stripMarkdown(text: string): string {
   return text
-    // Remove bold/italic markdown
     .replace(/\*\*\*(.+?)\*\*\*/g, "$1")
     .replace(/\*\*(.+?)\*\*/g, "$1")
     .replace(/\*(.+?)\*/g, "$1")
     .replace(/__(.+?)__/g, "$1")
     .replace(/_(.+?)_/g, "$1")
-    // Remove markdown headings
     .replace(/^#{1,6}\s+/gm, "")
-    // Remove backticks
     .replace(/`(.+?)`/g, "$1")
-    // Clean up bullet artifacts
     .replace(/^[•●◦▪▸►¢]\s*/gm, "- ")
-    // Normalize multiple blank lines
     .replace(/\n{3,}/g, "\n\n");
 }
 
 // ── PDF Generator ──────────────────────────────────────────────────
-// Produces a professional, branded PDF with proper visual hierarchy.
+// Luxury-quality branded PDF with the EvoLegal identity.
 
 interface PdfLine {
   text: string;
@@ -434,12 +430,16 @@ interface PdfLine {
 function parseLinesFromContent(title: string, docType: string, topic: string, content: string): PdfLine[] {
   const result: PdfLine[] = [];
 
-  // Meta header
+  // Meta header block
   result.push({ text: title, type: "title" });
   result.push({ text: "", type: "blank" });
   result.push({ text: `Document Type: ${docType}`, type: "meta" });
   result.push({ text: `Topic: ${topic}`, type: "meta" });
   result.push({ text: `Generated: ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}`, type: "meta" });
+  result.push({ text: "", type: "blank" });
+
+  // Horizontal rule after meta
+  result.push({ text: "__HR__", type: "blank" });
   result.push({ text: "", type: "blank" });
 
   const lines = content.split("\n");
@@ -492,7 +492,6 @@ function generatePDF(
     return s.replace(/\\/g, "\\\\").replace(/\(/g, "\\(").replace(/\)/g, "\\)");
   }
 
-  // Word-wrap helper
   function wrapText(text: string, maxChars: number): string[] {
     if (text.length <= maxChars) return [text];
     const words = text.split(/\s+/);
@@ -510,31 +509,28 @@ function generatePDF(
     return result;
   }
 
-  // Layout constants
-  const PW = 612; // Letter width
-  const PH = 792; // Letter height
-  const ML = 54;  // Left margin
-  const MR = 54;  // Right margin
-  const MT = 70;  // Top margin (below header)
-  const MB = 90;  // Bottom margin (above footer)
-  const CW = PW - ML - MR; // Content width
-  const BODY_CHARS = 85;
-  const BULLET_INDENT = 16;
-  const BULLET_CHARS = 78;
-  const NUM_INDENT = 20;
-  const NUM_CHARS = 76;
+  // Layout constants — generous whitespace for luxury feel
+  const PW = 612;
+  const PH = 792;
+  const ML = 60;
+  const MR = 60;
+  const MT = 72;
+  const MB = 85;
+  const CW = PW - ML - MR;
+  const BODY_CHARS = 82;
+  const BULLET_INDENT = 18;
+  const BULLET_CHARS = 76;
+  const NUM_INDENT = 22;
+  const NUM_CHARS = 74;
 
-  // Line heights per type
-  const LH_BODY = 13;
-  const LH_SECTION = 22; // includes spacing before
-  const LH_SUBSECTION = 18;
-  const LH_BLANK = 8;
-  const LH_META = 13;
+  const LH_BODY = 14;
+  const LH_SECTION = 24;
+  const LH_SUBSECTION = 20;
+  const LH_BLANK = 9;
+  const LH_META = 14;
 
-  // Parse content into structured lines
   const structured = parseLinesFromContent(title, docType, topic, content);
 
-  // Build render instructions per page
   interface RenderCmd {
     font: string; size: number; x: number; y: number; text: string;
     color?: [number, number, number];
@@ -544,6 +540,7 @@ function generatePDF(
   const pages: PageData[] = [];
   let currentPage: RenderCmd[] = [];
   let y = PH - MT;
+  let hasHrPending = false;
 
   function newPage() {
     if (currentPage.length > 0) pages.push({ cmds: currentPage });
@@ -552,45 +549,52 @@ function generatePDF(
   }
 
   function needSpace(h: number) {
-    if (y - h < MB) {
-      newPage();
-    }
+    if (y - h < MB) newPage();
   }
 
   function addText(font: string, size: number, x: number, text: string, color?: [number, number, number]) {
     currentPage.push({ font, size, x, y, text, color });
   }
 
-  // Render each structured line
   for (const item of structured) {
+    // Handle HR marker
+    if (item.type === "blank" && item.text === "__HR__") {
+      hasHrPending = true;
+      continue;
+    }
+
+    if (hasHrPending) {
+      hasHrPending = false;
+      needSpace(6);
+      currentPage.push({ font: "__FULL_LINE__", size: 0, x: ML, y: y + 4, text: `${ML} ${y + 4} m ${PW - MR} ${y + 4} l S` });
+      y -= 10;
+    }
+
     switch (item.type) {
       case "title": {
-        const wrapped = wrapText(item.text, 65);
+        const wrapped = wrapText(item.text, 62);
         for (const line of wrapped) {
-          needSpace(20);
-          addText("F2", 15, ML, line, [0, 60, 80]);
-          y -= 20;
+          needSpace(22);
+          addText("F2", 16, ML, line, [10, 40, 55]);
+          y -= 22;
         }
-        // Decorative line under title
-        needSpace(6);
-        currentPage.push({ font: "__LINE__", size: 0, x: ML, y: y + 8, text: `${ML} ${y + 8} m ${ML + 180} ${y + 8} l S` });
-        y -= 10;
+        y -= 4;
         break;
       }
       case "section": {
-        needSpace(LH_SECTION + 14);
-        y -= 8; // space before section
-        addText("F2", 12, ML, item.text.toUpperCase(), [0, 70, 90]);
-        y -= 4;
-        // Thin accent line
-        currentPage.push({ font: "__LINE_ACCENT__", size: 0, x: ML, y, text: `${ML} ${y} m ${ML + 120} ${y} l S` });
-        y -= LH_SECTION - 8;
+        needSpace(LH_SECTION + 16);
+        y -= 12;
+        addText("F2", 12, ML, item.text, [15, 50, 65]);
+        y -= 6;
+        // Subtle accent line under section heading
+        currentPage.push({ font: "__LINE_ACCENT__", size: 0, x: ML, y, text: `${ML} ${y} m ${ML + CW} ${y} l S` });
+        y -= LH_SECTION - 12;
         break;
       }
       case "subsection": {
-        needSpace(LH_SUBSECTION + 6);
-        y -= 4;
-        addText("F2", 10.5, ML, item.text, [30, 30, 30]);
+        needSpace(LH_SUBSECTION + 8);
+        y -= 6;
+        addText("F2", 11, ML, item.text, [30, 35, 40]);
         y -= LH_SUBSECTION - 4;
         break;
       }
@@ -598,7 +602,7 @@ function generatePDF(
         const wrapped = wrapText("Q:  " + item.text, BODY_CHARS);
         for (const line of wrapped) {
           needSpace(LH_BODY);
-          addText("F2", 10, ML + 4, line, [30, 50, 70]);
+          addText("F2", 10, ML + 4, line, [25, 45, 60]);
           y -= LH_BODY;
         }
         y -= 2;
@@ -608,10 +612,10 @@ function generatePDF(
         const wrapped = wrapText("A:  " + item.text, BODY_CHARS - 2);
         for (const line of wrapped) {
           needSpace(LH_BODY);
-          addText("F1", 10, ML + 8, line, [50, 55, 65]);
+          addText("F1", 10, ML + 8, line, [55, 58, 65]);
           y -= LH_BODY;
         }
-        y -= 4;
+        y -= 5;
         break;
       }
       case "bullet": {
@@ -619,15 +623,14 @@ function generatePDF(
         for (let i = 0; i < wrapped.length; i++) {
           needSpace(LH_BODY);
           if (i === 0) {
-            // Bullet marker
-            addText("F1", 10, ML + 6, "\u2013", [0, 130, 170]); // en-dash as bullet
-            addText("F1", 10, ML + BULLET_INDENT, wrapped[i], [50, 55, 65]);
+            addText("F1", 10, ML + 6, "\u2013", [0, 120, 155]);
+            addText("F1", 10, ML + BULLET_INDENT, wrapped[i], [55, 58, 65]);
           } else {
-            addText("F1", 10, ML + BULLET_INDENT, wrapped[i], [50, 55, 65]);
+            addText("F1", 10, ML + BULLET_INDENT, wrapped[i], [55, 58, 65]);
           }
           y -= LH_BODY;
         }
-        y -= 2;
+        y -= 3;
         break;
       }
       case "numbered": {
@@ -638,19 +641,19 @@ function generatePDF(
         for (let i = 0; i < wrapped.length; i++) {
           needSpace(LH_BODY);
           if (i === 0) {
-            addText("F2", 10, ML + 4, num, [0, 130, 170]);
-            addText("F1", 10, ML + NUM_INDENT, wrapped[i], [50, 55, 65]);
+            addText("F2", 10, ML + 4, num, [0, 120, 155]);
+            addText("F1", 10, ML + NUM_INDENT, wrapped[i], [55, 58, 65]);
           } else {
-            addText("F1", 10, ML + NUM_INDENT, wrapped[i], [50, 55, 65]);
+            addText("F1", 10, ML + NUM_INDENT, wrapped[i], [55, 58, 65]);
           }
           y -= LH_BODY;
         }
-        y -= 2;
+        y -= 3;
         break;
       }
       case "meta": {
         needSpace(LH_META);
-        addText("F1", 9, ML, item.text, [100, 110, 125]);
+        addText("F1", 9, ML, item.text, [90, 100, 115]);
         y -= LH_META;
         break;
       }
@@ -664,16 +667,15 @@ function generatePDF(
         const wrapped = wrapText(item.text, BODY_CHARS);
         for (const line of wrapped) {
           needSpace(LH_BODY);
-          addText("F1", 10, ML, line, [50, 55, 65]);
+          addText("F1", 10, ML, line, [55, 58, 65]);
           y -= LH_BODY;
         }
-        y -= 2;
+        y -= 3;
         break;
       }
     }
   }
 
-  // Push final page
   if (currentPage.length > 0) pages.push({ cmds: currentPage });
   if (pages.length === 0) pages.push({ cmds: [] });
 
@@ -689,7 +691,6 @@ function generatePDF(
   startObj(2);
   write("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>");
   write("endobj");
-  // Italic for disclaimer
   startObj(3);
   write("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Oblique /Encoding /WinAnsiEncoding >>");
   write("endobj");
@@ -699,71 +700,73 @@ function generatePDF(
   const pagesObjId = contentObjStart + totalPages;
   const catalogObjId = pagesObjId + 1;
 
-  // Disclaimer word-wrap
-  const disclaimerWrapped = wrapText(disclaimer, 95);
+  const disclaimerWrapped = wrapText(disclaimer, 92);
 
   for (let p = 0; p < totalPages; p++) {
     const page = pages[p];
     let stream = "";
 
-    // ── Page header: dark band ──────────────────────────────────────
-    // Dark header background
+    // ── HEADER: Dark band with logo ──────────────────────────────────
     stream += "q\n";
-    stream += "0.047 0.059 0.098 rg\n"; // ~12,15,25
-    stream += `0 ${PH - 44} ${PW} 44 re f\n`;
+    stream += "0.047 0.059 0.098 rg\n";
+    stream += `0 ${PH - 48} ${PW} 48 re f\n`;
     stream += "Q\n";
 
     // Cyan accent line under header
     stream += "q\n";
-    stream += "0 0.863 1 RG\n"; // cyan
-    stream += "0.5 w\n";
-    stream += `${ML} ${PH - 44} m ${PW - MR} ${PH - 44} l S\n`;
+    stream += "0 0.863 1 RG\n";
+    stream += "0.6 w\n";
+    stream += `${ML} ${PH - 48} m ${PW - MR} ${PH - 48} l S\n`;
     stream += "Q\n";
 
-    // 33° slanted "E" logo
+    // 33° slanted "E" logo — clean, sharp
     stream += "q\n";
-    stream += "0 0.918 1 RG\n"; // neon cyan
-    stream += "2 w\n";
+    stream += "0 0.918 1 RG\n";
+    stream += "2.2 w\n";
     const lx = ML;
-    const ly = PH - 32;
-    const sl = 4;
-    stream += `${lx + sl} ${ly} m ${lx} ${ly - 14} l S\n`; // vertical (slanted)
-    stream += `${lx + sl} ${ly} m ${lx + sl + 8} ${ly} l S\n`; // top bar
-    stream += `${lx + sl * 0.5 + 0.5} ${ly - 7} m ${lx + sl * 0.5 + 7} ${ly - 7} l S\n`; // mid bar
-    stream += `${lx} ${ly - 14} m ${lx + 8} ${ly - 14} l S\n`; // bottom bar
-    // Purple rim
+    const ly = PH - 34;
+    const sl = 4.5;
+    stream += `${lx + sl} ${ly} m ${lx} ${ly - 15} l S\n`;
+    stream += `${lx + sl} ${ly} m ${lx + sl + 9} ${ly} l S\n`;
+    stream += `${lx + sl * 0.5 + 0.5} ${ly - 7.5} m ${lx + sl * 0.5 + 7.5} ${ly - 7.5} l S\n`;
+    stream += `${lx} ${ly - 15} m ${lx + 9} ${ly - 15} l S\n`;
+    // Purple rim light
     stream += "0.753 0.518 0.988 RG\n";
     stream += "0.4 w\n";
-    stream += `${lx + sl + 0.4} ${ly + 0.3} m ${lx + 0.4} ${ly - 14.3} l S\n`;
+    stream += `${lx + sl + 0.4} ${ly + 0.3} m ${lx + 0.4} ${ly - 15.3} l S\n`;
     stream += "Q\n";
 
-    // Brand name
+    // Brand name "voLegal"
     stream += "BT\n";
     stream += "1 1 1 rg\n";
-    stream += `/F2 13 Tf\n`;
-    stream += `${ML + 16} ${PH - 35} Td\n`;
+    stream += `/F2 14 Tf\n`;
+    stream += `${ML + 18} ${PH - 38} Td\n`;
     stream += `(${pdfStr("voLegal")}) Tj\n`;
     stream += "ET\n";
 
-    // Page number in header (right)
+    // "EVOLEGAL" subtle watermark text in header area (right)
     stream += "BT\n";
-    stream += "0.6 0.65 0.72 rg\n";
+    stream += "0.55 0.58 0.65 rg\n";
     stream += `/F1 8 Tf\n`;
-    stream += `${PW - MR - 60} ${PH - 35} Td\n`;
+    stream += `${PW - MR - 70} ${PH - 38} Td\n`;
     stream += `(Page ${p + 1} of ${totalPages}) Tj\n`;
     stream += "ET\n";
 
-    // ── Page content ────────────────────────────────────────────────
+    // ── PAGE CONTENT ─────────────────────────────────────────────────
     for (const cmd of page.cmds) {
       if (cmd.font === "__LINE__") {
-        stream += "q\n0.75 0.8 0.85 RG\n0.5 w\n" + cmd.text + "\nQ\n";
+        stream += "q\n0.78 0.82 0.87 RG\n0.5 w\n" + cmd.text + "\nQ\n";
         continue;
       }
       if (cmd.font === "__LINE_ACCENT__") {
-        stream += "q\n0 0.7 0.86 RG\n0.6 w\n" + cmd.text + "\nQ\n";
+        stream += "q\n0.82 0.85 0.88 RG\n0.4 w\n" + cmd.text + "\nQ\n";
         continue;
       }
-      const [r, g, b] = cmd.color || [50, 55, 65];
+      if (cmd.font === "__FULL_LINE__") {
+        stream += "q\n0.75 0.78 0.82 RG\n0.4 w\n" + cmd.text + "\nQ\n";
+        continue;
+      }
+      const [r, g, b] = cmd.color || [55, 58, 65];
       stream += "BT\n";
       stream += `${(r / 255).toFixed(3)} ${(g / 255).toFixed(3)} ${(b / 255).toFixed(3)} rg\n`;
       stream += `/${cmd.font} ${cmd.size} Tf\n`;
@@ -772,17 +775,17 @@ function generatePDF(
       stream += "ET\n";
     }
 
-    // ── Footer ──────────────────────────────────────────────────────
-    // Footer separator line
+    // ── FOOTER ───────────────────────────────────────────────────────
+    // Footer separator
     stream += "q\n0.82 0.84 0.87 RG\n0.3 w\n";
-    stream += `${ML} ${MB - 10} m ${PW - MR} ${MB - 10} l S\n`;
+    stream += `${ML} ${MB - 8} m ${PW - MR} ${MB - 8} l S\n`;
     stream += "Q\n";
 
-    // Disclaimer
-    let fy = MB - 22;
+    // Disclaimer text
+    let fy = MB - 20;
     for (const dl of disclaimerWrapped) {
       stream += "BT\n";
-      stream += "0.5 0.52 0.56 rg\n";
+      stream += "0.48 0.50 0.55 rg\n";
       stream += `/F3 6.5 Tf\n`;
       stream += `${ML} ${fy} Td\n`;
       stream += `(${pdfStr(dl)}) Tj\n`;
@@ -790,15 +793,15 @@ function generatePDF(
       fy -= 8;
     }
 
-    // "EvoLegal - Confidential" right-aligned at bottom
+    // "EvoLegal — Confidential"
     stream += "BT\n";
-    stream += "0.45 0.48 0.52 rg\n";
+    stream += "0.42 0.45 0.50 rg\n";
     stream += `/F1 6.5 Tf\n`;
-    stream += `${PW - MR - 80} ${MB - 22 - disclaimerWrapped.length * 8 - 2} Td\n`;
+    stream += `${PW - MR - 82} ${fy - 2} Td\n`;
     stream += `(${pdfStr("EvoLegal \u2014 Confidential")}) Tj\n`;
     stream += "ET\n";
 
-    // Write content stream object
+    // Content stream object
     const contentId = contentObjStart + p;
     startObj(contentId);
     const streamBytes = new TextEncoder().encode(stream);
@@ -808,7 +811,7 @@ function generatePDF(
     write("endstream");
     write("endobj");
 
-    // Write page object
+    // Page object
     startObj(pageObjStart + p);
     write(`<< /Type /Page /Parent ${pagesObjId} 0 R /MediaBox [0 0 ${PW} ${PH}] /Contents ${contentId} 0 R /Resources << /Font << /F1 1 0 R /F2 2 0 R /F3 3 0 R >> >> >>`);
     write("endobj");
