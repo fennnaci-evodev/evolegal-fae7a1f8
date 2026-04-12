@@ -386,7 +386,7 @@ function buildDocumentContent(document: StructuredDocument): string {
 
   lines.push("SECTION: Further Resources");
   lines.push(...document.furtherResources.map((resource) => `- ${resource}`), "");
-  lines.push("SECTION: Prepared By", document.preparedBy, `Date: ${document.date}`);
+  lines.push("", `Date: ${document.date}`);
 
   return lines.join("\n").replace(/\n{3,}/g, "\n\n").trim();
 }
@@ -670,10 +670,6 @@ function parseLinesFromContent(title: string, docType: string, topic: string, co
   const result: PdfLine[] = [];
 
   result.push({ text: title, type: "title" });
-  result.push({ text: "", type: "blank" });
-  result.push({ text: `Document Type: ${docType}`, type: "meta" });
-  result.push({ text: `Topic: ${topic}`, type: "meta" });
-  result.push({ text: `Date: ${currentDateLabel}`, type: "meta" });
   result.push({ text: "", type: "blank" });
   result.push({ text: "__HR__", type: "blank" });
   result.push({ text: "", type: "blank" });
@@ -989,42 +985,59 @@ function generatePDF(
     stream += `${ML} ${PH - headerH} m ${PW - MR} ${PH - headerH} l S\n`;
     stream += "Q\n";
 
-    // 33-degree slanted "E" logo
+    // 33-degree solid filled "E" logo
+    // Draw a solid filled E shape rotated ~33 degrees using a filled polygon
     stream += "q\n";
-    stream += "0 0.918 1 RG\n";
-    stream += "2.2 w\n";
-    const lx = ML;
-    const ly = PH - 34;
-    const sl = 4.5;
-    stream += `${lx + sl} ${ly} m ${lx} ${ly - 15} l S\n`;           // vertical bar (slanted)
-    stream += `${lx + sl} ${ly} m ${lx + sl + 9} ${ly} l S\n`;       // top bar
-    stream += `${lx + sl * 0.5 + 0.5} ${ly - 7.5} m ${lx + sl * 0.5 + 7.5} ${ly - 7.5} l S\n`; // middle bar
-    stream += `${lx} ${ly - 15} m ${lx + 9} ${ly - 15} l S\n`;       // bottom bar
-    // Purple rim light
+    const lx = ML + 2;
+    const ly = PH - 16;
+    // E dimensions
+    const eW = 18;
+    const eH = 28;
+    const barH = 5;
+    const midBarW = 12;
+    const stemW = 6;
+    // Apply 33-degree rotation matrix: cos(33)=0.8387, sin(33)=0.5446
+    const cos33 = 0.8387;
+    const sin33 = 0.5446;
+    // Transform point relative to (lx, ly)
+    function tx(px: number, py: number) { return (lx + cos33 * px + sin33 * py).toFixed(2); }
+    function ty(px: number, py: number) { return (ly - sin33 * px + cos33 * py).toFixed(2); }
+    // E shape points (bottom-left origin going clockwise)
+    // Outer: bottom-left, bottom-right, up to bottom bar top, inward, up to mid bar bottom, out, mid bar top, inward, up to top bar, top-right, top-left
+    const pts: [number, number][] = [
+      [0, 0],                           // bottom-left
+      [eW, 0],                          // bottom-right
+      [eW, barH],                       // bottom bar top-right
+      [stemW, barH],                    // bottom bar top-inner
+      [stemW, eH/2 - barH/2],          // mid bar bottom-inner
+      [midBarW, eH/2 - barH/2],        // mid bar bottom-right
+      [midBarW, eH/2 + barH/2],        // mid bar top-right
+      [stemW, eH/2 + barH/2],          // mid bar top-inner
+      [stemW, eH - barH],              // top bar bottom-inner
+      [eW, eH - barH],                 // top bar bottom-right
+      [eW, eH],                        // top-right
+      [0, eH],                         // top-left
+    ];
+    // Neon cyan fill with slight glow effect
+    stream += "0 0.918 1 rg\n";
+    stream += `${tx(pts[0][0], -pts[0][1])} ${ty(pts[0][0], -pts[0][1])} m\n`;
+    for (let i = 1; i < pts.length; i++) {
+      stream += `${tx(pts[i][0], -pts[i][1])} ${ty(pts[i][0], -pts[i][1])} l\n`;
+    }
+    stream += "f\n";
+    // Purple rim light on left edge
     stream += "0.753 0.518 0.988 RG\n";
-    stream += "0.4 w\n";
-    stream += `${lx + sl + 0.4} ${ly + 0.3} m ${lx + 0.4} ${ly - 15.3} l S\n`;
+    stream += "0.6 w\n";
+    stream += `${tx(0, 0)} ${ty(0, 0)} m ${tx(0, -eH)} ${ty(0, -eH)} l S\n`;
     stream += "Q\n";
 
-    // Brand name "EvoLegal" -- the "E" is the logo graphic, text starts with "vo"
-    // But we write the FULL word so it reads correctly
-    // Brand name "EvoLegal" -- the "E" is the logo graphic, text starts with "vo"
-    // But we write the FULL word so it reads correctly
+    // Brand name "EvoLegal" next to logo
     stream += "BT\n";
     stream += "1 1 1 rg\n";
     stream += `/F2 14 Tf\n`;
-    stream += `${ML + 18} ${PH - 38} Td\n`;
+    stream += `${ML + 26} ${PH - 38} Td\n`;
     stream += `(${pdfEncode("EvoLegal")}) Tj\n`;
     stream += "ET\n";
-
-    for (let i = 0; i < headerTitle.length; i++) {
-      stream += "BT\n";
-      stream += "0.76 0.79 0.84 rg\n";
-      stream += `/F1 ${i === 0 ? 8.5 : 7.5} Tf\n`;
-      stream += `${ML + 18} ${PH - 50 - i * 9} Td\n`;
-      stream += `(${pdfEncode(headerTitle[i])}) Tj\n`;
-      stream += "ET\n";
-    }
 
     // Page number (right side)
     stream += "BT\n";
