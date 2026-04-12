@@ -16,7 +16,7 @@ const DOCUMENT_TYPES: Record<string, { label: string; prompt: string }> = {
     label: "Information Overview",
     prompt: `Produce a luxury-quality Information Overview document. Follow this exact structure:
 
-TITLE: [Elegant, precise title — e.g. "Information Overview: [Topic]"]
+TITLE: [Elegant, precise title]
 
 SECTION: Introduction
 A brief, calm, neutral paragraph introducing the topic and its relevance. State that this document provides general educational information only.
@@ -64,7 +64,7 @@ Date: {{Date}}`,
   },
   template: {
     label: "Template Outline",
-    prompt: `Produce a luxury-quality Template Outline document — a blank framework with placeholder fields. Follow this exact structure:
+    prompt: `Produce a luxury-quality Template Outline document. Follow this exact structure:
 
 TITLE: [Elegant, precise title]
 
@@ -75,7 +75,7 @@ SECTION: Parties
 {{Party B Address}}
 
 SECTION: Background
-[Brief recital of the purpose of this document — keep generic and neutral]
+[Brief recital of the purpose of this document]
 
 SECTION: Terms and Provisions
 Numbered sections with clear headings. Each provision should have placeholder fields using {{Placeholder Name}} syntax where specific terms would be inserted.
@@ -84,8 +84,8 @@ SECTION: General Provisions
 Standard protective clauses (Governing Law, Severability, Entire Agreement, Amendments, Notices) with {{Jurisdiction}} placeholders.
 
 SECTION: Signatures
-{{Party A Signature}} — Date: {{Date}}
-{{Party B Signature}} — Date: {{Date}}
+{{Party A Signature}} -- Date: {{Date}}
+{{Party B Signature}} -- Date: {{Date}}
 
 SECTION: Prepared By
 EvoLegal Experts
@@ -123,32 +123,34 @@ Date: {{Date}}`,
 
 // ── System prompts ─────────────────────────────────────────────────
 
-const GENERATOR_SYSTEM = `You are the EvoLegal Document Writer — a senior legal information specialist who produces calm, elegant, trustworthy documents that feel like they come from a premium law firm.
+const GENERATOR_SYSTEM = `You are the EvoLegal Document Writer -- a senior legal information specialist who produces calm, elegant, trustworthy documents that feel like they come from a premium law firm.
 
 VOICE AND TONE:
-- Write in a calm, confident, professional voice — never energetic, robotic, or overly formal.
+- Write in a calm, confident, professional voice -- never energetic, robotic, or overly formal.
 - Every sentence should feel considered and purposeful. Favor clarity over complexity.
-- Use formal but accessible language — a well-educated non-lawyer should understand every paragraph.
+- Use formal but accessible language -- a well-educated non-lawyer should understand every paragraph.
 - Aim for the reading experience of a high-end legal briefing, not a textbook.
+- Use smooth transitions between sections and paragraphs. The document should flow naturally.
 
-CRITICAL FORMATTING RULES:
+CRITICAL FORMATTING RULES (FOLLOW EXACTLY):
 - Use "SECTION:" prefix for all main section headings.
 - Use "SUBSECTION:" prefix for subsection headings.
 - For numbered items, use "1.", "2.", "3." at the start of lines.
 - For bullet points, use a simple dash "- " at the start of lines.
 - For Q&A, use "Q:" and "A:" prefixes.
-- NEVER use markdown syntax: no **, no *, no #, no __, no backticks.
-- NEVER use special Unicode bullets. Only use "- " for bullets.
+- NEVER use markdown syntax: no **, no *, no #, no __, no backticks, no ---.
+- NEVER use special Unicode characters: no em-dashes, no en-dashes, no smart quotes, no bullet symbols, no ellipsis characters.
+- Use only plain ASCII characters: use "--" instead of em-dash, use "-" for bullets, use regular quotes " and ', use "..." for ellipsis.
 - Write clean plain text with the SECTION:/SUBSECTION: markers only.
-- Do NOT include a disclaimer in the body — the PDF system adds it automatically.
+- Do NOT include a disclaimer in the body -- the PDF system adds it automatically.
 - Do NOT use the word "step" or "steps" anywhere. Do NOT use "you should", "you must", "need to", "have to".
 
 CONTENT QUALITY:
 - Be thorough but never repetitive. Each paragraph should add distinct value.
-- Use excellent paragraph flow — each section should read like well-crafted prose, not a list.
+- Use excellent paragraph flow -- each section should read like well-crafted prose, not a list.
 - Where lists are used, keep them purposeful and well-explained.
 - Replace all variables with {{Placeholder Name}} syntax.
-- If data is missing, use {{Placeholder Name}} — never invent or assume data.
+- If data is missing, use {{Placeholder Name}} -- never invent or assume data.
 
 RISK ASSESSMENT:
 - If the topic involves active legal proceedings, imminent deadlines, criminal matters, or requests for specific legal strategy, output ONLY:
@@ -158,42 +160,49 @@ RISK ASSESSMENT:
 OUTPUT:
 - Output ONLY the document content. No preamble, no explanation, no commentary.`;
 
-const REVIEWER_SYSTEM = `You are the EvoLegal Document Reviewer — an independent senior editor ensuring every document meets luxury publication standards.
+const REVIEWER_SYSTEM = `You are the EvoLegal Document Reviewer -- an independent senior editor ensuring every document meets luxury publication standards.
 
 Your job is to take the document below and produce a polished, final version. Apply these fixes silently:
 
-1. FORMATTING CLEANUP:
-   - Remove ALL markdown artifacts: **, *, #, __, backticks — replace with clean plain text.
+1. ENCODING AND CHARACTER CLEANUP (HIGHEST PRIORITY):
+   - Replace ALL em-dashes, en-dashes, and any Unicode dash variants with "--" (double hyphen).
+   - Replace ALL smart/curly quotes with straight quotes (" and ').
+   - Replace ALL Unicode bullet symbols with "- " (dash space).
+   - Replace ALL ellipsis characters with "..." (three dots).
+   - Remove ALL other non-ASCII characters except letters with accents when needed for proper nouns.
+   - The output must be 100% clean ASCII-safe text (WinAnsiEncoding compatible).
+
+2. FORMATTING CLEANUP:
+   - Remove ALL markdown artifacts: **, *, #, __, backticks -- replace with clean plain text.
    - Ensure all section headers use "SECTION:" prefix exactly.
    - Ensure all subsection headers use "SUBSECTION:" prefix exactly.
    - Ensure bullet points use only "- " (dash space).
    - Ensure numbered items use "1.", "2.", "3." format.
-   - Remove any broken characters, encoding artifacts, or Unicode bullets.
    - Remove any repeated or redundant sections.
-   - Remove the words "step", "steps", "you should", "you must", "need to", "have to" — rephrase naturally.
+   - Remove the words "step", "steps", "you should", "you must", "need to", "have to" -- rephrase naturally.
 
-2. CONTENT QUALITY:
-   - Tighten verbose or repetitive language — every sentence must earn its place.
+3. CONTENT QUALITY:
+   - Tighten verbose or repetitive language -- every sentence must earn its place.
    - Ensure smooth logical flow between sections and paragraphs.
    - Add missing essential content if a section feels thin.
    - Remove any content that could be interpreted as personalized legal advice.
    - Verify all placeholders use {{Placeholder Name}} syntax.
    - Ensure the writing feels calm, confident, and expertly crafted.
 
-3. TONE:
-   - Ensure calm, professional, neutral voice throughout — like a premium law firm overview.
+4. TONE:
+   - Ensure calm, professional, neutral voice throughout -- like a premium law firm overview.
    - Remove any energetic, chatty, casual, or marketing language.
    - The document should feel trustworthy and authoritative without being stiff.
 
-4. STRUCTURE CHECK:
-   - Verify sections appear in the correct order: Title, Introduction, Key Concepts/Main Content, Important Considerations, Common Questions (if relevant), Further Resources, Prepared By.
-   - Verify each section has substantive content — no empty or skeleton sections.
+5. STRUCTURE CHECK:
+   - Verify sections appear in the correct order.
+   - Verify each section has substantive content -- no empty or skeleton sections.
 
-5. RISK CHECK:
+6. RISK CHECK:
    - If the document contains specific legal strategy or advice for a particular case, output ONLY:
      "RISK_ESCALATION: This document requires expert review."
 
-OUTPUT: The complete, polished document only. No review notes, no commentary, no explanations.`;
+OUTPUT: The complete, polished document only. No review notes, no commentary, no explanations. Use ONLY plain ASCII characters.`;
 
 // ── Main handler ───────────────────────────────────────────────────
 
@@ -346,7 +355,7 @@ serve(async (req) => {
     }
 
     // ── POST-PROCESS ────────────────────────────────────────────────
-    finalContent = stripMarkdown(finalContent);
+    finalContent = sanitizeForPdf(finalContent);
 
     // ── BUILD PDF ───────────────────────────────────────────────────
     const pdfBytes = generatePDF(title, docConfig.label, topic, finalContent, DISCLAIMER);
@@ -405,9 +414,12 @@ serve(async (req) => {
   }
 });
 
-// ── Markdown stripper ──────────────────────────────────────────────
-function stripMarkdown(text: string): string {
+// ── Text sanitizer (replaces stripMarkdown) ────────────────────────
+// Aggressively cleans all non-ASCII and markdown artifacts for safe
+// WinAnsiEncoding PDF rendering.
+function sanitizeForPdf(text: string): string {
   return text
+    // Remove markdown formatting
     .replace(/\*\*\*(.+?)\*\*\*/g, "$1")
     .replace(/\*\*(.+?)\*\*/g, "$1")
     .replace(/\*(.+?)\*/g, "$1")
@@ -415,12 +427,40 @@ function stripMarkdown(text: string): string {
     .replace(/_(.+?)_/g, "$1")
     .replace(/^#{1,6}\s+/gm, "")
     .replace(/`(.+?)`/g, "$1")
-    .replace(/^[•●◦▪▸►¢]\s*/gm, "- ")
+    // Fix encoding artifacts (UTF-8 mojibake from em-dash, en-dash, smart quotes)
+    .replace(/\u00e2\u0080\u0093/g, "--")  // â€" -> --
+    .replace(/\u00e2\u0080\u0094/g, "--")  // â€" -> --
+    .replace(/\u00e2\u0080\u009c/g, '"')   // â€œ -> "
+    .replace(/\u00e2\u0080\u009d/g, '"')   // â€ -> "
+    .replace(/\u00e2\u0080\u0098/g, "'")   // â€˜ -> '
+    .replace(/\u00e2\u0080\u0099/g, "'")   // â€™ -> '
+    .replace(/\u00e2\u0080\u00a2/g, "- ")  // â€¢ -> -
+    .replace(/\u00e2\u0080\u00a6/g, "...") // â€¦ -> ...
+    // Direct Unicode replacements
+    .replace(/[\u2013\u2014]/g, "--")       // en-dash, em-dash
+    .replace(/[\u2018\u2019]/g, "'")        // smart single quotes
+    .replace(/[\u201C\u201D]/g, '"')        // smart double quotes
+    .replace(/\u2022/g, "- ")              // bullet
+    .replace(/\u2026/g, "...")             // ellipsis
+    .replace(/\u00A0/g, " ")              // non-breaking space
+    // Common mojibake patterns (string form)
+    .replace(/â€"/g, "--")
+    .replace(/â€"/g, "--")
+    .replace(/â€œ/g, '"')
+    .replace(/â€\u009d/g, '"')
+    .replace(/â€˜/g, "'")
+    .replace(/â€™/g, "'")
+    .replace(/â€¢/g, "- ")
+    .replace(/â€¦/g, "...")
+    .replace(/Â·/g, "-")
+    .replace(/Â /g, " ")
+    // Replace any remaining Unicode bullets
+    .replace(/^[•●◦▪▸►¢→»]/gm, "-")
+    // Clean up excessive newlines
     .replace(/\n{3,}/g, "\n\n");
 }
 
 // ── PDF Generator ──────────────────────────────────────────────────
-// Luxury-quality branded PDF with the EvoLegal identity.
 
 interface PdfLine {
   text: string;
@@ -430,15 +470,12 @@ interface PdfLine {
 function parseLinesFromContent(title: string, docType: string, topic: string, content: string): PdfLine[] {
   const result: PdfLine[] = [];
 
-  // Meta header block
   result.push({ text: title, type: "title" });
   result.push({ text: "", type: "blank" });
   result.push({ text: `Document Type: ${docType}`, type: "meta" });
   result.push({ text: `Topic: ${topic}`, type: "meta" });
   result.push({ text: `Generated: ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}`, type: "meta" });
   result.push({ text: "", type: "blank" });
-
-  // Horizontal rule after meta
   result.push({ text: "__HR__", type: "blank" });
   result.push({ text: "", type: "blank" });
 
@@ -448,7 +485,7 @@ function parseLinesFromContent(title: string, docType: string, topic: string, co
     if (!trimmed) {
       result.push({ text: "", type: "blank" });
     } else if (trimmed.startsWith("TITLE:")) {
-      // Skip — we already have the title
+      // Skip -- we already have the title
     } else if (trimmed.startsWith("SECTION:")) {
       result.push({ text: trimmed.replace("SECTION:", "").trim(), type: "section" });
     } else if (trimmed.startsWith("SUBSECTION:")) {
@@ -467,6 +504,32 @@ function parseLinesFromContent(title: string, docType: string, topic: string, co
   }
 
   return result;
+}
+
+// Encode a string for PDF text operators using WinAnsiEncoding.
+// Replaces problematic characters with safe ASCII equivalents,
+// then escapes PDF special chars.
+function pdfEncode(s: string): string {
+  let safe = s
+    .replace(/[\u2013\u2014]/g, "--")
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/[\u201C\u201D]/g, '"')
+    .replace(/\u2022/g, "-")
+    .replace(/\u2026/g, "...")
+    .replace(/\u00A0/g, " ");
+  // Strip any remaining chars outside WinAnsiEncoding printable range
+  // Keep 0x20-0x7E (basic ASCII) and 0xA0-0xFF (WinAnsi extended)
+  let out = "";
+  for (let i = 0; i < safe.length; i++) {
+    const c = safe.charCodeAt(i);
+    if ((c >= 0x20 && c <= 0x7E) || (c >= 0xA0 && c <= 0xFF)) {
+      out += safe[i];
+    } else if (c === 0x09) {
+      out += "    "; // tab -> spaces
+    }
+    // else drop the character silently
+  }
+  return out.replace(/\\/g, "\\\\").replace(/\(/g, "\\(").replace(/\)/g, "\\)");
 }
 
 function generatePDF(
@@ -488,9 +551,6 @@ function generatePDF(
     objects[id] = { offset: currentOffset };
     write(`${id} 0 obj`);
   }
-  function pdfStr(s: string): string {
-    return s.replace(/\\/g, "\\\\").replace(/\(/g, "\\(").replace(/\)/g, "\\)");
-  }
 
   function wrapText(text: string, maxChars: number): string[] {
     if (text.length <= maxChars) return [text];
@@ -509,13 +569,13 @@ function generatePDF(
     return result;
   }
 
-  // Layout constants — generous whitespace for luxury feel
+  // Layout constants
   const PW = 612;
   const PH = 792;
   const ML = 60;
   const MR = 60;
   const MT = 72;
-  const MB = 85;
+  const MB = 90; // more room for footer disclaimer
   const CW = PW - ML - MR;
   const BODY_CHARS = 82;
   const BULLET_INDENT = 18;
@@ -523,10 +583,10 @@ function generatePDF(
   const NUM_INDENT = 22;
   const NUM_CHARS = 74;
 
-  const LH_BODY = 14;
-  const LH_SECTION = 24;
-  const LH_SUBSECTION = 20;
-  const LH_BLANK = 9;
+  const LH_BODY = 15;
+  const LH_SECTION = 28;
+  const LH_SUBSECTION = 22;
+  const LH_BLANK = 10;
   const LH_META = 14;
 
   const structured = parseLinesFromContent(title, docType, topic, content);
@@ -557,7 +617,6 @@ function generatePDF(
   }
 
   for (const item of structured) {
-    // Handle HR marker
     if (item.type === "blank" && item.text === "__HR__") {
       hasHrPending = true;
       continue;
@@ -567,33 +626,32 @@ function generatePDF(
       hasHrPending = false;
       needSpace(6);
       currentPage.push({ font: "__FULL_LINE__", size: 0, x: ML, y: y + 4, text: `${ML} ${y + 4} m ${PW - MR} ${y + 4} l S` });
-      y -= 10;
+      y -= 12;
     }
 
     switch (item.type) {
       case "title": {
-        const wrapped = wrapText(item.text, 62);
+        const wrapped = wrapText(item.text, 58);
         for (const line of wrapped) {
-          needSpace(22);
+          needSpace(24);
           addText("F2", 16, ML, line, [10, 40, 55]);
-          y -= 22;
+          y -= 24;
         }
-        y -= 4;
+        y -= 6;
         break;
       }
       case "section": {
-        needSpace(LH_SECTION + 16);
-        y -= 12;
+        needSpace(LH_SECTION + 18);
+        y -= 16;
         addText("F2", 12, ML, item.text, [15, 50, 65]);
-        y -= 6;
-        // Subtle accent line under section heading
-        currentPage.push({ font: "__LINE_ACCENT__", size: 0, x: ML, y, text: `${ML} ${y} m ${ML + CW} ${y} l S` });
-        y -= LH_SECTION - 12;
+        y -= 8;
+        currentPage.push({ font: "__LINE_ACCENT__", size: 0, x: ML, y, text: `${ML} ${y} m ${PW - MR} ${y} l S` });
+        y -= LH_SECTION - 14;
         break;
       }
       case "subsection": {
-        needSpace(LH_SUBSECTION + 8);
-        y -= 6;
+        needSpace(LH_SUBSECTION + 10);
+        y -= 8;
         addText("F2", 11, ML, item.text, [30, 35, 40]);
         y -= LH_SUBSECTION - 4;
         break;
@@ -605,7 +663,7 @@ function generatePDF(
           addText("F2", 10, ML + 4, line, [25, 45, 60]);
           y -= LH_BODY;
         }
-        y -= 2;
+        y -= 3;
         break;
       }
       case "qa-a": {
@@ -615,7 +673,7 @@ function generatePDF(
           addText("F1", 10, ML + 8, line, [55, 58, 65]);
           y -= LH_BODY;
         }
-        y -= 5;
+        y -= 6;
         break;
       }
       case "bullet": {
@@ -623,14 +681,15 @@ function generatePDF(
         for (let i = 0; i < wrapped.length; i++) {
           needSpace(LH_BODY);
           if (i === 0) {
-            addText("F1", 10, ML + 6, "\u2013", [0, 120, 155]);
+            // Use a simple hyphen-minus as bullet -- safe in WinAnsiEncoding
+            addText("F2", 10, ML + 6, "-", [0, 120, 155]);
             addText("F1", 10, ML + BULLET_INDENT, wrapped[i], [55, 58, 65]);
           } else {
             addText("F1", 10, ML + BULLET_INDENT, wrapped[i], [55, 58, 65]);
           }
           y -= LH_BODY;
         }
-        y -= 3;
+        y -= 4;
         break;
       }
       case "numbered": {
@@ -648,7 +707,7 @@ function generatePDF(
           }
           y -= LH_BODY;
         }
-        y -= 3;
+        y -= 4;
         break;
       }
       case "meta": {
@@ -670,7 +729,7 @@ function generatePDF(
           addText("F1", 10, ML, line, [55, 58, 65]);
           y -= LH_BODY;
         }
-        y -= 3;
+        y -= 4;
         break;
       }
     }
@@ -700,51 +759,55 @@ function generatePDF(
   const pagesObjId = contentObjStart + totalPages;
   const catalogObjId = pagesObjId + 1;
 
-  const disclaimerWrapped = wrapText(disclaimer, 92);
+  const disclaimerWrapped = wrapText(disclaimer, 95);
 
   for (let p = 0; p < totalPages; p++) {
     const page = pages[p];
     let stream = "";
 
     // ── HEADER: Dark band with logo ──────────────────────────────────
+    const headerH = 48;
     stream += "q\n";
     stream += "0.047 0.059 0.098 rg\n";
-    stream += `0 ${PH - 48} ${PW} 48 re f\n`;
+    stream += `0 ${PH - headerH} ${PW} ${headerH} re f\n`;
     stream += "Q\n";
 
     // Cyan accent line under header
     stream += "q\n";
     stream += "0 0.863 1 RG\n";
     stream += "0.6 w\n";
-    stream += `${ML} ${PH - 48} m ${PW - MR} ${PH - 48} l S\n`;
+    stream += `${ML} ${PH - headerH} m ${PW - MR} ${PH - headerH} l S\n`;
     stream += "Q\n";
 
-    // 33° slanted "E" logo — clean, sharp
+    // 33-degree slanted "E" logo
     stream += "q\n";
     stream += "0 0.918 1 RG\n";
     stream += "2.2 w\n";
     const lx = ML;
     const ly = PH - 34;
     const sl = 4.5;
-    stream += `${lx + sl} ${ly} m ${lx} ${ly - 15} l S\n`;
-    stream += `${lx + sl} ${ly} m ${lx + sl + 9} ${ly} l S\n`;
-    stream += `${lx + sl * 0.5 + 0.5} ${ly - 7.5} m ${lx + sl * 0.5 + 7.5} ${ly - 7.5} l S\n`;
-    stream += `${lx} ${ly - 15} m ${lx + 9} ${ly - 15} l S\n`;
+    stream += `${lx + sl} ${ly} m ${lx} ${ly - 15} l S\n`;           // vertical bar (slanted)
+    stream += `${lx + sl} ${ly} m ${lx + sl + 9} ${ly} l S\n`;       // top bar
+    stream += `${lx + sl * 0.5 + 0.5} ${ly - 7.5} m ${lx + sl * 0.5 + 7.5} ${ly - 7.5} l S\n`; // middle bar
+    stream += `${lx} ${ly - 15} m ${lx + 9} ${ly - 15} l S\n`;       // bottom bar
     // Purple rim light
     stream += "0.753 0.518 0.988 RG\n";
     stream += "0.4 w\n";
     stream += `${lx + sl + 0.4} ${ly + 0.3} m ${lx + 0.4} ${ly - 15.3} l S\n`;
     stream += "Q\n";
 
-    // Brand name "voLegal"
+    // Brand name "EvoLegal" -- the "E" is the logo graphic, text starts with "vo"
+    // But we write the FULL word so it reads correctly
+    // Brand name "EvoLegal" -- the "E" is the logo graphic, text starts with "vo"
+    // But we write the FULL word so it reads correctly
     stream += "BT\n";
     stream += "1 1 1 rg\n";
     stream += `/F2 14 Tf\n`;
     stream += `${ML + 18} ${PH - 38} Td\n`;
-    stream += `(${pdfStr("voLegal")}) Tj\n`;
+    stream += `(${pdfEncode("EvoLegal")}) Tj\n`;
     stream += "ET\n";
 
-    // "EVOLEGAL" subtle watermark text in header area (right)
+    // Page number (right side)
     stream += "BT\n";
     stream += "0.55 0.58 0.65 rg\n";
     stream += `/F1 8 Tf\n`;
@@ -771,34 +834,33 @@ function generatePDF(
       stream += `${(r / 255).toFixed(3)} ${(g / 255).toFixed(3)} ${(b / 255).toFixed(3)} rg\n`;
       stream += `/${cmd.font} ${cmd.size} Tf\n`;
       stream += `${cmd.x} ${cmd.y} Td\n`;
-      stream += `(${pdfStr(cmd.text)}) Tj\n`;
+      stream += `(${pdfEncode(cmd.text)}) Tj\n`;
       stream += "ET\n";
     }
 
     // ── FOOTER ───────────────────────────────────────────────────────
-    // Footer separator
     stream += "q\n0.82 0.84 0.87 RG\n0.3 w\n";
-    stream += `${ML} ${MB - 8} m ${PW - MR} ${MB - 8} l S\n`;
+    stream += `${ML} ${MB - 6} m ${PW - MR} ${MB - 6} l S\n`;
     stream += "Q\n";
 
     // Disclaimer text
-    let fy = MB - 20;
+    let fy = MB - 18;
     for (const dl of disclaimerWrapped) {
       stream += "BT\n";
       stream += "0.48 0.50 0.55 rg\n";
       stream += `/F3 6.5 Tf\n`;
       stream += `${ML} ${fy} Td\n`;
-      stream += `(${pdfStr(dl)}) Tj\n`;
+      stream += `(${pdfEncode(dl)}) Tj\n`;
       stream += "ET\n";
       fy -= 8;
     }
 
-    // "EvoLegal — Confidential"
+    // "EvoLegal -- Confidential"
     stream += "BT\n";
     stream += "0.42 0.45 0.50 rg\n";
     stream += `/F1 6.5 Tf\n`;
-    stream += `${PW - MR - 82} ${fy - 2} Td\n`;
-    stream += `(${pdfStr("EvoLegal \u2014 Confidential")}) Tj\n`;
+    stream += `${PW - MR - 90} ${fy - 2} Td\n`;
+    stream += `(${pdfEncode("EvoLegal -- Confidential")}) Tj\n`;
     stream += "ET\n";
 
     // Content stream object
