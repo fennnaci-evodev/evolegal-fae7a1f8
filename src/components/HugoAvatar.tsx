@@ -11,9 +11,8 @@ interface HugoAvatarProps {
  * Static, high-definition photo avatar with a crisp glassmorphic ring.
  */
 export function HugoAvatar({ size = 40 }: HugoAvatarProps) {
-  const frameSize = Math.round(size * 1.12);
-  const ringSize = Math.max(3, Math.round(frameSize * 0.06));
-  const imageSize = frameSize - ringSize * 2;
+  const ringSize = Math.max(2, Math.round(size * 0.05));
+  const imgSize = size - ringSize * 2;
 
   return (
     <div
