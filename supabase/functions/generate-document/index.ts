@@ -10,199 +10,385 @@ const corsHeaders = {
 const DISCLAIMER =
   "This is a general informational template only. It is not legal advice and does not create an attorney-client relationship. Laws vary by jurisdiction. Always consult a licensed professional for your specific situation.";
 
+const DOCUMENT_MODEL = "google/gemini-2.5-pro";
+const EXPERT_REVIEW_MESSAGE =
+  "This topic may benefit from expert review. Would you like to connect with an EvoLegal Expert?";
+
 // ── Document type definitions ──────────────────────────────────────
 const DOCUMENT_TYPES: Record<string, { label: string; prompt: string }> = {
   overview: {
     label: "Information Overview",
-    prompt: `Produce a luxury-quality Information Overview document. Follow this exact structure:
-
-TITLE: [Elegant, precise title]
-
-SECTION: Introduction
-A brief, calm, neutral paragraph introducing the topic and its relevance. State that this document provides general educational information only.
-
-SECTION: Key Concepts
-Organize into clearly labeled subsections using SUBSECTION: prefix. Each subsection should contain well-crafted paragraphs with excellent flow. Cover all essential aspects thoroughly.
-
-SECTION: Important Considerations
-Cover practical factors, common pitfalls, and critical nuances. Use focused paragraphs with clear SUBSECTION: headings where appropriate. Use bullet points (with "- " prefix) only where a true list adds clarity.
-
-SECTION: Common Questions
-Present 3-5 thoughtful questions with comprehensive, neutral answers. Format each as "Q:" followed by "A:" paragraphs.
-
-SECTION: Further Resources
-List general categories of resources (not specific URLs) that may be helpful for further research.
-
-SECTION: Prepared By
-EvoLegal Experts
-Date: {{Date}}`,
+    prompt: `Create a refined general overview that explains the topic with calm authority. Prioritize elegant prose, a coherent introduction, well-developed key concepts, practical considerations, helpful neutral questions, and general resource categories.`,
   },
   checklist: {
     label: "Preparation Checklist",
-    prompt: `Produce a luxury-quality Preparation Checklist document. Follow this exact structure:
-
-TITLE: [Elegant, precise title]
-
-SECTION: Purpose
-A brief paragraph explaining what this checklist helps prepare for and who would benefit from it.
-
-SECTION: Documents to Gather
-A numbered list of documents or records to collect, each with a brief explanatory note.
-
-SECTION: Actions to Complete
-A numbered sequence of actions to take, each with a concise explanation of its purpose.
-
-SECTION: Timeline
-Key milestones with {{Date}} placeholders where dates would be inserted.
-
-SECTION: Notes
-Space for personal notes: [REQUIRES USER INPUT: Your notes here]
-
-SECTION: Prepared By
-EvoLegal Experts
-Date: {{Date}}`,
+    prompt: `Create a polished preparation checklist with a brief purpose statement, clearly organized concepts, practical considerations, concise numbered actions, and placeholders where personal details or dates would normally be inserted.`,
   },
   template: {
     label: "Template Outline",
-    prompt: `Produce a luxury-quality Template Outline document. Follow this exact structure:
-
-TITLE: [Elegant, precise title]
-
-SECTION: Parties
-{{Party A Full Name}}
-{{Party A Address}}
-{{Party B Full Name}}
-{{Party B Address}}
-
-SECTION: Background
-[Brief recital of the purpose of this document]
-
-SECTION: Terms and Provisions
-Numbered sections with clear headings. Each provision should have placeholder fields using {{Placeholder Name}} syntax where specific terms would be inserted.
-
-SECTION: General Provisions
-Standard protective clauses (Governing Law, Severability, Entire Agreement, Amendments, Notices) with {{Jurisdiction}} placeholders.
-
-SECTION: Signatures
-{{Party A Signature}} -- Date: {{Date}}
-{{Party B Signature}} -- Date: {{Date}}
-
-SECTION: Prepared By
-EvoLegal Experts
-Date: {{Date}}`,
+    prompt: `Create a clean informational template outline with elegant placeholder-driven drafting language, neutral provisions, and clearly labeled sections that remain general and educational rather than personalized.`,
   },
   comparative: {
     label: "Comparative Guide",
-    prompt: `Produce a luxury-quality Comparative Guide document. Follow this exact structure:
-
-TITLE: [Elegant, precise title]
-
-SECTION: Introduction
-A brief paragraph explaining what is being compared and why this comparison is valuable.
-
-SECTION: Overview of Approaches
-Describe each approach or framework in its own clearly labeled SUBSECTION:. Provide balanced, thorough coverage.
-
-SECTION: Key Differences
-Organized comparison of the most significant differences, with clear SUBSECTION: headings for each dimension of comparison.
-
-SECTION: Similarities
-Common ground between the approaches, clearly articulated.
-
-SECTION: Practical Considerations
-Guidance on factors that may influence which approach applies, using {{Jurisdiction}} placeholders where relevant.
-
-SECTION: Summary
-A neutral, balanced concluding paragraph synthesizing the key takeaways.
-
-SECTION: Prepared By
-EvoLegal Experts
-Date: {{Date}}`,
+    prompt: `Create a balanced comparative guide with clear distinctions, shared themes, practical considerations, and a neutral summary. Preserve a calm, sophisticated tone throughout.`,
   },
 };
 
 // ── System prompts ─────────────────────────────────────────────────
 
-const GENERATOR_SYSTEM = `You are the EvoLegal Document Writer -- a senior legal information specialist who produces calm, elegant, trustworthy documents that feel like they come from a premium law firm.
+const GENERATOR_SYSTEM = `You are the EvoLegal Document Writer -- a senior legal information specialist producing calm, elegant, trustworthy informational documents.
 
-VOICE AND TONE:
-- Write in a calm, confident, professional voice -- never energetic, robotic, or overly formal.
-- Every sentence should feel considered and purposeful. Favor clarity over complexity.
-- Use formal but accessible language -- a well-educated non-lawyer should understand every paragraph.
-- Aim for the reading experience of a high-end legal briefing, not a textbook.
-- Use smooth transitions between sections and paragraphs. The document should flow naturally.
+Return ONLY valid JSON matching this exact shape:
+{
+  "needsExpertReview": false,
+  "expertReviewMessage": "",
+  "document": {
+    "title": "string",
+    "introduction": ["paragraph"],
+    "keyConcepts": [
+      {
+        "heading": "string",
+        "paragraphs": ["paragraph"],
+        "bullets": ["optional bullet"]
+      }
+    ],
+    "importantConsiderations": [
+      {
+        "heading": "string",
+        "paragraphs": ["paragraph"],
+        "bullets": ["optional bullet"]
+      }
+    ],
+    "commonQuestions": [
+      {
+        "question": "string",
+        "answer": "string"
+      }
+    ],
+    "furtherResources": ["resource category"],
+    "preparedBy": "EvoLegal Experts",
+    "date": "Month Day, Year"
+  }
+}
 
-CRITICAL FORMATTING RULES (FOLLOW EXACTLY):
-- Use "SECTION:" prefix for all main section headings.
-- Use "SUBSECTION:" prefix for subsection headings.
-- For numbered items, use "1.", "2.", "3." at the start of lines.
-- For bullet points, use a simple dash "- " at the start of lines.
-- For Q&A, use "Q:" and "A:" prefixes.
-- NEVER use markdown syntax: no **, no *, no #, no __, no backticks, no ---.
-- NEVER use special Unicode characters: no em-dashes, no en-dashes, no smart quotes, no bullet symbols, no ellipsis characters.
-- Use only plain ASCII characters: use "--" instead of em-dash, use "-" for bullets, use regular quotes " and ', use "..." for ellipsis.
-- Write clean plain text with the SECTION:/SUBSECTION: markers only.
-- Do NOT include a disclaimer in the body -- the PDF system adds it automatically.
-- Do NOT use the word "step" or "steps" anywhere. Do NOT use "you should", "you must", "need to", "have to".
+Rules:
+- Use plain ASCII only.
+- Never include markdown, code fences, bullets as Unicode, or commentary outside JSON.
+- Replace variables with {{Placeholder Name}} or [REQUIRES USER INPUT: ...].
+- Keep the voice calm, refined, confident, and professional.
+- Avoid repetitive openings, filler language, and mechanical phrasing.
+- Common Questions may be empty only if the topic genuinely does not benefit from them.
+- Only set needsExpertReview to true for active court proceedings involving real party names and real case numbers.
+- General informational topics must proceed normally.`;
 
-CONTENT QUALITY:
-- Be thorough but never repetitive. Each paragraph should add distinct value.
-- Use excellent paragraph flow -- each section should read like well-crafted prose, not a list.
-- Where lists are used, keep them purposeful and well-explained.
-- Replace all variables with {{Placeholder Name}} syntax.
-- If data is missing, use {{Placeholder Name}} -- never invent or assume data.
+const REVIEWER_SYSTEM = `You are the EvoLegal Document Reviewer -- a senior editorial reviewer enforcing luxury publication standards.
 
-RISK ASSESSMENT:
-- Almost ALL topics are safe to generate a general informational document about. Proceed normally for any general topic.
-- Output RISK_ESCALATION ONLY if the user explicitly asks you to draft a document for an active court case with real party names and case numbers. General topics like "Ukrainian law", "tenant rights", "crypto regulation", "family law" etc. are NEVER grounds for escalation.
-- When in doubt, ALWAYS proceed with generation. The document is general information, not legal advice.
+Return ONLY valid JSON in the SAME schema you received.
 
-OUTPUT:
-- Output ONLY the document content. No preamble, no explanation, no commentary.`;
+Silently fix all of the following before returning JSON:
+- broken encoding or mojibake
+- markdown artifacts or stray symbols
+- incorrect or inconsistent date
+- missing structure or weak hierarchy
+- repetitive, vague, or mechanical language
+- poor flow between sections
+- thin or underdeveloped sections
+- placeholder mistakes
 
-const REVIEWER_SYSTEM = `You are the EvoLegal Document Reviewer -- an independent senior editor ensuring every document meets luxury publication standards.
+Rules:
+- Output plain ASCII text only inside the JSON values.
+- Preserve a calm, elegant, neutral tone.
+- Ensure the document is general information only and not personalized legal advice.
+- Ensure all required sections are present and substantive.
+- Only set needsExpertReview to true for active court proceedings involving real party names and real case numbers.
+- General informational content must remain generatable.`;
 
-Your job is to take the document below and produce a polished, final version. Apply these fixes silently:
+interface StructuredBlock {
+  heading: string;
+  paragraphs: string[];
+  bullets?: string[];
+  numbered?: string[];
+}
 
-1. ENCODING AND CHARACTER CLEANUP (HIGHEST PRIORITY):
-   - Replace ALL em-dashes, en-dashes, and any Unicode dash variants with "--" (double hyphen).
-   - Replace ALL smart/curly quotes with straight quotes (" and ').
-   - Replace ALL Unicode bullet symbols with "- " (dash space).
-   - Replace ALL ellipsis characters with "..." (three dots).
-   - Remove ALL other non-ASCII characters except letters with accents when needed for proper nouns.
-   - The output must be 100% clean ASCII-safe text (WinAnsiEncoding compatible).
+interface StructuredQuestion {
+  question: string;
+  answer: string;
+}
 
-2. FORMATTING CLEANUP:
-   - Remove ALL markdown artifacts: **, *, #, __, backticks -- replace with clean plain text.
-   - Ensure all section headers use "SECTION:" prefix exactly.
-   - Ensure all subsection headers use "SUBSECTION:" prefix exactly.
-   - Ensure bullet points use only "- " (dash space).
-   - Ensure numbered items use "1.", "2.", "3." format.
-   - Remove any repeated or redundant sections.
-   - Remove the words "step", "steps", "you should", "you must", "need to", "have to" -- rephrase naturally.
+interface StructuredDocument {
+  title: string;
+  introduction: string[];
+  keyConcepts: StructuredBlock[];
+  importantConsiderations: StructuredBlock[];
+  commonQuestions: StructuredQuestion[];
+  furtherResources: string[];
+  preparedBy: string;
+  date: string;
+}
 
-3. CONTENT QUALITY:
-   - Tighten verbose or repetitive language -- every sentence must earn its place.
-   - Ensure smooth logical flow between sections and paragraphs.
-   - Add missing essential content if a section feels thin.
-   - Remove any content that could be interpreted as personalized legal advice.
-   - Verify all placeholders use {{Placeholder Name}} syntax.
-   - Ensure the writing feels calm, confident, and expertly crafted.
+function formatCurrentDate(date = new Date()): string {
+  return new Intl.DateTimeFormat("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(date);
+}
 
-4. TONE:
-   - Ensure calm, professional, neutral voice throughout -- like a premium law firm overview.
-   - Remove any energetic, chatty, casual, or marketing language.
-   - The document should feel trustworthy and authoritative without being stiff.
+function extractJsonFromResponse(response: string): unknown {
+  let cleaned = response
+    .replace(/```json\s*/gi, "")
+    .replace(/```\s*/g, "")
+    .trim();
 
-5. STRUCTURE CHECK:
-   - Verify sections appear in the correct order.
-   - Verify each section has substantive content -- no empty or skeleton sections.
+  const jsonStart = cleaned.search(/[\[{]/);
+  if (jsonStart === -1) {
+    throw new Error("No JSON object found in response");
+  }
 
-6. RISK CHECK:
-   - Almost all documents are safe. Only escalate if the document contains real party names and real case numbers for an active court proceeding.
-   - General informational content is NEVER grounds for escalation. When in doubt, proceed normally.
+  const opening = cleaned[jsonStart];
+  const closing = opening === "[" ? "]" : "}";
+  const jsonEnd = cleaned.lastIndexOf(closing);
+  if (jsonEnd === -1) {
+    throw new Error("Incomplete JSON object found in response");
+  }
 
-OUTPUT: The complete, polished document only. No review notes, no commentary, no explanations. Use ONLY plain ASCII characters.`;
+  cleaned = cleaned.substring(jsonStart, jsonEnd + 1);
+
+  try {
+    return JSON.parse(cleaned);
+  } catch {
+    cleaned = cleaned
+      .replace(/,\s*}/g, "}")
+      .replace(/,\s*]/g, "]")
+      .replace(/[\x00-\x1F\x7F]/g, "");
+
+    return JSON.parse(cleaned);
+  }
+}
+
+function normalizeTextValue(value: unknown): string {
+  const base = typeof value === "string" ? value : String(value ?? "");
+  return base
+    .replace(/```json\s*/gi, "")
+    .replace(/```/g, "")
+    .replace(/\*\*|__|`|#{1,6}\s*/g, "")
+    .replace(/[\u2013\u2014]/g, "--")
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/[\u201C\u201D]/g, '"')
+    .replace(/[\u2022\u2023\u25E6\u2043\u2219]/g, "-")
+    .replace(/[\u2026]/g, "...")
+    .replace(/â€“|â€”|â€"|â€\"/g, "--")
+    .replace(/â€œ|â€\u009d/g, '"')
+    .replace(/â€˜|â€™/g, "'")
+    .replace(/â€¢|¢/g, "-")
+    .replace(/â€¦/g, "...")
+    .replace(/Â/g, " ")
+    .replace(/[\r\t]+/g, " ")
+    .replace(/[ ]{2,}/g, " ")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+function polishSentenceFlow(text: string): string {
+  return normalizeTextValue(text)
+    .replace(/\byou should\b/gi, "it is often appropriate to")
+    .replace(/\byou must\b/gi, "it is generally required to")
+    .replace(/\bneed to\b/gi, "it is often necessary to")
+    .replace(/\bhave to\b/gi, "it is often necessary to")
+    .replace(/\bsteps\b/gi, "considerations")
+    .replace(/\bstep\b/gi, "consideration")
+    .replace(/\s+([,.;:?!])/g, "$1")
+    .trim();
+}
+
+function normalizeParagraphArray(value: unknown): string[] {
+  const source = Array.isArray(value)
+    ? value
+    : typeof value === "string"
+      ? value.split(/\n{2,}|\n/)
+      : [];
+
+  return source
+    .map((entry) => polishSentenceFlow(entry))
+    .filter(Boolean);
+}
+
+function normalizeStringList(value: unknown): string[] {
+  const source = Array.isArray(value)
+    ? value
+    : typeof value === "string"
+      ? value.split(/\n|;/)
+      : [];
+
+  const seen = new Set<string>();
+  return source
+    .map((entry) => polishSentenceFlow(entry).replace(/^-+\s*/, ""))
+    .filter(Boolean)
+    .filter((entry) => {
+      const key = entry.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+}
+
+function normalizeBlocks(value: unknown): StructuredBlock[] {
+  if (!Array.isArray(value)) return [];
+
+  return value
+    .map((entry) => {
+      if (typeof entry === "string") {
+        return {
+          heading: polishSentenceFlow(entry),
+          paragraphs: [],
+          bullets: [],
+          numbered: [],
+        } satisfies StructuredBlock;
+      }
+
+      const record = entry && typeof entry === "object" ? entry as Record<string, unknown> : {};
+      return {
+        heading: polishSentenceFlow(record.heading ?? record.title ?? ""),
+        paragraphs: normalizeParagraphArray(record.paragraphs ?? record.content ?? record.body),
+        bullets: normalizeStringList(record.bullets),
+        numbered: normalizeStringList(record.numbered),
+      } satisfies StructuredBlock;
+    })
+    .filter((block) => block.heading || block.paragraphs.length || (block.bullets?.length ?? 0) || (block.numbered?.length ?? 0))
+    .map((block, index) => ({
+      heading: block.heading || `Concept ${index + 1}`,
+      paragraphs: block.paragraphs,
+      bullets: block.bullets?.length ? block.bullets : undefined,
+      numbered: block.numbered?.length ? block.numbered : undefined,
+    }));
+}
+
+function normalizeQuestions(value: unknown): StructuredQuestion[] {
+  if (!Array.isArray(value)) return [];
+
+  return value
+    .map((entry) => {
+      const record = entry && typeof entry === "object" ? entry as Record<string, unknown> : {};
+      return {
+        question: polishSentenceFlow(record.question ?? record.q ?? ""),
+        answer: polishSentenceFlow(record.answer ?? record.a ?? ""),
+      } satisfies StructuredQuestion;
+    })
+    .filter((qa) => qa.question && qa.answer);
+}
+
+function repairStructuredDocument(candidate: unknown, fallbackTitle: string, currentDateLabel: string): StructuredDocument {
+  const record = candidate && typeof candidate === "object" ? candidate as Record<string, unknown> : {};
+
+  const introduction = normalizeParagraphArray(record.introduction);
+  const keyConcepts = normalizeBlocks(record.keyConcepts);
+  const importantConsiderations = normalizeBlocks(record.importantConsiderations);
+  const commonQuestions = normalizeQuestions(record.commonQuestions);
+  const furtherResources = normalizeStringList(record.furtherResources);
+
+  return {
+    title: polishSentenceFlow(record.title ?? fallbackTitle) || fallbackTitle,
+    introduction: introduction.length
+      ? introduction
+      : [
+          `This document provides a calm, general overview of ${fallbackTitle.replace(/^.+?:\s*/, "").trim()} for informational purposes only.`,
+        ],
+    keyConcepts: keyConcepts.length
+      ? keyConcepts
+      : [
+          {
+            heading: "Core Framework",
+            paragraphs: [
+              "Key concepts should be reviewed in light of the relevant legal framework, procedural posture, and jurisdiction-specific context.",
+            ],
+          },
+        ],
+    importantConsiderations: importantConsiderations.length
+      ? importantConsiderations
+      : [
+          {
+            heading: "General Considerations",
+            paragraphs: [
+              "Important considerations often include timing, documentation quality, local rules, and the factual detail required for reliable professional guidance.",
+            ],
+          },
+        ],
+    commonQuestions,
+    furtherResources: furtherResources.length
+      ? furtherResources
+      : ["Local statutes and regulations", "Official court or agency guidance", "Licensed professional consultation"],
+    preparedBy: "EvoLegal Experts",
+    date: currentDateLabel,
+  };
+}
+
+function extractStructuredPayload(response: string, fallbackTitle: string, currentDateLabel: string): {
+  needsExpertReview: boolean;
+  expertReviewMessage: string;
+  document: StructuredDocument;
+} {
+  const parsed = extractJsonFromResponse(response);
+  const root = parsed && typeof parsed === "object" ? parsed as Record<string, unknown> : {};
+  const documentCandidate = root.document ?? root;
+
+  return {
+    needsExpertReview: Boolean(root.needsExpertReview),
+    expertReviewMessage: polishSentenceFlow(root.expertReviewMessage ?? "") || EXPERT_REVIEW_MESSAGE,
+    document: repairStructuredDocument(documentCandidate, fallbackTitle, currentDateLabel),
+  };
+}
+
+function hasLuxuryQualityIssues(document: StructuredDocument, currentDateLabel: string): boolean {
+  const serialized = JSON.stringify(document);
+  return (
+    !document.title ||
+    document.introduction.length === 0 ||
+    document.keyConcepts.length === 0 ||
+    document.importantConsiderations.length === 0 ||
+    document.furtherResources.length === 0 ||
+    document.preparedBy !== "EvoLegal Experts" ||
+    document.date !== currentDateLabel ||
+    /(â€|â€¢|�|```|\*\*|__|#[A-Za-z]|\b(?:you should|you must|need to|have to|steps?)\b)/i.test(serialized)
+  );
+}
+
+function buildDocumentContent(document: StructuredDocument): string {
+  const lines: string[] = [`TITLE: ${document.title}`, "", "SECTION: Introduction"];
+
+  lines.push(...document.introduction, "", "SECTION: Key Concepts");
+
+  for (const block of document.keyConcepts) {
+    lines.push(`SUBSECTION: ${block.heading}`);
+    lines.push(...block.paragraphs);
+    if (block.bullets?.length) lines.push(...block.bullets.map((bullet) => `- ${bullet}`));
+    if (block.numbered?.length) lines.push(...block.numbered.map((item, index) => `${index + 1}. ${item}`));
+    lines.push("");
+  }
+
+  lines.push("SECTION: Important Considerations");
+  for (const block of document.importantConsiderations) {
+    lines.push(`SUBSECTION: ${block.heading}`);
+    lines.push(...block.paragraphs);
+    if (block.bullets?.length) lines.push(...block.bullets.map((bullet) => `- ${bullet}`));
+    if (block.numbered?.length) lines.push(...block.numbered.map((item, index) => `${index + 1}. ${item}`));
+    lines.push("");
+  }
+
+  if (document.commonQuestions.length) {
+    lines.push("SECTION: Common Questions");
+    for (const qa of document.commonQuestions) {
+      lines.push(`Q: ${qa.question}`);
+      lines.push(`A: ${qa.answer}`, "");
+    }
+  }
+
+  lines.push("SECTION: Further Resources");
+  lines.push(...document.furtherResources.map((resource) => `- ${resource}`), "");
+  lines.push("SECTION: Prepared By", document.preparedBy, `Date: ${document.date}`);
+
+  return lines.join("\n").replace(/\n{3,}/g, "\n\n").trim();
+}
 
 // ── Main handler ───────────────────────────────────────────────────
 
