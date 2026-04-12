@@ -60,7 +60,7 @@ const plans = [
     price: "$59",
     period: "/mo",
     desc: "Full power",
-    features: ["Everything in Basic", "Unlimited submissions", "Priority 24h turnaround", "Deep-dive exclusive content", "Full Case File portal", "Human Expert consultations"],
+    features: ["Everything in Basic", "Unlimited submissions", "Priority ~4h turnaround", "Deep-dive exclusive content", "Full Case File portal", "Human Expert consultations"],
     cta: "Go Pro",
     highlight: false,
     annual: "$499/year (save 20%)",

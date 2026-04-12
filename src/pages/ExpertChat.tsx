@@ -229,7 +229,7 @@ const ExpertChat = () => {
                     exit={{ height: 0, opacity: 0 }}
                     className="text-[10px] text-muted-foreground leading-relaxed overflow-hidden"
                   >
-                    Every response is carefully reviewed by our Experts — structured with Options → Risks → Resources. We deeply care about accuracy and your legal security.
+                    Every response is carefully reviewed by our Experts — structured with Options → Risks → Resources. You will get your answer as soon as possible. It always depends on the complexity of your case.
                   </motion.p>
                 )}
               </AnimatePresence>

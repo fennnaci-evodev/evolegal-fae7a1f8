@@ -24,7 +24,7 @@ const steps = [
     icon: UserCheck,
     number: "03",
     title: "Expert Review & Delivery",
-    desc: "Every response is reviewed by an EvoLegal Expert for accuracy and completeness, then delivered to your portal — typically within 4 hours for Pro and 8 hours for Basic.",
+    desc: "Every response is reviewed by an EvoLegal Expert for accuracy and completeness, then delivered to your portal. You will get your answer as soon as possible — it always depends on the complexity of your case. Typical turnaround: 4 hours for Pro, 8 hours for Basic.",
   },
 ];
 
@@ -79,7 +79,7 @@ const HowItWorks = () => {
             <h3 className="text-xl font-display font-semibold mb-3">Quality You Can Trust</h3>
             <p className="text-muted-foreground max-w-lg mx-auto mb-6">
               Every response is carefully reviewed by our Experts — structured with Options → Risks → Resources.<br />
-              We deeply care about accuracy and your legal security.
+              You will get your answer as soon as possible. It always depends on the complexity of your case.
             </p>
             <Link to="/auth">
               <Button variant="hero" size="lg">

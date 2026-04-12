@@ -25,7 +25,7 @@ const faqs = [
   },
   {
     q: "How fast will I get a response?",
-    a: "Typical turnaround: 4 hours for Pro, 8 hours for Basic. Hugo handles many questions instantly, and our Legal Experts review complex submissions promptly.",
+    a: "You will get your answer as soon as possible. It always depends on the complexity of your case. Typical turnaround: 4 hours for Pro, 8 hours for Basic. Hugo handles many questions instantly, and our Experts review complex submissions promptly.",
   },
   {
     q: "Can I cancel my subscription?",
