@@ -185,6 +185,7 @@ function normalizeTextValue(value: unknown): string {
     .replace(/â€¦/g, "...")
     .replace(/Â/g, " ")
     .replace(/[\r\t]+/g, " ")
+    .replace(/[^\x20-\x7E\n]/g, "")
     .replace(/[ ]{2,}/g, " ")
     .replace(/\n{3,}/g, "\n\n")
     .trim();
@@ -962,6 +963,7 @@ function generatePDF(
   for (let p = 0; p < totalPages; p++) {
     const page = pages[p];
     let stream = "";
+    const headerTitle = wrapText(title, 52).slice(0, 2);
 
     // ── HEADER: Dark band with logo ──────────────────────────────────
     const headerH = 48;
@@ -1004,6 +1006,15 @@ function generatePDF(
     stream += `${ML + 18} ${PH - 38} Td\n`;
     stream += `(${pdfEncode("EvoLegal")}) Tj\n`;
     stream += "ET\n";
+
+    for (let i = 0; i < headerTitle.length; i++) {
+      stream += "BT\n";
+      stream += "0.76 0.79 0.84 rg\n";
+      stream += `/F1 ${i === 0 ? 8.5 : 7.5} Tf\n`;
+      stream += `${ML + 18} ${PH - 50 - i * 9} Td\n`;
+      stream += `(${pdfEncode(headerTitle[i])}) Tj\n`;
+      stream += "ET\n";
+    }
 
     // Page number (right side)
     stream += "BT\n";
