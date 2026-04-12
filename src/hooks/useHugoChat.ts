@@ -271,6 +271,34 @@ export function useHugoChat(chatId?: string | null) {
     }
   }, [streaming, user, currentChatId, messages, createChat, saveMessage, updateTitle]);
 
+  // Edit the last user message: remove last user+assistant msgs, return the text
+  const editLastMessage = useCallback(async (): Promise<string | null> => {
+    if (streaming || !currentChatId) return null;
+
+    // Find the last user message index
+    const lastUserIdx = messages.length - 1 - [...messages].reverse().findIndex(m => m.role === "user");
+    if (lastUserIdx < 0 || lastUserIdx >= messages.length) return null;
+
+    const lastUserMsg = messages[lastUserIdx];
+    const toRemove = messages.slice(lastUserIdx); // user msg + any assistant after it
+
+    // Remove from DB
+    for (const msg of toRemove) {
+      await supabase.from("hugo_messages" as any).delete().eq("id", msg.id);
+    }
+
+    // Also delete any feedback for removed assistant messages
+    const assistantIds = toRemove.filter(m => m.role === "assistant").map(m => m.id);
+    if (assistantIds.length > 0) {
+      await supabase.from("hugo_feedback" as any).delete().in("message_id", assistantIds);
+    }
+
+    // Remove from state
+    setMessages(prev => prev.slice(0, lastUserIdx));
+
+    return lastUserMsg.content;
+  }, [streaming, currentChatId, messages]);
+
   // Start a new chat (reset state)
   const startNewChat = useCallback(() => {
     setCurrentChatId(null);
@@ -287,6 +315,7 @@ export function useHugoChat(chatId?: string | null) {
     currentChatId,
     currentTitle,
     sendMessage,
+    editLastMessage,
     startNewChat,
     loadMessages,
     setCurrentChatId,
