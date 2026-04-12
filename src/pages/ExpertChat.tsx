@@ -364,6 +364,13 @@ const ExpertChat = () => {
           </div>
 
           {/* Input */}
+          {editingMode && (
+            <div className="flex items-center gap-2 px-3 py-1.5 text-[11px] text-muted-foreground">
+              <Pencil className="h-3 w-3" />
+              <span>Editing message</span>
+              <button onClick={() => { setEditingMode(false); setInput(""); }} className="ml-auto hover:text-foreground">Cancel</button>
+            </div>
+          )}
           <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="glass-strong shimmer-chat-form p-2.5 flex items-end gap-2 relative">
             <Button
               type="button" size="icon" variant="ghost"
