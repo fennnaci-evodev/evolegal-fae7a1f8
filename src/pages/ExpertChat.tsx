@@ -110,7 +110,7 @@ const ExpertChat = () => {
     }
   };
 
-
+  const handleNewChat = () => {
     startNewChat();
     navigate("/dashboard/chat", { replace: true });
   };
