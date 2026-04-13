@@ -56,6 +56,8 @@ export function useHugoChat(chatId?: string | null) {
   const [currentTitle, setCurrentTitle] = useState<string>("New Chat");
   const [historyLoading, setHistoryLoading] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
+  const messagesRef = useRef<HugoMessage[]>(messages);
+  messagesRef.current = messages;
 
   // Load messages for an existing chat
   const loadMessages = useCallback(async (cId: string) => {
@@ -160,7 +162,7 @@ export function useHugoChat(chatId?: string | null) {
     if (savedId) userMsg.id = savedId;
 
     // Stream Hugo's response
-    const allMsgs = [...messages, userMsg];
+    const allMsgs = [...messagesRef.current, userMsg];
     const apiMessages = allMsgs.map(m => ({ role: m.role, content: m.content }));
 
     try {
@@ -269,7 +271,7 @@ export function useHugoChat(chatId?: string | null) {
       setStreaming(false);
       abortRef.current = null;
     }
-  }, [streaming, user, currentChatId, messages, createChat, saveMessage, updateTitle]);
+  }, [streaming, user, currentChatId, createChat, saveMessage, updateTitle]);
 
   // Edit the last user message: remove last user+assistant msgs, return the text
   const editLastMessage = useCallback(async (): Promise<string | null> => {
