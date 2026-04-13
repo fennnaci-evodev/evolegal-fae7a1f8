@@ -271,7 +271,7 @@ export function useHugoChat(chatId?: string | null) {
       setStreaming(false);
       abortRef.current = null;
     }
-  }, [streaming, user, currentChatId, messages, createChat, saveMessage, updateTitle]);
+  }, [streaming, user, currentChatId, createChat, saveMessage, updateTitle]);
 
   // Edit the last user message: remove last user+assistant msgs, return the text
   const editLastMessage = useCallback(async (): Promise<string | null> => {
