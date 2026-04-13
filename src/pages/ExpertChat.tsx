@@ -327,7 +327,15 @@ const ExpertChat = () => {
                         ? "bg-primary text-primary-foreground rounded-br-md"
                         : "glass rounded-bl-md"
                     }`}>
-                      {msg.content}
+                      {msg.role === "assistant" ? (
+                        <HugoTypingMessage
+                          content={msg.content}
+                          messageId={msg.id}
+                          isStreaming={streaming && idx === messages.length - 1}
+                        />
+                      ) : (
+                        msg.content
+                      )}
                     </div>
                     {msg.role === "user" && isLastUserMsg && !streaming && (
                       <button
