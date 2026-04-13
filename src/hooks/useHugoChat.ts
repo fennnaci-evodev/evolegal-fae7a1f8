@@ -261,8 +261,10 @@ export function useHugoChat(chatId?: string | null) {
     } catch (err: any) {
       if (err.name !== "AbortError") {
         toast.error(err.message || "Something went wrong.");
+        const errId = crypto.randomUUID();
+        newAssistantIdsRef.current.add(errId);
         const errMsg: HugoMessage = {
-          id: crypto.randomUUID(),
+          id: errId,
           role: "assistant",
           content: "I'm sorry, I wasn't able to process that right now. Please try again in a moment.",
         };
