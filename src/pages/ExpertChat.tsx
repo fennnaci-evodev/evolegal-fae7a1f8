@@ -37,6 +37,7 @@ const ExpertChat = () => {
     startNewChat,
     setCurrentChatId,
     loadMessages,
+    newAssistantIds,
   } = useHugoChat(paramChatId || null);
 
   const [input, setInput] = useState("");
@@ -333,6 +334,7 @@ const ExpertChat = () => {
                           content={msg.content}
                           messageId={msg.id}
                           isStreaming={streaming && idx === messages.length - 1}
+                          isNew={newAssistantIds.has(msg.id)}
                         />
                       ) : (
                         msg.content

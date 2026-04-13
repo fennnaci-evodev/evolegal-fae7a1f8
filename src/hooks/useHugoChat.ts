@@ -58,6 +58,8 @@ export function useHugoChat(chatId?: string | null) {
   const abortRef = useRef<AbortController | null>(null);
   const messagesRef = useRef<HugoMessage[]>(messages);
   messagesRef.current = messages;
+  // Track IDs of assistant messages created in this session (not loaded from DB)
+  const newAssistantIdsRef = useRef<Set<string>>(new Set());
 
   // Load messages for an existing chat
   const loadMessages = useCallback(async (cId: string) => {
@@ -192,6 +194,7 @@ export function useHugoChat(chatId?: string | null) {
       let buf = "";
       let full = "";
       const assistantId = crypto.randomUUID();
+      newAssistantIdsRef.current.add(assistantId);
 
       const updateAssistant = (text: string) => {
         full = text;
@@ -258,8 +261,10 @@ export function useHugoChat(chatId?: string | null) {
     } catch (err: any) {
       if (err.name !== "AbortError") {
         toast.error(err.message || "Something went wrong.");
+        const errId = crypto.randomUUID();
+        newAssistantIdsRef.current.add(errId);
         const errMsg: HugoMessage = {
-          id: crypto.randomUUID(),
+          id: errId,
           role: "assistant",
           content: "I'm sorry, I wasn't able to process that right now. Please try again in a moment.",
         };
@@ -321,6 +326,7 @@ export function useHugoChat(chatId?: string | null) {
     startNewChat,
     loadMessages,
     setCurrentChatId,
+    newAssistantIds: newAssistantIdsRef.current,
   };
 }
 

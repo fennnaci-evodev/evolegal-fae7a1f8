@@ -30,6 +30,7 @@ export function HugoDemoBubble() {
     currentChatId,
     sendMessage,
     startNewChat,
+    newAssistantIds,
   } = useHugoChat();
 
   const userMsgCount = messages.filter((m) => m.role === "user").length;
@@ -189,6 +190,7 @@ export function HugoDemoBubble() {
                         content={msg.content}
                         messageId={msg.id}
                         isStreaming={streaming && msg.id === messages[messages.length - 1]?.id}
+                        isNew={newAssistantIds.has(msg.id)}
                       />
                     ) : (
                       msg.content
