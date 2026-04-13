@@ -194,6 +194,7 @@ export function useHugoChat(chatId?: string | null) {
       let buf = "";
       let full = "";
       const assistantId = crypto.randomUUID();
+      newAssistantIdsRef.current.add(assistantId);
 
       const updateAssistant = (text: string) => {
         full = text;
