@@ -404,6 +404,15 @@ img,
   50% { opacity: 0; }
 }
 
+@keyframes hugo-paragraph-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.hugo-paragraph-reveal {
+  animation: hugo-paragraph-in 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
 .hugo-typing-cursor {
   display: inline;
   font-weight: 300;
