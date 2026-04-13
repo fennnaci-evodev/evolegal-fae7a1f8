@@ -4,14 +4,13 @@ interface HugoTypingMessageProps {
   content: string;
   isStreaming?: boolean;
   messageId: string;
-  /** Only animate if this is a brand-new message (not loaded from history) */
   isNew?: boolean;
 }
 
-function splitSentences(text: string): string[] {
-  const parts = text.match(/[^.!?\n]+[.!?\n]*[\s]*/g);
-  if (!parts) return [text];
-  return parts;
+/** Split text into paragraphs (double newline) */
+function splitParagraphs(text: string): string[] {
+  const parts = text.split(/\n\n+/);
+  return parts.filter((p) => p.trim().length > 0);
 }
 
 function usePrefersReducedMotion() {
@@ -33,9 +32,8 @@ export function HugoTypingMessage({ content, isStreaming, messageId, isNew }: Hu
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const prevIdRef = useRef(messageId);
 
-  const sentences = useMemo(() => splitSentences(content), [content]);
+  const paragraphs = useMemo(() => splitParagraphs(content), [content]);
 
-  // Only animate if: isNew=true, not streaming, not reduced motion
   const shouldAnimate = isNew === true && !isStreaming && !reducedMotion;
 
   useEffect(() => {
@@ -48,7 +46,7 @@ export function HugoTypingMessage({ content, isStreaming, messageId, isNew }: Hu
 
   useEffect(() => {
     if (!shouldAnimate) {
-      setRevealedCount(sentences.length);
+      setRevealedCount(paragraphs.length);
       setDone(true);
       return;
     }
@@ -58,42 +56,54 @@ export function HugoTypingMessage({ content, isStreaming, messageId, isNew }: Hu
     const revealNext = () => {
       setRevealedCount((prev) => {
         const next = prev + 1;
-        if (next >= sentences.length) {
+        if (next >= paragraphs.length) {
           setDone(true);
           return next;
         }
-        // Faster: 30ms per word, min 80ms, max 500ms
-        const wordCount = sentences[next]?.split(/\s+/).length ?? 2;
-        const delay = Math.min(Math.max(wordCount * 30, 80), 500);
+        // Calm pace: ~50ms per word, min 400ms, max 1800ms per paragraph
+        const wordCount = paragraphs[next]?.split(/\s+/).length ?? 5;
+        const delay = Math.min(Math.max(wordCount * 50, 400), 1800);
         timerRef.current = setTimeout(revealNext, delay);
         return next;
       });
     };
 
-    timerRef.current = setTimeout(revealNext, 60);
+    // Initial delay before first paragraph
+    timerRef.current = setTimeout(revealNext, 300);
 
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, [sentences, shouldAnimate, done]);
+  }, [paragraphs, shouldAnimate, done]);
 
   useEffect(() => {
-    if (!shouldAnimate && revealedCount < sentences.length) {
-      setRevealedCount(sentences.length);
+    if (!shouldAnimate && revealedCount < paragraphs.length) {
+      setRevealedCount(paragraphs.length);
       setDone(true);
     }
-  }, [sentences.length, shouldAnimate, revealedCount]);
+  }, [paragraphs.length, shouldAnimate, revealedCount]);
 
   if (!shouldAnimate) {
     return <span>{content}</span>;
   }
 
-  const visibleText = sentences.slice(0, revealedCount).join("");
   const showCursor = !done;
 
   return (
     <span className="hugo-typing-container">
-      {visibleText}
+      {paragraphs.map((para, i) => {
+        if (i >= revealedCount) return null;
+        const isLatest = i === revealedCount - 1 && !done;
+        return (
+          <span
+            key={i}
+            className={isLatest ? "hugo-paragraph-reveal" : undefined}
+            style={{ display: "block", marginBottom: i < paragraphs.length - 1 ? "0.75em" : 0 }}
+          >
+            {para}
+          </span>
+        );
+      })}
       {showCursor && (
         <span className="hugo-typing-cursor" aria-hidden="true">|</span>
       )}
