@@ -397,3 +397,34 @@ img,
     animation: none !important;
   }
 }
+
+/* Hugo typing animation cursor */
+@keyframes hugo-cursor-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.hugo-typing-cursor {
+  display: inline;
+  font-weight: 300;
+  color: hsl(var(--primary));
+  animation: hugo-cursor-blink 0.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  margin-left: 1px;
+  font-size: 1em;
+  line-height: 1;
+}
+
+.hugo-typing-reduced {
+  animation: hugo-fade-in 0.4s ease-out;
+}
+
+@keyframes hugo-fade-in {
+  from { opacity: 0.3; }
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hugo-typing-cursor {
+    display: none !important;
+  }
+}

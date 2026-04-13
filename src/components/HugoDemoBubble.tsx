@@ -5,6 +5,7 @@ import { HugoAvatar } from "@/components/HugoAvatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { InlineELoader } from "@/components/InlineELoader";
+import { HugoTypingMessage } from "@/components/HugoTypingMessage";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { lovable } from "@/integrations/lovable/index";
@@ -183,7 +184,15 @@ export function HugoDemoBubble() {
                       ? "bg-primary text-primary-foreground rounded-br-sm"
                       : "glass rounded-bl-sm"
                   }`}>
-                    {msg.content}
+                    {msg.role === "assistant" ? (
+                      <HugoTypingMessage
+                        content={msg.content}
+                        messageId={msg.id}
+                        isStreaming={streaming && msg.id === messages[messages.length - 1]?.id}
+                      />
+                    ) : (
+                      msg.content
+                    )}
                   </div>
                 </motion.div>
               ))}

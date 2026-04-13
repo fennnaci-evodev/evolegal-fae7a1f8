@@ -10,6 +10,7 @@ import { HugoFeedbackButtons } from "@/components/HugoFeedbackButtons";
 import { DocumentFactoryButton } from "@/components/DocumentFactoryButton";
 import { isRateLimited } from "@/lib/security";
 import { InlineELoader } from "@/components/InlineELoader";
+import { HugoTypingMessage } from "@/components/HugoTypingMessage";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { useHugoChat, fetchHugoChats, deleteHugoChat, type HugoChat } from "@/hooks/useHugoChat";
@@ -327,7 +328,15 @@ const ExpertChat = () => {
                         ? "bg-primary text-primary-foreground rounded-br-md"
                         : "glass rounded-bl-md"
                     }`}>
-                      {msg.content}
+                      {msg.role === "assistant" ? (
+                        <HugoTypingMessage
+                          content={msg.content}
+                          messageId={msg.id}
+                          isStreaming={streaming && idx === messages.length - 1}
+                        />
+                      ) : (
+                        msg.content
+                      )}
                     </div>
                     {msg.role === "user" && isLastUserMsg && !streaming && (
                       <button
