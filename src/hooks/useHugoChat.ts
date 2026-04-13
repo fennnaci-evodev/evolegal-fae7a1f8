@@ -56,6 +56,8 @@ export function useHugoChat(chatId?: string | null) {
   const [currentTitle, setCurrentTitle] = useState<string>("New Chat");
   const [historyLoading, setHistoryLoading] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
+  const messagesRef = useRef<HugoMessage[]>(messages);
+  messagesRef.current = messages;
 
   // Load messages for an existing chat
   const loadMessages = useCallback(async (cId: string) => {
