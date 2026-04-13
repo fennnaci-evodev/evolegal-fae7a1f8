@@ -37,6 +37,7 @@ const ExpertChat = () => {
     startNewChat,
     setCurrentChatId,
     loadMessages,
+    newAssistantIds,
   } = useHugoChat(paramChatId || null);
 
   const [input, setInput] = useState("");

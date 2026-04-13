@@ -25,7 +25,6 @@ export function HugoDemoBubble() {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const {
-  const {
     messages,
     streaming,
     currentChatId,
