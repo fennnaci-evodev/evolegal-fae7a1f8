@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 
 interface HugoTypingMessageProps {
   content: string;
@@ -7,10 +7,18 @@ interface HugoTypingMessageProps {
   isNew?: boolean;
 }
 
-/** Split text into paragraphs (double newline) */
-function splitParagraphs(text: string): string[] {
-  const parts = text.split(/\n\n+/);
-  return parts.filter((p) => p.trim().length > 0);
+/** Split text into paragraphs, then each paragraph into sentences */
+function splitParagraphs(text: string): string[][] {
+  const paras = text.split(/\n\n+/).filter((p) => p.trim().length > 0);
+  return paras.map(splitSentences);
+}
+
+/** Split a paragraph into sentences, keeping punctuation attached */
+function splitSentences(para: string): string[] {
+  // Split on sentence-ending punctuation followed by a space or end
+  const raw = para.match(/[^.!?]*[.!?]+[\s]?|[^.!?]+$/g);
+  if (!raw) return [para];
+  return raw.map((s) => s.trim()).filter((s) => s.length > 0);
 }
 
 function usePrefersReducedMotion() {
@@ -25,88 +33,158 @@ function usePrefersReducedMotion() {
   return reduced;
 }
 
+interface RevealState {
+  paraIndex: number;
+  sentenceIndex: number;
+}
+
 export function HugoTypingMessage({ content, isStreaming, messageId, isNew }: HugoTypingMessageProps) {
   const reducedMotion = usePrefersReducedMotion();
-  const [revealedCount, setRevealedCount] = useState(0);
+  const [revealed, setRevealed] = useState<RevealState>({ paraIndex: 0, sentenceIndex: 0 });
   const [done, setDone] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const prevIdRef = useRef(messageId);
 
   const paragraphs = useMemo(() => splitParagraphs(content), [content]);
 
-  const shouldAnimate = isNew === true && !isStreaming && !reducedMotion;
+  // Total sentence count for quick checks
+  const totalSentences = useMemo(() => paragraphs.reduce((sum, p) => sum + p.length, 0), [paragraphs]);
 
+  const shouldAnimate = isNew === true && !isStreaming && !reducedMotion && totalSentences > 0;
+
+  // Reset on new message
   useEffect(() => {
     if (prevIdRef.current !== messageId) {
-      setRevealedCount(0);
+      setRevealed({ paraIndex: 0, sentenceIndex: 0 });
       setDone(false);
       prevIdRef.current = messageId;
     }
   }, [messageId]);
 
+  const clearTimer = useCallback(() => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+  }, []);
+
+  // Main reveal loop
   useEffect(() => {
     if (!shouldAnimate) {
-      setRevealedCount(paragraphs.length);
       setDone(true);
       return;
     }
-
     if (done) return;
 
-    const revealNext = () => {
-      setRevealedCount((prev) => {
-        const next = prev + 1;
-        if (next >= paragraphs.length) {
-          setDone(true);
-          return next;
-        }
-        // Calm pace: ~50ms per word, min 400ms, max 1800ms per paragraph
-        const wordCount = paragraphs[next]?.split(/\s+/).length ?? 5;
-        const delay = Math.min(Math.max(wordCount * 50, 400), 1800);
-        timerRef.current = setTimeout(revealNext, delay);
-        return next;
-      });
+    const scheduleNext = (currentPara: number, currentSent: number) => {
+      const para = paragraphs[currentPara];
+      if (!para) {
+        setDone(true);
+        return;
+      }
+
+      const isLastSentenceInPara = currentSent >= para.length - 1;
+      const isLastPara = currentPara >= paragraphs.length - 1;
+
+      if (isLastSentenceInPara && isLastPara) {
+        // All done
+        setDone(true);
+        return;
+      }
+
+      let nextPara = currentPara;
+      let nextSent = currentSent + 1;
+
+      if (isLastSentenceInPara) {
+        // Move to next paragraph
+        nextPara = currentPara + 1;
+        nextSent = 0;
+      }
+
+      // Calculate delay based on context
+      let delay: number;
+      if (isLastSentenceInPara && !isLastPara) {
+        // Pause between paragraphs: 600-800ms
+        delay = 700;
+      } else {
+        // Pause between sentences: 300-500ms, scaled by sentence length
+        const nextSentText = paragraphs[nextPara]?.[nextSent] ?? "";
+        const wordCount = nextSentText.split(/\s+/).length;
+        delay = Math.min(Math.max(wordCount * 35, 300), 500);
+      }
+
+      timerRef.current = setTimeout(() => {
+        setRevealed({ paraIndex: nextPara, sentenceIndex: nextSent });
+        scheduleNext(nextPara, nextSent);
+      }, delay);
     };
 
-    // Initial delay before first paragraph
-    timerRef.current = setTimeout(revealNext, 300);
+    // Start: reveal first sentence after a brief initial delay
+    timerRef.current = setTimeout(() => {
+      setRevealed({ paraIndex: 0, sentenceIndex: 0 });
+      scheduleNext(0, 0);
+    }, 200);
 
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-    };
-  }, [paragraphs, shouldAnimate, done]);
+    return clearTimer;
+  }, [paragraphs, shouldAnimate, done, clearTimer]);
 
+  // If animation conditions change mid-way, finish instantly
   useEffect(() => {
-    if (!shouldAnimate && revealedCount < paragraphs.length) {
-      setRevealedCount(paragraphs.length);
+    if (!shouldAnimate && !done) {
       setDone(true);
+      clearTimer();
     }
-  }, [paragraphs.length, shouldAnimate, revealedCount]);
+  }, [shouldAnimate, done, clearTimer]);
 
-  if (!shouldAnimate) {
+  // No animation — render full content instantly
+  if (!shouldAnimate && !isNew) {
     return <span>{content}</span>;
   }
 
-  const showCursor = !done;
+  // Reduced motion — soft fade
+  if (reducedMotion && isNew) {
+    return <span className="hugo-typing-reduced">{content}</span>;
+  }
 
+  // Done — show full content with a subtle settle
+  if (done) {
+    return (
+      <span className={isNew ? "hugo-msg-settle" : undefined}>
+        {paragraphs.map((para, pi) => (
+          <span key={pi} style={{ display: "block", marginBottom: pi < paragraphs.length - 1 ? "0.75em" : 0 }}>
+            {para.join(" ")}
+          </span>
+        ))}
+      </span>
+    );
+  }
+
+  // Animating — render revealed sentences
   return (
     <span className="hugo-typing-container">
-      {paragraphs.map((para, i) => {
-        if (i >= revealedCount) return null;
-        const isLatest = i === revealedCount - 1 && !done;
+      {paragraphs.map((para, pi) => {
+        if (pi > revealed.paraIndex) return null;
+        const isCurrentPara = pi === revealed.paraIndex;
+        const visibleCount = isCurrentPara ? revealed.sentenceIndex + 1 : para.length;
+
         return (
-          <span
-            key={i}
-            className={isLatest ? "hugo-paragraph-reveal" : undefined}
-            style={{ display: "block", marginBottom: i < paragraphs.length - 1 ? "0.75em" : 0 }}
-          >
-            {para}
+          <span key={pi} style={{ display: "block", marginBottom: pi < paragraphs.length - 1 ? "0.75em" : 0 }}>
+            {para.map((sentence, si) => {
+              if (si >= visibleCount) return null;
+              const isLatest = isCurrentPara && si === revealed.sentenceIndex;
+              return (
+                <span
+                  key={si}
+                  className={isLatest ? "hugo-sentence-reveal" : undefined}
+                >
+                  {sentence}{si < visibleCount - 1 ? " " : ""}
+                </span>
+              );
+            })}
           </span>
         );
       })}
-      {showCursor && (
-        <span className="hugo-typing-cursor" aria-hidden="true">|</span>
-      )}
+      <span className="hugo-typing-cursor" aria-hidden="true">|</span>
     </span>
   );
 }

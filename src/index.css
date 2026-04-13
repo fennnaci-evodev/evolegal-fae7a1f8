@@ -404,13 +404,22 @@ img,
   50% { opacity: 0; }
 }
 
-@keyframes hugo-paragraph-in {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
+@keyframes hugo-sentence-in {
+  from { opacity: 0; filter: blur(2px); }
+  to { opacity: 1; filter: blur(0); }
 }
 
-.hugo-paragraph-reveal {
-  animation: hugo-paragraph-in 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+.hugo-sentence-reveal {
+  animation: hugo-sentence-in 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+@keyframes hugo-settle {
+  from { opacity: 0.85; }
+  to { opacity: 1; }
+}
+
+.hugo-msg-settle {
+  animation: hugo-settle 0.4s ease-out both;
 }
 
 .hugo-typing-cursor {
