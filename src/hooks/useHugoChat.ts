@@ -162,7 +162,7 @@ export function useHugoChat(chatId?: string | null) {
     if (savedId) userMsg.id = savedId;
 
     // Stream Hugo's response
-    const allMsgs = [...messages, userMsg];
+    const allMsgs = [...messagesRef.current, userMsg];
     const apiMessages = allMsgs.map(m => ({ role: m.role, content: m.content }));
 
     try {
