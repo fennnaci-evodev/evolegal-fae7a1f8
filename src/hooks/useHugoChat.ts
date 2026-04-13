@@ -58,6 +58,8 @@ export function useHugoChat(chatId?: string | null) {
   const abortRef = useRef<AbortController | null>(null);
   const messagesRef = useRef<HugoMessage[]>(messages);
   messagesRef.current = messages;
+  // Track IDs of assistant messages created in this session (not loaded from DB)
+  const newAssistantIdsRef = useRef<Set<string>>(new Set());
 
   // Load messages for an existing chat
   const loadMessages = useCallback(async (cId: string) => {
