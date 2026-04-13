@@ -25,11 +25,13 @@ export function HugoDemoBubble() {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const {
+  const {
     messages,
     streaming,
     currentChatId,
     sendMessage,
     startNewChat,
+    newAssistantIds,
   } = useHugoChat();
 
   const userMsgCount = messages.filter((m) => m.role === "user").length;
