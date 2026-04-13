@@ -333,6 +333,7 @@ const ExpertChat = () => {
                           content={msg.content}
                           messageId={msg.id}
                           isStreaming={streaming && idx === messages.length - 1}
+                          isNew={newAssistantIds.has(msg.id)}
                         />
                       ) : (
                         msg.content
