@@ -326,6 +326,7 @@ export function useHugoChat(chatId?: string | null) {
     startNewChat,
     loadMessages,
     setCurrentChatId,
+    newAssistantIds: newAssistantIdsRef.current,
   };
 }
 
