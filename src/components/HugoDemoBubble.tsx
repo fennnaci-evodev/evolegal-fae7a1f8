@@ -23,6 +23,10 @@ export function HugoDemoBubble() {
   const [choiceDismissed, setChoiceDismissed] = useState(false);
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
+  const [preciseMode, setPreciseMode] = useState(false);
+  const [showPreciseSuggest, setShowPreciseSuggest] = useState(false);
+  const [showPreciseLimit, setShowPreciseLimit] = useState(false);
+  const [preciseStatus, setPreciseStatus] = useState<PreciseStatus>({ plan: "free", dailyLimit: 2, usedToday: 0, remainingToday: 2, packCredits: 0, canConsume: true });
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const {
@@ -40,40 +44,67 @@ export function HugoDemoBubble() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, streaming]);
 
-  const EXPERT_TRIGGER_PATTERN = /\b(connect\s*(me\s*)?(to\s*)?(an?\s*)?expert|talk\s*to\s*(an?\s*)?expert|need\s*(an?\s*)?expert|speak\s*(to|with)\s*(an?\s*)?expert|more\s*precise\s*help|review\s*by\s*expert|human\s*review)/i;
+  useEffect(() => {
+    if (user) setPreciseStatus(getPreciseStatus(user.id));
+  }, [user, messages.length]);
+
+  const EXPERT_TRIGGER_PATTERN = /\b(connect\s*(me\s*)?(to\s*)?(an?\s*)?expert|talk\s*to\s*(an?\s*)?expert|need\s*(an?\s*)?expert|speak\s*(to|with)\s*(an?\s*)?expert|review\s*by\s*expert|human\s*review)/i;
 
   const handleSend = async () => {
     const text = input.trim();
     if (!text || streaming) return;
 
-    // Guest gate after 1 message
     if (!user && userMsgCount >= 1) {
       setShowAuthPrompt(true);
       return;
     }
 
-    // Expert trigger
+    // Precise mode: enforce daily/credit limit
+    if (preciseMode && user) {
+      const status = getPreciseStatus(user.id);
+      if (!status.canConsume) {
+        setShowPreciseLimit(true);
+        return;
+      }
+      consumePreciseCredit(user.id);
+      setPreciseStatus(getPreciseStatus(user.id));
+    }
+
     if (EXPERT_TRIGGER_PATTERN.test(text)) {
       setInput("");
-      await sendMessage(text);
+      await sendMessage(text, { precise: preciseMode });
       setShowChoice(true);
       return;
     }
 
     setInput("");
-    const result = await sendMessage(text);
+    setShowPreciseSuggest(false);
+    const result = await sendMessage(text, { precise: preciseMode });
 
-    // Check escalation
     if (result?.escalated) {
       setTimeout(() => setShowChoice(true), 300);
+      return;
     }
 
-    // Show choice after N messages
+    if (result?.suggestPrecise && !preciseMode) {
+      setShowPreciseSuggest(true);
+      return;
+    }
+
     const newUserCount = userMsgCount + 1;
-    if (newUserCount >= MESSAGES_BEFORE_CHOICE && user && !choiceDismissed && !result?.escalated) {
+    if (newUserCount >= MESSAGES_BEFORE_CHOICE && user && !choiceDismissed) {
       setTimeout(() => setShowChoice(true), 800);
     }
   };
+
+  const handleAcceptPrecise = () => {
+    setShowPreciseSuggest(false);
+    if (!user) { setShowAuthPrompt(true); return; }
+    const status = getPreciseStatus(user.id);
+    if (!status.canConsume) { setShowPreciseLimit(true); return; }
+    setPreciseMode(true);
+  };
+
 
   const handleContinueHugo = () => {
     setShowChoice(false);
