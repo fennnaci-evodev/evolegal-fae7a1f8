@@ -142,7 +142,7 @@ export function useHugoChat(chatId?: string | null) {
   }, []);
 
   // Stream and persist
-  const sendMessage = useCallback(async (text: string) => {
+  const sendMessage = useCallback(async (text: string, opts?: { precise?: boolean }) => {
     if (!text.trim() || streaming || !user) return;
 
     let cId = currentChatId;
