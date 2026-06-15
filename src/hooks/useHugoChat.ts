@@ -277,7 +277,7 @@ export function useHugoChat(chatId?: string | null) {
         setMessages(prev => [...prev, errMsg]);
         await saveMessage(cId!, "assistant", errMsg.content);
       }
-      return { escalated: false, chatId: cId };
+      return { escalated: false, suggestPrecise: false, chatId: cId };
     } finally {
       setStreaming(false);
       abortRef.current = null;
