@@ -252,6 +252,9 @@ serve(async (req) => {
       );
     }
 
+    const preciseMode = body.precise_mode === true;
+    const systemPrompt = preciseMode ? PRECISE_PROMPT : BASE_PROMPT;
+
     const response = await fetch(
       "https://ai.gateway.lovable.dev/v1/chat/completions",
       {
@@ -263,11 +266,11 @@ serve(async (req) => {
         body: JSON.stringify({
           model: "google/gemini-3-flash-preview",
           messages: [
-            { role: "system", content: SYSTEM_PROMPT },
+            { role: "system", content: systemPrompt },
             ...chatMessages,
           ],
           stream: true,
-          temperature: 0.7,
+          temperature: preciseMode ? 0.55 : 0.7,
         }),
       }
     );
