@@ -229,12 +229,18 @@ export function useHugoChat(chatId?: string | null) {
 
       // Strip metrics tags from response (internal Hugo metrics, not shown to user)
       let finalContent = full.replace(/<!--METRICS:.*?-->/s, "").trim();
-      
+
+      // Detect precise-mode suggestion marker (auto-suggested by Hugo)
+      const suggestPrecise = /\[SUGGEST_PRECISE_MODE\]/.test(finalContent);
+      if (suggestPrecise) {
+        finalContent = finalContent.replace(/\[SUGGEST_PRECISE_MODE\]/g, "").trim();
+      }
+
       // Handle escalation markers
       if (finalContent.includes("[ESCALATE_TO_EXPERT]")) {
         finalContent = finalContent.replace(/\[ESCALATE_TO_EXPERT\]/g, "").trim() || "Let me connect you with an EvoLegal Expert right away.";
       }
-      
+
       // Update displayed message with cleaned content
       setMessages(prev => prev.map((m, i) =>
         i === prev.length - 1 && m.role === "assistant" ? { ...m, content: finalContent } : m
@@ -257,7 +263,7 @@ export function useHugoChat(chatId?: string | null) {
         });
       }
 
-      return { escalated: full.includes("[ESCALATE_TO_EXPERT]"), chatId: cId };
+      return { escalated: full.includes("[ESCALATE_TO_EXPERT]"), suggestPrecise, chatId: cId };
     } catch (err: any) {
       if (err.name !== "AbortError") {
         toast.error(err.message || "Something went wrong.");
