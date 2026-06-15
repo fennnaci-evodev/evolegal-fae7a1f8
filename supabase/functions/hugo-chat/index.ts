@@ -337,7 +337,7 @@ serve(async (req) => {
           // Extract and store metrics
           const { metrics } = extractMetrics(assistantMessage);
           if (metrics && userId) {
-            storeMetrics(metrics, chatId, userId, "chat");
+            storeMetrics(metrics, chatId, userId, preciseMode ? "precise" : "chat");
           }
         } catch (e) {
           console.error("Stream error:", e);
