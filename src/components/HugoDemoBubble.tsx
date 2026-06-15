@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, X, Send, LogIn, ArrowRight, Users, Crown } from "lucide-react";
+import { MessageCircle, X, Send, LogIn, ArrowRight, Users, Crown, Sparkles, Zap } from "lucide-react";
 import { HugoAvatar } from "@/components/HugoAvatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { lovable } from "@/integrations/lovable/index";
 import { useHugoChat } from "@/hooks/useHugoChat";
+import { getPreciseStatus, consumePreciseCredit, type PreciseStatus } from "@/lib/preciseCredits";
 
 const MESSAGES_BEFORE_CHOICE = 3;
 
@@ -22,6 +23,10 @@ export function HugoDemoBubble() {
   const [choiceDismissed, setChoiceDismissed] = useState(false);
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
+  const [preciseMode, setPreciseMode] = useState(false);
+  const [showPreciseSuggest, setShowPreciseSuggest] = useState(false);
+  const [showPreciseLimit, setShowPreciseLimit] = useState(false);
+  const [preciseStatus, setPreciseStatus] = useState<PreciseStatus>({ plan: "free", dailyLimit: 2, usedToday: 0, remainingToday: 2, packCredits: 0, canConsume: true });
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const {
@@ -39,40 +44,67 @@ export function HugoDemoBubble() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, streaming]);
 
-  const EXPERT_TRIGGER_PATTERN = /\b(connect\s*(me\s*)?(to\s*)?(an?\s*)?expert|talk\s*to\s*(an?\s*)?expert|need\s*(an?\s*)?expert|speak\s*(to|with)\s*(an?\s*)?expert|more\s*precise\s*help|review\s*by\s*expert|human\s*review)/i;
+  useEffect(() => {
+    if (user) setPreciseStatus(getPreciseStatus(user.id));
+  }, [user, messages.length]);
+
+  const EXPERT_TRIGGER_PATTERN = /\b(connect\s*(me\s*)?(to\s*)?(an?\s*)?expert|talk\s*to\s*(an?\s*)?expert|need\s*(an?\s*)?expert|speak\s*(to|with)\s*(an?\s*)?expert|review\s*by\s*expert|human\s*review)/i;
 
   const handleSend = async () => {
     const text = input.trim();
     if (!text || streaming) return;
 
-    // Guest gate after 1 message
     if (!user && userMsgCount >= 1) {
       setShowAuthPrompt(true);
       return;
     }
 
-    // Expert trigger
+    // Precise mode: enforce daily/credit limit
+    if (preciseMode && user) {
+      const status = getPreciseStatus(user.id);
+      if (!status.canConsume) {
+        setShowPreciseLimit(true);
+        return;
+      }
+      consumePreciseCredit(user.id);
+      setPreciseStatus(getPreciseStatus(user.id));
+    }
+
     if (EXPERT_TRIGGER_PATTERN.test(text)) {
       setInput("");
-      await sendMessage(text);
+      await sendMessage(text, { precise: preciseMode });
       setShowChoice(true);
       return;
     }
 
     setInput("");
-    const result = await sendMessage(text);
+    setShowPreciseSuggest(false);
+    const result = await sendMessage(text, { precise: preciseMode });
 
-    // Check escalation
     if (result?.escalated) {
       setTimeout(() => setShowChoice(true), 300);
+      return;
     }
 
-    // Show choice after N messages
+    if (result?.suggestPrecise && !preciseMode) {
+      setShowPreciseSuggest(true);
+      return;
+    }
+
     const newUserCount = userMsgCount + 1;
-    if (newUserCount >= MESSAGES_BEFORE_CHOICE && user && !choiceDismissed && !result?.escalated) {
+    if (newUserCount >= MESSAGES_BEFORE_CHOICE && user && !choiceDismissed) {
       setTimeout(() => setShowChoice(true), 800);
     }
   };
+
+  const handleAcceptPrecise = () => {
+    setShowPreciseSuggest(false);
+    if (!user) { setShowAuthPrompt(true); return; }
+    const status = getPreciseStatus(user.id);
+    if (!status.canConsume) { setShowPreciseLimit(true); return; }
+    setPreciseMode(true);
+  };
+
 
   const handleContinueHugo = () => {
     setShowChoice(false);
@@ -150,9 +182,20 @@ export function HugoDemoBubble() {
               <div className="flex items-center gap-2">
                 <HugoAvatar size={39} animate={false} talking={streaming} />
                 <span className="font-display font-semibold text-sm">Hugo</span>
-                <span className="text-[10px] text-muted-foreground">· Expert Manager</span>
+                {preciseMode ? (
+                  <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full" style={{ background: "hsla(270,95%,75%,0.15)", color: "hsl(270,95%,75%)", border: "1px solid hsla(270,95%,75%,0.35)" }}>
+                    <Sparkles className="h-2.5 w-2.5" /> Precise mode
+                  </span>
+                ) : (
+                  <span className="text-[10px] text-muted-foreground">· Expert Manager</span>
+                )}
               </div>
               <div className="flex items-center gap-1">
+                {preciseMode && (
+                  <button onClick={() => setPreciseMode(false)} className="text-[10px] text-muted-foreground hover:text-foreground mr-2">
+                    Exit precise
+                  </button>
+                )}
                 {user && messages.length > 0 && (
                   <button
                     onClick={handleGoToFullChat}
@@ -166,6 +209,56 @@ export function HugoDemoBubble() {
                 </button>
               </div>
             </div>
+
+            {/* Precise mode suggestion banner (auto-detected by Hugo) */}
+            <AnimatePresence>
+              {showPreciseSuggest && !preciseMode && (
+                <motion.div
+                  initial={{ opacity: 0, y: -6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  className="mx-3 mt-3 rounded-xl px-3 py-2.5 flex items-center gap-2"
+                  style={{ background: "linear-gradient(135deg, hsla(270,95%,75%,0.08), hsla(186,100%,50%,0.06))", border: "1px solid hsla(270,95%,75%,0.25)" }}
+                >
+                  <Sparkles className="h-3.5 w-3.5 shrink-0" style={{ color: "hsl(270,95%,75%)" }} />
+                  <p className="text-[11px] text-foreground/85 leading-snug flex-1">
+                    Switch to a deeper Legal Analysis of Your Life Circumstances?
+                  </p>
+                  <button onClick={handleAcceptPrecise} className="text-[11px] font-semibold text-primary hover:underline shrink-0">
+                    Switch
+                  </button>
+                  <button onClick={() => setShowPreciseSuggest(false)} className="text-muted-foreground/60 hover:text-foreground shrink-0" aria-label="Dismiss">
+                    <X className="h-3 w-3" />
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Precise mode limit reached */}
+            <AnimatePresence>
+              {showPreciseLimit && (
+                <motion.div
+                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                  className="absolute inset-0 z-20 flex items-center justify-center"
+                  style={{ background: "hsla(0,0%,0%,0.6)", backdropFilter: "blur(6px)", borderRadius: "1.25rem" }}
+                >
+                  <div className="glass-strong rounded-xl p-5 mx-4 text-center space-y-3 max-w-[280px]">
+                    <Zap className="h-7 w-7 mx-auto" style={{ color: "hsl(270,95%,75%)" }} />
+                    <p className="text-sm font-display font-semibold">You've used your daily analyses</p>
+                    <p className="text-[11px] text-muted-foreground leading-relaxed">
+                      Free plan includes {preciseStatus.dailyLimit} precise analyses per day. Purchase a credit pack or upgrade to Pro for higher limits.
+                    </p>
+                    <Button variant="hero" size="sm" className="w-full text-xs" onClick={() => { setShowPreciseLimit(false); setOpen(false); navigate("/pricing"); }}>
+                      <Crown className="h-3.5 w-3.5 mr-1" /> View plans & credits
+                    </Button>
+                    <button onClick={() => { setShowPreciseLimit(false); setPreciseMode(false); }} className="w-full text-[11px] text-muted-foreground hover:text-foreground transition-colors pt-1">
+                      Continue with regular Hugo
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
 
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-4 space-y-3 min-h-0">
