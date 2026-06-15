@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, X, Send, LogIn, ArrowRight, Users, Crown } from "lucide-react";
+import { MessageCircle, X, Send, LogIn, ArrowRight, Users, Crown, Sparkles, Zap } from "lucide-react";
 import { HugoAvatar } from "@/components/HugoAvatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { lovable } from "@/integrations/lovable/index";
 import { useHugoChat } from "@/hooks/useHugoChat";
+import { getPreciseStatus, consumePreciseCredit, type PreciseStatus } from "@/lib/preciseCredits";
 
 const MESSAGES_BEFORE_CHOICE = 3;
 
