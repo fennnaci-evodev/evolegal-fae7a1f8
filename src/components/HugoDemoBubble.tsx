@@ -182,9 +182,20 @@ export function HugoDemoBubble() {
               <div className="flex items-center gap-2">
                 <HugoAvatar size={39} animate={false} talking={streaming} />
                 <span className="font-display font-semibold text-sm">Hugo</span>
-                <span className="text-[10px] text-muted-foreground">· Expert Manager</span>
+                {preciseMode ? (
+                  <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full" style={{ background: "hsla(270,95%,75%,0.15)", color: "hsl(270,95%,75%)", border: "1px solid hsla(270,95%,75%,0.35)" }}>
+                    <Sparkles className="h-2.5 w-2.5" /> Precise mode
+                  </span>
+                ) : (
+                  <span className="text-[10px] text-muted-foreground">· Expert Manager</span>
+                )}
               </div>
               <div className="flex items-center gap-1">
+                {preciseMode && (
+                  <button onClick={() => setPreciseMode(false)} className="text-[10px] text-muted-foreground hover:text-foreground mr-2">
+                    Exit precise
+                  </button>
+                )}
                 {user && messages.length > 0 && (
                   <button
                     onClick={handleGoToFullChat}
@@ -198,6 +209,56 @@ export function HugoDemoBubble() {
                 </button>
               </div>
             </div>
+
+            {/* Precise mode suggestion banner (auto-detected by Hugo) */}
+            <AnimatePresence>
+              {showPreciseSuggest && !preciseMode && (
+                <motion.div
+                  initial={{ opacity: 0, y: -6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  className="mx-3 mt-3 rounded-xl px-3 py-2.5 flex items-center gap-2"
+                  style={{ background: "linear-gradient(135deg, hsla(270,95%,75%,0.08), hsla(186,100%,50%,0.06))", border: "1px solid hsla(270,95%,75%,0.25)" }}
+                >
+                  <Sparkles className="h-3.5 w-3.5 shrink-0" style={{ color: "hsl(270,95%,75%)" }} />
+                  <p className="text-[11px] text-foreground/85 leading-snug flex-1">
+                    Switch to a deeper Legal Analysis of Your Life Circumstances?
+                  </p>
+                  <button onClick={handleAcceptPrecise} className="text-[11px] font-semibold text-primary hover:underline shrink-0">
+                    Switch
+                  </button>
+                  <button onClick={() => setShowPreciseSuggest(false)} className="text-muted-foreground/60 hover:text-foreground shrink-0" aria-label="Dismiss">
+                    <X className="h-3 w-3" />
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Precise mode limit reached */}
+            <AnimatePresence>
+              {showPreciseLimit && (
+                <motion.div
+                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                  className="absolute inset-0 z-20 flex items-center justify-center"
+                  style={{ background: "hsla(0,0%,0%,0.6)", backdropFilter: "blur(6px)", borderRadius: "1.25rem" }}
+                >
+                  <div className="glass-strong rounded-xl p-5 mx-4 text-center space-y-3 max-w-[280px]">
+                    <Zap className="h-7 w-7 mx-auto" style={{ color: "hsl(270,95%,75%)" }} />
+                    <p className="text-sm font-display font-semibold">You've used your daily analyses</p>
+                    <p className="text-[11px] text-muted-foreground leading-relaxed">
+                      Free plan includes {preciseStatus.dailyLimit} precise analyses per day. Purchase a credit pack or upgrade to Pro for higher limits.
+                    </p>
+                    <Button variant="hero" size="sm" className="w-full text-xs" onClick={() => { setShowPreciseLimit(false); setOpen(false); navigate("/pricing"); }}>
+                      <Crown className="h-3.5 w-3.5 mr-1" /> View plans & credits
+                    </Button>
+                    <button onClick={() => { setShowPreciseLimit(false); setPreciseMode(false); }} className="w-full text-[11px] text-muted-foreground hover:text-foreground transition-colors pt-1">
+                      Continue with regular Hugo
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
 
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-4 space-y-3 min-h-0">
