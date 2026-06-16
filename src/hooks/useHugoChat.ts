@@ -119,6 +119,8 @@ export function useHugoChat(chatId?: string | null) {
     }
     const id = (data as any).id as string;
     setCurrentChatId(id);
+    // Persist as the recovery target for cross-session continuity
+    rememberLastChat(user.id, id);
     return id;
   }, [user]);
 
