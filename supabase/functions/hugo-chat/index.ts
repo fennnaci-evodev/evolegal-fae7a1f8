@@ -26,16 +26,19 @@ ABSOLUTE LANGUAGE PROHIBITIONS:
 - ALL responses must be written in natural, flowing paragraphs ONLY.
 
 INTERNAL EVALUATION (silent):
-Score complexity (0-100), risk (0-100), commercial_potential (0-100), confidence (0-100). Detect Red Words (court, lawsuit, sued, eviction, police, fine, deadline, urgent, debt, chargeback, sue, legal action) and Yellow Words (domain + problem type + object). Keep a running internal Artifact summarising the user's situation, key facts, legal domains, risks, and what has already been discussed; use it to avoid repetition and to draw deeper conclusions over time.
+Score complexity (0-100), risk (0-100), commercial_potential (0-100), confidence (0-100). Detect Red Words and Yellow Words. Maintain a running internal Artifact summarising the user's situation, key facts, legal domains, risks, and what has been discussed; use it to avoid repetition and to deepen conclusions over time.
 
-PRECISE-MODE AUTO-SUGGESTION (critical new behavior):
+SMART MEMORY (Learning, Remembering, Repeating, Recovering):
+A MEMORY block may be provided below containing (a) a rolling Artifact of this case file, (b) durable facts and preferences this user has shared before, and (c) patterns previously proven effective. ALWAYS read it before composing your reply. Use remembered facts so the user never has to repeat themselves. Repeat clarifying or explanatory patterns that have worked. Never quote the memory back literally — weave it naturally into the conversation. If new important context appears in the user's message, silently note it (the learning loop will persist it after your reply).
+
+PRECISE-MODE AUTO-SUGGESTION:
 EvoLegal has an internal "Legal Analysis of Your Life Circumstances" mode — a deeper, more structured analysis regime. It is not a separate feature; it is a thinking mode inside this chat.
 
 After composing a normal response, silently evaluate whether switching to precise mode would genuinely benefit this user. Suggest it ONLY when ALL are true:
   - The user has shared meaningful specifics (parties, dates, amounts, jurisdiction, or stakes).
   - The situation is complex, multi-jurisdictional, or has high personal stakes (risk > 60 OR complexity > 65 OR commercial_potential > 60).
   - You have NOT already suggested precise mode earlier in this conversation.
-  - Precise mode would unlock real depth (structured analysis, sharper questions, ordered options, risk mapping) that the normal mode cannot deliver as well.
+  - Precise mode would unlock real depth that normal mode cannot deliver as well.
 
 When you decide to suggest it, end your natural-paragraph response with a single short, warm line like: "This looks like a good case for a deeper Legal Analysis of Your Life Circumstances. Would you like me to switch to precise mode?" — then on a NEW LINE append exactly this marker: [SUGGEST_PRECISE_MODE]
 Never explain the marker. Never use it more than once per conversation. Never be pushy.
@@ -60,11 +63,11 @@ EXPERTISE: Deep familiarity with US and UK law including crypto, tenant-landlord
 const PRECISE_PROMPT = `You are Hugo operating in PRECISE MODE — "Legal Analysis of Your Life Circumstances". This is a deeper, more structured thinking regime inside the same conversation. You are still Hugo, still a real expert, still general/informational only.
 
 In precise mode you must:
-- Treat the full conversation as a case file. Re-read every prior message before answering and reason from the complete picture.
+- Treat the full conversation as a case file. Re-read every prior message AND the MEMORY block before answering, then reason from the complete picture.
 - Deliver a structured analysis in natural flowing paragraphs (no bullets, no numbered lists, no bold, no headings — same language rules as normal mode).
 - Walk through the user's situation in this logical order, weaving it as connected prose: (a) a brief faithful restatement of their circumstances, (b) the legal domains and core issues involved, (c) the realistic general options open to them, (d) the main risks and trade-offs of each option, (e) the most useful general resources or document templates, (f) the clarifying facts that would sharpen the analysis if shared.
 - Ask sharper, more targeted clarifying questions when key facts are missing — woven into prose, never as a list.
-- Recommend an EvoLegal Expert only when the matter clearly exceeds general information (high risk, hard deadline, contested facts, multi-jurisdiction). Do so naturally at the end when it fits.
+- Recommend an EvoLegal Expert only when the matter clearly exceeds general information.
 - Never give specific legal advice, never invent laws or cases, never produce filled-in personalized documents. Stay strictly general.
 
 LANGUAGE RULES (identical to normal mode):
@@ -87,48 +90,57 @@ Rules:
 - Maximum 8 words total
 - Use these Yellow Words for domains: Rent, Landlord, Employment, Family, Crypto, Contract, Immigration, Insurance, Injury, Corporate, Tax, IP
 - Use these for problem types: Dispute, Termination, Eviction, Refund, Violation, Classification, Claim, Review, Process
-- If Red Words are detected (court, lawsuit, sued, eviction, police, fine, deadline, urgent, debt, chargeback, sue, legal action), add a risk marker like "Risk", "Urgent", or "High Stakes"
+- If Red Words are detected, add a risk marker like "Risk", "Urgent", or "High Stakes"
 - Never use generic titles like "Help needed", "Question", "New Chat"
 - Be precise and searchable
 
-Examples:
-- Rent Dispute – Deposit Not Returned – Zurich
-- Employment Issue – Unpaid Salary – Contract Missing
-- Crypto Law – Token Classification – US/UK
-- Family Law – Divorce Process – Child Custody
-- Rent Dispute – Eviction Risk – Urgent
-
 Respond with ONLY the title, nothing else.`;
 
-// Parse metrics from Hugo's response
+const LEARN_SYSTEM_PROMPT = `You are Hugo's silent Learning Operator. Given the latest user message, Hugo's reply, and the prior artifact, produce a STRICT JSON object (no prose, no markdown) with this shape:
+{
+  "artifact": {
+    "summary": "<=600 chars rolling case-file summary in flowing prose, updated to incorporate the new turn>",
+    "legal_domains": ["..."],
+    "risk_score": 0-100,
+    "complexity_score": 0-100,
+    "key_facts": { "<facet>": "<short value>" }
+  },
+  "memories": [
+    { "kind": "preference|fact|lesson|context|pattern", "key": "snake_case_key", "value": "<=240 chars", "importance": 1-10 }
+  ],
+  "patterns": [
+    { "pattern_type": "clarifier|explanation|document|escalation", "trigger": "<short>", "guidance": "<=200 chars", "outcome": "success|neutral" }
+  ]
+}
+Rules:
+- Output ONLY valid JSON. No code fences. No commentary.
+- Empty arrays are fine. Skip memories that are trivial or already obvious.
+- Never store sensitive personal identifiers (full names, government IDs, payment numbers, exact addresses). Generalise.
+- "memories" should be durable facts/preferences worth remembering across sessions.
+- "patterns" capture interaction techniques Hugo should repeat in similar future situations.`;
+
 function extractMetrics(text: string): { cleanText: string; metrics: Record<string, any> | null } {
   const metricsRegex = /<!--METRICS:(.*?)-->/s;
   const match = text.match(metricsRegex);
   if (!match) return { cleanText: text, metrics: null };
-  
   const cleanText = text.replace(metricsRegex, "").trim();
   try {
-    const metrics = JSON.parse(match[1]);
-    return { cleanText, metrics };
+    return { cleanText, metrics: JSON.parse(match[1]) };
   } catch {
     return { cleanText, metrics: null };
   }
 }
 
-// Store metrics in the database
 async function storeMetrics(
+  admin: any,
   metrics: Record<string, any>,
   chatId: string | null,
   userId: string | null,
-  interactionType: string
+  interactionType: string,
 ) {
   try {
-    const supabaseUrl = Deno.env.get("SUPABASE_URL");
-    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    if (!supabaseUrl || !serviceKey || !userId) return;
-
-    const supabase = createClient(supabaseUrl, serviceKey);
-    await supabase.from("hugo_metrics").insert({
+    if (!userId) return;
+    await admin.from("hugo_metrics").insert({
       chat_id: chatId || null,
       user_id: userId,
       interaction_type: interactionType,
@@ -145,7 +157,186 @@ async function storeMetrics(
       ethics_flags: metrics.ethics_flags || null,
     });
   } catch (e) {
-    console.error("Failed to store metrics:", e);
+    console.error("storeMetrics failed:", e);
+  }
+}
+
+/** Fetch the rolling artifact + top user memories + top global patterns. */
+async function loadMemoryContext(
+  admin: any,
+  userId: string | null,
+  chatId: string | null,
+): Promise<string> {
+  if (!userId) return "";
+  try {
+    const [artifactRes, memRes, patternRes] = await Promise.all([
+      chatId
+        ? admin.from("hugo_chat_artifacts").select("*").eq("chat_id", chatId).maybeSingle()
+        : Promise.resolve({ data: null }),
+      admin
+        .from("hugo_user_memory")
+        .select("kind,key,value,importance")
+        .eq("user_id", userId)
+        .order("importance", { ascending: false })
+        .order("updated_at", { ascending: false })
+        .limit(12),
+      admin
+        .from("hugo_learning_patterns")
+        .select("pattern_type,trigger,guidance,score")
+        .order("score", { ascending: false })
+        .limit(6),
+    ]);
+
+    const artifact = (artifactRes as any).data;
+    const memories = ((memRes as any).data || []) as any[];
+    const patterns = ((patternRes as any).data || []) as any[];
+
+    const parts: string[] = [];
+    if (artifact?.summary) {
+      parts.push(
+        `CASE ARTIFACT (rolling): ${artifact.summary} | domains: ${(artifact.legal_domains || []).join(", ") || "—"} | risk: ${artifact.risk_score ?? 0}/100 | complexity: ${artifact.complexity_score ?? 0}/100`,
+      );
+    }
+    if (memories.length) {
+      const lines = memories
+        .map((m) => `- (${m.kind}, imp ${m.importance}) ${m.key}: ${m.value}`)
+        .join("\n");
+      parts.push(`USER LONG-TERM MEMORY:\n${lines}`);
+    }
+    if (patterns.length) {
+      const lines = patterns
+        .map((p) => `- [${p.pattern_type}] when ${p.trigger} → ${p.guidance}`)
+        .join("\n");
+      parts.push(`PROVEN PATTERNS (repeat what works):\n${lines}`);
+    }
+    if (!parts.length) return "";
+    return `\n\n[MEMORY]\n${parts.join("\n\n")}\n[/MEMORY]\n`;
+  } catch (e) {
+    console.debug("loadMemoryContext skipped:", e);
+    return "";
+  }
+}
+
+/** Background learn-and-remember step. Fire-and-forget. */
+async function learnAndRemember(opts: {
+  admin: any;
+  apiKey: string;
+  userId: string;
+  chatId: string | null;
+  userMessage: string;
+  assistantReply: string;
+  priorArtifact: string;
+  turnCount: number;
+}) {
+  const { admin, apiKey, userId, chatId, userMessage, assistantReply, priorArtifact, turnCount } = opts;
+  try {
+    const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash-lite",
+        messages: [
+          { role: "system", content: LEARN_SYSTEM_PROMPT },
+          {
+            role: "user",
+            content: `PRIOR ARTIFACT:\n${priorArtifact || "(none)"}\n\nLATEST USER MESSAGE:\n${userMessage}\n\nHUGO REPLY:\n${assistantReply}\n\nReturn the JSON now.`,
+          },
+        ],
+        temperature: 0.2,
+        response_format: { type: "json_object" },
+      }),
+    });
+    if (!resp.ok) return;
+    const data = await resp.json();
+    const raw = data.choices?.[0]?.message?.content || "{}";
+    let parsed: any = {};
+    try {
+      parsed = JSON.parse(raw);
+    } catch {
+      const m = raw.match(/\{[\s\S]*\}/);
+      if (m) {
+        try { parsed = JSON.parse(m[0]); } catch { return; }
+      } else return;
+    }
+
+    const artifact = parsed.artifact || {};
+    if (chatId && artifact.summary) {
+      await admin.from("hugo_chat_artifacts").upsert(
+        {
+          chat_id: chatId,
+          user_id: userId,
+          summary: String(artifact.summary).slice(0, 2000),
+          legal_domains: Array.isArray(artifact.legal_domains) ? artifact.legal_domains.slice(0, 8) : [],
+          key_facts: artifact.key_facts && typeof artifact.key_facts === "object" ? artifact.key_facts : {},
+          risk_score: Math.max(0, Math.min(100, Number(artifact.risk_score) || 0)),
+          complexity_score: Math.max(0, Math.min(100, Number(artifact.complexity_score) || 0)),
+          turn_count: turnCount,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "chat_id" },
+      );
+    }
+
+    const memories = Array.isArray(parsed.memories) ? parsed.memories.slice(0, 8) : [];
+    for (const mem of memories) {
+      if (!mem || typeof mem !== "object" || !mem.key || !mem.value) continue;
+      const kind = ["preference","fact","lesson","context","pattern"].includes(mem.kind) ? mem.kind : "context";
+      try {
+        await admin.from("hugo_user_memory").upsert(
+          {
+            user_id: userId,
+            kind,
+            key: String(mem.key).slice(0, 80),
+            value: String(mem.value).slice(0, 600),
+            importance: Math.max(1, Math.min(10, Number(mem.importance) || 5)),
+            source_chat_id: chatId,
+            last_used_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: "user_id,kind,key" },
+        );
+      } catch (e) {
+        console.debug("memory upsert skipped:", e);
+      }
+    }
+
+    const patterns = Array.isArray(parsed.patterns) ? parsed.patterns.slice(0, 5) : [];
+    for (const p of patterns) {
+      if (!p?.pattern_type || !p?.trigger || !p?.guidance) continue;
+      try {
+        const isSuccess = p.outcome === "success";
+        // Best-effort dedupe: find an existing pattern with same type+trigger
+        const { data: existing } = await admin
+          .from("hugo_learning_patterns")
+          .select("id,success_count,failure_count")
+          .eq("pattern_type", p.pattern_type)
+          .eq("trigger", String(p.trigger).slice(0, 200))
+          .limit(1)
+          .maybeSingle();
+        if (existing) {
+          const success = (existing.success_count || 0) + (isSuccess ? 1 : 0);
+          const failure = (existing.failure_count || 0) + (!isSuccess ? 0 : 0);
+          const score = success - failure;
+          await admin
+            .from("hugo_learning_patterns")
+            .update({ success_count: success, failure_count: failure, score, last_seen_at: new Date().toISOString() })
+            .eq("id", existing.id);
+        } else {
+          await admin.from("hugo_learning_patterns").insert({
+            pattern_type: p.pattern_type,
+            trigger: String(p.trigger).slice(0, 200),
+            guidance: String(p.guidance).slice(0, 400),
+            success_count: isSuccess ? 1 : 0,
+            failure_count: 0,
+            score: isSuccess ? 1 : 0,
+          });
+        }
+      } catch (e) {
+        console.debug("pattern upsert skipped:", e);
+      }
+    }
+  } catch (e) {
+    console.error("learnAndRemember failed:", e);
   }
 }
 
@@ -163,7 +354,11 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    // Title generation action (non-streaming)
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    const admin = supabaseUrl && serviceKey ? createClient(supabaseUrl, serviceKey) : null;
+
+    // ---- Title generation ----
     if (action === "generate_title") {
       const userMessages = body.messages || [];
       const content = userMessages
@@ -173,137 +368,140 @@ serve(async (req) => {
         .join("\n");
 
       if (!content.trim()) {
-        return new Response(
-          JSON.stringify({ title: "New Chat" }),
-          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+        return new Response(JSON.stringify({ title: "New Chat" }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
       }
 
-      const response = await fetch(
-        "https://ai.gateway.lovable.dev/v1/chat/completions",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${LOVABLE_API_KEY}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            model: "google/gemini-2.5-flash-lite",
-            messages: [
-              { role: "system", content: TITLE_SYSTEM_PROMPT },
-              { role: "user", content: `Generate a title for this legal conversation:\n\n${content}` },
-            ],
-            temperature: 0.3,
-          }),
-        }
-      );
+      const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash-lite",
+          messages: [
+            { role: "system", content: TITLE_SYSTEM_PROMPT },
+            { role: "user", content: `Generate a title for this legal conversation:\n\n${content}` },
+          ],
+          temperature: 0.3,
+        }),
+      });
 
       if (!response.ok) {
-        console.error("Title generation failed:", response.status);
-        return new Response(
-          JSON.stringify({ title: "New Chat" }),
-          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+        return new Response(JSON.stringify({ title: "New Chat" }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
       }
-
       const data = await response.json();
       const title = (data.choices?.[0]?.message?.content || "New Chat").trim().replace(/^["']|["']$/g, "");
-
-      return new Response(
-        JSON.stringify({ title }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ title }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
-    // Metrics query action (non-streaming) — for admin dashboard
+    // ---- Metrics summary ----
     if (action === "metrics_summary") {
-      const supabaseUrl = Deno.env.get("SUPABASE_URL");
-      const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-      if (!supabaseUrl || !serviceKey) throw new Error("Missing Supabase config");
-
-      const supabase = createClient(supabaseUrl, serviceKey);
+      if (!admin) throw new Error("Missing Supabase config");
       const days = body.days || 7;
       const since = new Date(Date.now() - days * 86400000).toISOString();
-
-      const { data: metrics, error } = await supabase
+      const { data: metrics, error } = await admin
         .from("hugo_metrics")
         .select("*")
         .gte("created_at", since)
         .order("created_at", { ascending: true });
-
       if (error) throw error;
+      return new Response(JSON.stringify({ metrics: metrics || [] }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
+    // ---- Memory recall (debug / dashboard) ----
+    if (action === "recall_memory") {
+      if (!admin || !userId) {
+        return new Response(JSON.stringify({ memories: [], artifact: null }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const [m, a] = await Promise.all([
+        admin.from("hugo_user_memory").select("*").eq("user_id", userId)
+          .order("importance", { ascending: false }).limit(50),
+        chatId ? admin.from("hugo_chat_artifacts").select("*").eq("chat_id", chatId).maybeSingle()
+               : Promise.resolve({ data: null }),
+      ]);
       return new Response(
-        JSON.stringify({ metrics: metrics || [] }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ memories: (m as any).data || [], artifact: (a as any).data || null }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
-    // Standard chat action (streaming)
+    // ---- Streaming chat ----
     let chatMessages: { role: string; content: string }[];
-    if (Array.isArray(body.messages)) {
-      chatMessages = body.messages;
-    } else if (typeof body.message === "string") {
-      chatMessages = [{ role: "user", content: body.message }];
-    } else {
+    if (Array.isArray(body.messages)) chatMessages = body.messages;
+    else if (typeof body.message === "string") chatMessages = [{ role: "user", content: body.message }];
+    else {
       return new Response(
         JSON.stringify({ error: "Invalid request: provide 'messages' array or 'message' string." }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
     const preciseMode = body.precise_mode === true;
-    const systemPrompt = preciseMode ? PRECISE_PROMPT : BASE_PROMPT;
+    const basePrompt = preciseMode ? PRECISE_PROMPT : BASE_PROMPT;
 
-    const response = await fetch(
-      "https://ai.gateway.lovable.dev/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "google/gemini-3-flash-preview",
-          messages: [
-            { role: "system", content: systemPrompt },
-            ...chatMessages,
-          ],
-          stream: true,
-          temperature: preciseMode ? 0.55 : 0.7,
-        }),
-      }
-    );
+    // Load memory + artifact and inject
+    const memoryBlock = admin ? await loadMemoryContext(admin, userId, chatId) : "";
+    const systemPrompt = memoryBlock ? `${basePrompt}${memoryBlock}` : basePrompt;
+
+    // Capture prior artifact summary for the learn step
+    let priorArtifactSummary = "";
+    let priorTurnCount = 0;
+    if (admin && chatId) {
+      try {
+        const { data } = await admin
+          .from("hugo_chat_artifacts")
+          .select("summary,turn_count")
+          .eq("chat_id", chatId)
+          .maybeSingle();
+        priorArtifactSummary = (data as any)?.summary || "";
+        priorTurnCount = (data as any)?.turn_count || 0;
+      } catch { /* table missing */ }
+    }
+
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "google/gemini-3-flash-preview",
+        messages: [{ role: "system", content: systemPrompt }, ...chatMessages],
+        stream: true,
+        temperature: preciseMode ? 0.55 : 0.7,
+      }),
+    });
 
     if (!response.ok) {
       const status = response.status;
       if (status === 429) {
-        return new Response(
-          JSON.stringify({ error: "Rate limited, please try again shortly." }),
-          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+        return new Response(JSON.stringify({ error: "Rate limited, please try again shortly." }), {
+          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
       }
       if (status === 402) {
-        return new Response(
-          JSON.stringify({ error: "AI credits exhausted. Please add credits in your workspace settings." }),
-          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+        return new Response(JSON.stringify({ error: "AI credits exhausted. Please add credits in your workspace settings." }), {
+          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
       }
       const t = await response.text();
       console.error("AI gateway error:", status, t);
-      return new Response(
-        JSON.stringify({ error: "AI service temporarily unavailable." }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: "AI service temporarily unavailable." }), {
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
-    // Stream response, collect full text for metrics extraction
     const reader = response.body?.getReader();
     if (!reader) throw new Error("No response body");
 
     let fullText = "";
-    const encoder = new TextEncoder();
     const decoder = new TextDecoder();
+    const lastUserMessage = [...chatMessages].reverse().find((m) => m.role === "user")?.content || "";
 
     const stream = new ReadableStream({
       async start(controller) {
@@ -311,33 +509,41 @@ serve(async (req) => {
           while (true) {
             const { done, value } = await reader.read();
             if (done) break;
-            
             const chunk = decoder.decode(value, { stream: true });
             fullText += chunk;
-            
-            // Forward the chunk to the client
             controller.enqueue(value);
           }
           controller.close();
 
-          // After streaming is complete, extract metrics and store them
-          // Parse the accumulated SSE data to get the full assistant message
+          // Parse accumulated SSE into the assistant message
           let assistantMessage = "";
-          const lines = fullText.split("\n");
-          for (const line of lines) {
+          for (const line of fullText.split("\n")) {
             if (line.startsWith("data: ") && line !== "data: [DONE]") {
               try {
                 const json = JSON.parse(line.slice(6));
                 const delta = json.choices?.[0]?.delta?.content;
                 if (delta) assistantMessage += delta;
-              } catch { /* skip invalid lines */ }
+              } catch { /* skip */ }
             }
           }
 
-          // Extract and store metrics
-          const { metrics } = extractMetrics(assistantMessage);
-          if (metrics && userId) {
-            storeMetrics(metrics, chatId, userId, preciseMode ? "precise" : "chat");
+          const { cleanText, metrics } = extractMetrics(assistantMessage);
+          if (admin && metrics && userId) {
+            storeMetrics(admin, metrics, chatId, userId, preciseMode ? "precise" : "chat");
+          }
+
+          // Learn / remember loop — fire-and-forget
+          if (admin && userId && cleanText) {
+            learnAndRemember({
+              admin,
+              apiKey: LOVABLE_API_KEY,
+              userId,
+              chatId,
+              userMessage: lastUserMessage,
+              assistantReply: cleanText.slice(0, 4000),
+              priorArtifact: priorArtifactSummary,
+              turnCount: priorTurnCount + 1,
+            }).catch((e) => console.error("learn step error:", e));
           }
         } catch (e) {
           console.error("Stream error:", e);
@@ -353,7 +559,7 @@ serve(async (req) => {
     console.error("hugo-chat error:", e);
     return new Response(
       JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   }
 });
