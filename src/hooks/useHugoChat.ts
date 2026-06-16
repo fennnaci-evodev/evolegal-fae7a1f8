@@ -2,8 +2,12 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { rememberLastChat, getOrCreateSessionId } from "@/lib/hugoMemory";
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/hugo-chat`;
+
+// Establish a recovery session id as soon as the hook module loads.
+try { getOrCreateSessionId(); } catch { /* SSR safe */ }
 
 export interface HugoMessage {
   id: string;
@@ -96,8 +100,9 @@ export function useHugoChat(chatId?: string | null) {
     if (chatId) {
       setCurrentChatId(chatId);
       loadMessages(chatId);
+      if (user) rememberLastChat(user.id, chatId);
     }
-  }, [chatId, loadMessages]);
+  }, [chatId, loadMessages, user]);
 
   // Create a new chat session
   const createChat = useCallback(async (): Promise<string | null> => {
@@ -115,6 +120,8 @@ export function useHugoChat(chatId?: string | null) {
     }
     const id = (data as any).id as string;
     setCurrentChatId(id);
+    // Persist as the recovery target for cross-session continuity
+    rememberLastChat(user.id, id);
     return id;
   }, [user]);
 
