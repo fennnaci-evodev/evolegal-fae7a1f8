@@ -100,8 +100,9 @@ export function useHugoChat(chatId?: string | null) {
     if (chatId) {
       setCurrentChatId(chatId);
       loadMessages(chatId);
+      if (user) rememberLastChat(user.id, chatId);
     }
-  }, [chatId, loadMessages]);
+  }, [chatId, loadMessages, user]);
 
   // Create a new chat session
   const createChat = useCallback(async (): Promise<string | null> => {
