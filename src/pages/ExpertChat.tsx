@@ -298,6 +298,7 @@ const ExpertChat = () => {
 
             {!historyLoading && messages.length === 0 && !streaming && (
               <div className="flex flex-col items-center justify-center h-full text-center space-y-5">
+                <HugoRecallBanner onResume={handleSelectChat} hidden={!!currentChatId} />
                 <ScalesOfJustice />
                 <div>
                   <h3 className="text-lg font-display font-semibold mb-1">Talk to Hugo</h3>
