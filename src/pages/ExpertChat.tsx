@@ -19,6 +19,7 @@ import { HugoChatTopicChips } from "@/components/HugoChatTopicChips";
 import { HugoChatRecentTopics } from "@/components/HugoChatRecentTopics";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import { HugoRecallBanner } from "@/components/HugoRecallBanner";
 const ExpertChat = () => {
   const { chatId: paramChatId } = useParams<{ chatId?: string }>();
   const [searchParams] = useSearchParams();
