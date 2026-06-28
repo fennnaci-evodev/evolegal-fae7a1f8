@@ -29,6 +29,8 @@ import { toast } from "sonner";
 import { InlineELoader } from "@/components/InlineELoader";
 import { generateCasePdf } from "@/lib/generateCasePdf";
 import { HugoPerformancePanel } from "@/components/HugoPerformancePanel";
+import { McCloderPanel } from "@/components/McCloderPanel";
+import { useAdminMode } from "@/contexts/AdminModeContext";
 
 // Types
 interface RequestItem {
@@ -1000,6 +1002,13 @@ ${chatContext || "(No messages yet)"}`,
           <div className="p-4 border-t border-border/20">
             <HugoPerformancePanel />
           </div>
+
+          {/* McCloder Intelligence — main admin only */}
+          {isMainAdmin && (
+            <div className="p-4 border-t border-border/20">
+              <McCloderPanel />
+            </div>
+          )}
         </aside>
       )}
 
