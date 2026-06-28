@@ -130,6 +130,7 @@ function isToday(dateStr: string) {
 const ExpertDashboard = () => {
   const { user } = useAuth();
   const { isAdmin, loading: roleLoading } = useAdminRole();
+  const { isMainAdmin } = useAdminMode();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
