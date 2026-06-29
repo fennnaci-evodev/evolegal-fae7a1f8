@@ -54,6 +54,10 @@ export function HugoDemoBubble() {
     const text = input.trim();
     if (!text || streaming) return;
 
+    // Wait for auth to resolve before deciding anything — prevents flashing the
+    // sign-in prompt to users who actually have a valid session being restored.
+    if (authLoading) return;
+
     if (!user && userMsgCount >= 1) {
       setShowAuthPrompt(true);
       return;
