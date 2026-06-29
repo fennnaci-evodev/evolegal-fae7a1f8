@@ -454,6 +454,20 @@ function Stat({ label, value, accent, positive, negative }: { label: string; val
   );
 }
 
+function PRField({ label, value, onCopy, copied, mono }: { label: string; value: string; onCopy: () => void; copied?: boolean; mono?: boolean }) {
+  return (
+    <div className="space-y-1">
+      <div className="flex items-center justify-between">
+        <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
+        <button onClick={onCopy} className="text-[10px] inline-flex items-center gap-1 text-primary hover:underline">
+          {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />} Copy
+        </button>
+      </div>
+      <p className={`glass rounded-md p-2 text-[11px] ${mono ? "font-mono" : ""} break-all`}>{value}</p>
+    </div>
+  );
+}
+
 function TabBtn({ active, onClick, icon, label }: any) {
   return (
     <button
