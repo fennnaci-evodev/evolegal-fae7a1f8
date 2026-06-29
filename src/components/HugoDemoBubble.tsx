@@ -15,7 +15,7 @@ import { getPreciseStatus, consumePreciseCredit, type PreciseStatus } from "@/li
 const MESSAGES_BEFORE_CHOICE = 3;
 
 export function HugoDemoBubble() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
