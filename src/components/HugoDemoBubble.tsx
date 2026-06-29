@@ -15,7 +15,7 @@ import { getPreciseStatus, consumePreciseCredit, type PreciseStatus } from "@/li
 const MESSAGES_BEFORE_CHOICE = 3;
 
 export function HugoDemoBubble() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
@@ -48,11 +48,20 @@ export function HugoDemoBubble() {
     if (user) setPreciseStatus(getPreciseStatus(user.id));
   }, [user, messages.length]);
 
+  // If auth resolves to a real user, never leave the sign-in overlay up.
+  useEffect(() => {
+    if (user && showAuthPrompt) setShowAuthPrompt(false);
+  }, [user, showAuthPrompt]);
+
   const EXPERT_TRIGGER_PATTERN = /\b(connect\s*(me\s*)?(to\s*)?(an?\s*)?expert|talk\s*to\s*(an?\s*)?expert|need\s*(an?\s*)?expert|speak\s*(to|with)\s*(an?\s*)?expert|review\s*by\s*expert|human\s*review)/i;
 
   const handleSend = async () => {
     const text = input.trim();
     if (!text || streaming) return;
+
+    // Wait for auth to resolve before deciding anything — prevents flashing the
+    // sign-in prompt to users who actually have a valid session being restored.
+    if (authLoading) return;
 
     if (!user && userMsgCount >= 1) {
       setShowAuthPrompt(true);
@@ -395,11 +404,11 @@ export function HugoDemoBubble() {
               <Input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Ask me a question..."
+                placeholder={authLoading ? "Loading…" : "Ask me a question..."}
                 className="bg-transparent border-0 focus-visible:ring-0 text-sm"
-                disabled={streaming}
+                disabled={streaming || authLoading}
               />
-              <Button type="submit" size="icon" disabled={!input.trim() || streaming} className="shrink-0 h-8 w-8">
+              <Button type="submit" size="icon" disabled={!input.trim() || streaming || authLoading} className="shrink-0 h-8 w-8">
                 <Send className="h-3.5 w-3.5" />
               </Button>
             </form>
