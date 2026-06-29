@@ -48,6 +48,11 @@ export function HugoDemoBubble() {
     if (user) setPreciseStatus(getPreciseStatus(user.id));
   }, [user, messages.length]);
 
+  // If auth resolves to a real user, never leave the sign-in overlay up.
+  useEffect(() => {
+    if (user && showAuthPrompt) setShowAuthPrompt(false);
+  }, [user, showAuthPrompt]);
+
   const EXPERT_TRIGGER_PATTERN = /\b(connect\s*(me\s*)?(to\s*)?(an?\s*)?expert|talk\s*to\s*(an?\s*)?expert|need\s*(an?\s*)?expert|speak\s*(to|with)\s*(an?\s*)?expert|review\s*by\s*expert|human\s*review)/i;
 
   const handleSend = async () => {
