@@ -8,8 +8,11 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Shield, Sparkles, Activity, AlertTriangle, CheckCircle2, RefreshCw,
-  Code2, Brain, History, ChevronDown, ChevronRight, Trash2,
+  Code2, Brain, History, ChevronDown, ChevronRight, Trash2, GitPullRequest, Copy, Check,
 } from "lucide-react";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
 
 type Severity = "critical" | "high" | "medium" | "low" | "info";
@@ -52,6 +55,17 @@ interface StoredCycle {
 
 const STORAGE_KEY = "mccloder_cycles_v1";
 const LESSONS_KEY = "mccloder_lessons_v1";
+const PR_KEY = "mccloder_prs_v1";
+
+interface PRPackage {
+  title: string;
+  branch_name: string;
+  description: string;
+  patch_suggestions?: { file: string; change_summary: string; diff_hint?: string }[];
+  commit_message?: string;
+  self_evaluation?: { usefulness: number; safety: number; correctness_confidence: number; improvement_notes: string[] };
+  ci_notes?: string;
+}
 
 const sevColor: Record<Severity, string> = {
   critical: "bg-red-500/20 text-red-300 border-red-500/40",
@@ -80,6 +94,10 @@ export function McCloderPanel() {
   const [cycles, setCycles] = useState<StoredCycle[]>([]);
   const [lessons, setLessons] = useState<string[]>([]);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [pr, setPr] = useState<PRPackage | null>(null);
+  const [prOpen, setPrOpen] = useState(false);
+  const [prLoading, setPrLoading] = useState(false);
+  const [copied, setCopied] = useState<string | null>(null);
 
   // review state
   const [code, setCode] = useState("");
@@ -169,7 +187,46 @@ export function McCloderPanel() {
     setCycles([]); setLessons([]);
     localStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem(LESSONS_KEY);
+    localStorage.removeItem(PR_KEY);
     toast.success("Memory cleared");
+  }
+
+  async function generatePR() {
+    const latest = assess[0];
+    if (!latest) { toast.error("Run an assessment cycle first"); return; }
+    setPrLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("mccloder", {
+        body: { action: "generate_pr", report: latest.report, signals: latest.signals },
+      });
+      if (error) throw error;
+      if (!data?.ok) throw new Error(data?.error || "PR generation failed");
+      setPr(data.pr);
+      setPrOpen(true);
+      // Persist self-evaluation as a lesson for future cycles
+      const notes = data.pr?.self_evaluation?.improvement_notes;
+      if (Array.isArray(notes) && notes.length) {
+        const merged = [...lessons, ...notes.map((n: string) => `[PR self-eval] ${n}`)].slice(-40);
+        setLessons(merged); saveLessons(merged);
+      }
+      try { localStorage.setItem(PR_KEY, JSON.stringify(data.pr)); } catch {}
+      toast.success("PR package generated");
+    } catch (e: any) {
+      toast.error(e?.message || "PR generation failed");
+    } finally {
+      setPrLoading(false);
+    }
+  }
+
+  async function copyText(label: string, text: string) {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(label);
+      setTimeout(() => setCopied(null), 1500);
+      toast.success(`${label} copied`);
+    } catch {
+      toast.error("Copy failed");
+    }
   }
 
   return (
@@ -204,6 +261,16 @@ export function McCloderPanel() {
         <div className="space-y-3">
           <Button size="sm" onClick={runAssessment} disabled={running} className="w-full h-8 text-xs">
             {running ? <><RefreshCw className="h-3 w-3 mr-1 animate-spin" /> Running cycle…</> : <><Sparkles className="h-3 w-3 mr-1" /> Run Assessment Cycle</>}
+          </Button>
+
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={generatePR}
+            disabled={prLoading || !latestAssess}
+            className="w-full h-8 text-xs"
+          >
+            {prLoading ? <><RefreshCw className="h-3 w-3 mr-1 animate-spin" /> Drafting PR…</> : <><GitPullRequest className="h-3 w-3 mr-1" /> Generate GitHub PR from Latest Analysis</>}
           </Button>
 
           {latestAssess && (
@@ -289,6 +356,90 @@ export function McCloderPanel() {
           </p>
         </div>
       )}
+
+      <Dialog open={prOpen} onOpenChange={setPrOpen}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-base">
+              <GitPullRequest className="h-4 w-4 text-primary" /> McCloder Pull Request
+            </DialogTitle>
+            <DialogDescription className="text-xs">
+              Copy this into a new branch and open a PR on GitHub. Formatted for GitHub Actions / CI/CD pipelines.
+            </DialogDescription>
+          </DialogHeader>
+          {pr && (
+            <ScrollArea className="flex-1 pr-3">
+              <div className="space-y-3 text-xs">
+                <PRField label="Branch" value={pr.branch_name} onCopy={() => copyText("Branch", pr.branch_name)} copied={copied === "Branch"} mono />
+                <PRField label="Title" value={pr.title} onCopy={() => copyText("Title", pr.title)} copied={copied === "Title"} />
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Description</p>
+                    <button onClick={() => copyText("Description", pr.description)} className="text-[10px] inline-flex items-center gap-1 text-primary hover:underline">
+                      {copied === "Description" ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />} Copy
+                    </button>
+                  </div>
+                  <pre className="glass rounded-md p-3 text-[11px] whitespace-pre-wrap font-mono leading-relaxed">{pr.description}</pre>
+                </div>
+
+                {pr.patch_suggestions?.length ? (
+                  <div className="space-y-1.5">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Patch suggestions</p>
+                    {pr.patch_suggestions.map((p, i) => (
+                      <div key={i} className="glass rounded-md p-2 space-y-1">
+                        <p className="text-[11px] font-mono text-primary">{p.file}</p>
+                        <p className="text-[11px]">{p.change_summary}</p>
+                        {p.diff_hint && (
+                          <pre className="bg-black/40 rounded p-2 text-[10px] font-mono whitespace-pre-wrap overflow-x-auto">{p.diff_hint}</pre>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+
+                {pr.commit_message && (
+                  <PRField label="Commit message" value={pr.commit_message} onCopy={() => copyText("Commit message", pr.commit_message!)} copied={copied === "Commit message"} mono />
+                )}
+
+                {pr.self_evaluation && (
+                  <div className="glass rounded-md p-3 space-y-1.5">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">McCloder self-evaluation</p>
+                    <div className="grid grid-cols-3 gap-2 text-center">
+                      <div><p className="text-[9px] text-muted-foreground">Usefulness</p><p className="text-sm font-bold text-primary">{pr.self_evaluation.usefulness}</p></div>
+                      <div><p className="text-[9px] text-muted-foreground">Safety</p><p className="text-sm font-bold text-primary">{pr.self_evaluation.safety}</p></div>
+                      <div><p className="text-[9px] text-muted-foreground">Confidence</p><p className="text-sm font-bold text-primary">{pr.self_evaluation.correctness_confidence}</p></div>
+                    </div>
+                    {pr.self_evaluation.improvement_notes?.length ? (
+                      <ul className="pt-1 space-y-0.5">
+                        {pr.self_evaluation.improvement_notes.map((n, i) => (
+                          <li key={i} className="text-[10px] text-muted-foreground">• {n}</li>
+                        ))}
+                      </ul>
+                    ) : null}
+                  </div>
+                )}
+
+                {pr.ci_notes && (
+                  <div className="glass rounded-md p-2 border border-primary/20">
+                    <p className="text-[10px] font-semibold text-primary mb-1">CI/CD note</p>
+                    <p className="text-[11px] text-muted-foreground">{pr.ci_notes}</p>
+                  </div>
+                )}
+
+                <div className="glass rounded-md p-3 text-[10px] text-muted-foreground leading-relaxed">
+                  <p className="font-semibold mb-1">How to ship this PR</p>
+                  <ol className="list-decimal list-inside space-y-0.5">
+                    <li><code className="font-mono">git checkout -b {pr.branch_name}</code></li>
+                    <li>Apply the patch suggestions above to the listed files</li>
+                    <li><code className="font-mono">git commit -m "{pr.title}"</code> and push</li>
+                    <li>Open a PR on GitHub using the title + description above</li>
+                  </ol>
+                </div>
+              </div>
+            </ScrollArea>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -299,6 +450,20 @@ function Stat({ label, value, accent, positive, negative }: { label: string; val
     <div className="glass rounded-lg p-2 text-center">
       <p className="text-[9px] text-muted-foreground">{label}</p>
       <p className={`text-lg font-display font-bold ${color}`}>{value}</p>
+    </div>
+  );
+}
+
+function PRField({ label, value, onCopy, copied, mono }: { label: string; value: string; onCopy: () => void; copied?: boolean; mono?: boolean }) {
+  return (
+    <div className="space-y-1">
+      <div className="flex items-center justify-between">
+        <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
+        <button onClick={onCopy} className="text-[10px] inline-flex items-center gap-1 text-primary hover:underline">
+          {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />} Copy
+        </button>
+      </div>
+      <p className={`glass rounded-md p-2 text-[11px] ${mono ? "font-mono" : ""} break-all`}>{value}</p>
     </div>
   );
 }

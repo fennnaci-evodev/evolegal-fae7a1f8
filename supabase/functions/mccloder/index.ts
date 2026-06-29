@@ -170,6 +170,34 @@ Produce the JSON report.`;
       });
     }
 
+    if (action === "generate_pr") {
+      const report = body.report ?? {};
+      const signals = body.signals ?? {};
+      const PR_PROMPT = `You are McCloder generating a ready-to-use GitHub Pull Request from a system analysis report. Output strict JSON:
+{
+  "title": "conventional-commit style PR title (refactor: ... | fix: ... | feat: ... | perf: ... | chore: ...)",
+  "branch_name": "kebab-case branch name (e.g. refactor/chat-persistence)",
+  "description": "Full markdown PR body with sections: ## Problem, ## Proposed Solution, ## Files Likely Changed, ## Expected Impact (performance/stability/UX/security), ## Testing Notes, ## Risks & Rollback",
+  "patch_suggestions": [
+    { "file": "relative/path.ts", "change_summary": "what to change", "diff_hint": "optional pseudo-diff or before/after snippet" }
+  ],
+  "commit_message": "conventional commit message body",
+  "self_evaluation": {
+    "usefulness": 0-100,
+    "safety": 0-100,
+    "correctness_confidence": 0-100,
+    "improvement_notes": ["how future suggestions can be better"]
+  },
+  "ci_notes": "short note about how this PR fits a GitHub Actions / CI/CD pipeline"
+}
+Be concrete. Reference actual finding titles. If patch content is unknown, leave diff_hint empty but keep change_summary specific.`;
+      const userPrompt = `Generate a PR package from the latest McCloder report.\n\nREPORT:\n${JSON.stringify(report, null, 2)}\n\nSIGNALS:\n${JSON.stringify(signals, null, 2)}`;
+      const pr = await callAI(PR_PROMPT, userPrompt);
+      return new Response(JSON.stringify({ ok: true, pr }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     if (action === "review") {
       const code = String(body.code ?? "").slice(0, 18000);
       const context = String(body.context ?? "").slice(0, 1000);
