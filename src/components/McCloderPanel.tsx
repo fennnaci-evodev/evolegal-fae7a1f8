@@ -263,6 +263,16 @@ export function McCloderPanel() {
             {running ? <><RefreshCw className="h-3 w-3 mr-1 animate-spin" /> Running cycle…</> : <><Sparkles className="h-3 w-3 mr-1" /> Run Assessment Cycle</>}
           </Button>
 
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={generatePR}
+            disabled={prLoading || !latestAssess}
+            className="w-full h-8 text-xs"
+          >
+            {prLoading ? <><RefreshCw className="h-3 w-3 mr-1 animate-spin" /> Drafting PR…</> : <><GitPullRequest className="h-3 w-3 mr-1" /> Generate GitHub PR from Latest Analysis</>}
+          </Button>
+
           {latestAssess && (
             <div className="glass rounded-xl p-3 space-y-2">
               <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Latest Report</p>
