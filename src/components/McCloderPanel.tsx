@@ -356,6 +356,90 @@ export function McCloderPanel() {
           </p>
         </div>
       )}
+
+      <Dialog open={prOpen} onOpenChange={setPrOpen}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-base">
+              <GitPullRequest className="h-4 w-4 text-primary" /> McCloder Pull Request
+            </DialogTitle>
+            <DialogDescription className="text-xs">
+              Copy this into a new branch and open a PR on GitHub. Formatted for GitHub Actions / CI/CD pipelines.
+            </DialogDescription>
+          </DialogHeader>
+          {pr && (
+            <ScrollArea className="flex-1 pr-3">
+              <div className="space-y-3 text-xs">
+                <PRField label="Branch" value={pr.branch_name} onCopy={() => copyText("Branch", pr.branch_name)} copied={copied === "Branch"} mono />
+                <PRField label="Title" value={pr.title} onCopy={() => copyText("Title", pr.title)} copied={copied === "Title"} />
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Description</p>
+                    <button onClick={() => copyText("Description", pr.description)} className="text-[10px] inline-flex items-center gap-1 text-primary hover:underline">
+                      {copied === "Description" ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />} Copy
+                    </button>
+                  </div>
+                  <pre className="glass rounded-md p-3 text-[11px] whitespace-pre-wrap font-mono leading-relaxed">{pr.description}</pre>
+                </div>
+
+                {pr.patch_suggestions?.length ? (
+                  <div className="space-y-1.5">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Patch suggestions</p>
+                    {pr.patch_suggestions.map((p, i) => (
+                      <div key={i} className="glass rounded-md p-2 space-y-1">
+                        <p className="text-[11px] font-mono text-primary">{p.file}</p>
+                        <p className="text-[11px]">{p.change_summary}</p>
+                        {p.diff_hint && (
+                          <pre className="bg-black/40 rounded p-2 text-[10px] font-mono whitespace-pre-wrap overflow-x-auto">{p.diff_hint}</pre>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+
+                {pr.commit_message && (
+                  <PRField label="Commit message" value={pr.commit_message} onCopy={() => copyText("Commit message", pr.commit_message!)} copied={copied === "Commit message"} mono />
+                )}
+
+                {pr.self_evaluation && (
+                  <div className="glass rounded-md p-3 space-y-1.5">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">McCloder self-evaluation</p>
+                    <div className="grid grid-cols-3 gap-2 text-center">
+                      <div><p className="text-[9px] text-muted-foreground">Usefulness</p><p className="text-sm font-bold text-primary">{pr.self_evaluation.usefulness}</p></div>
+                      <div><p className="text-[9px] text-muted-foreground">Safety</p><p className="text-sm font-bold text-primary">{pr.self_evaluation.safety}</p></div>
+                      <div><p className="text-[9px] text-muted-foreground">Confidence</p><p className="text-sm font-bold text-primary">{pr.self_evaluation.correctness_confidence}</p></div>
+                    </div>
+                    {pr.self_evaluation.improvement_notes?.length ? (
+                      <ul className="pt-1 space-y-0.5">
+                        {pr.self_evaluation.improvement_notes.map((n, i) => (
+                          <li key={i} className="text-[10px] text-muted-foreground">• {n}</li>
+                        ))}
+                      </ul>
+                    ) : null}
+                  </div>
+                )}
+
+                {pr.ci_notes && (
+                  <div className="glass rounded-md p-2 border border-primary/20">
+                    <p className="text-[10px] font-semibold text-primary mb-1">CI/CD note</p>
+                    <p className="text-[11px] text-muted-foreground">{pr.ci_notes}</p>
+                  </div>
+                )}
+
+                <div className="glass rounded-md p-3 text-[10px] text-muted-foreground leading-relaxed">
+                  <p className="font-semibold mb-1">How to ship this PR</p>
+                  <ol className="list-decimal list-inside space-y-0.5">
+                    <li><code className="font-mono">git checkout -b {pr.branch_name}</code></li>
+                    <li>Apply the patch suggestions above to the listed files</li>
+                    <li><code className="font-mono">git commit -m "{pr.title}"</code> and push</li>
+                    <li>Open a PR on GitHub using the title + description above</li>
+                  </ol>
+                </div>
+              </div>
+            </ScrollArea>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
