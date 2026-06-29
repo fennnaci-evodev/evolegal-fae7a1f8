@@ -187,7 +187,46 @@ export function McCloderPanel() {
     setCycles([]); setLessons([]);
     localStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem(LESSONS_KEY);
+    localStorage.removeItem(PR_KEY);
     toast.success("Memory cleared");
+  }
+
+  async function generatePR() {
+    const latest = assess[0];
+    if (!latest) { toast.error("Run an assessment cycle first"); return; }
+    setPrLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("mccloder", {
+        body: { action: "generate_pr", report: latest.report, signals: latest.signals },
+      });
+      if (error) throw error;
+      if (!data?.ok) throw new Error(data?.error || "PR generation failed");
+      setPr(data.pr);
+      setPrOpen(true);
+      // Persist self-evaluation as a lesson for future cycles
+      const notes = data.pr?.self_evaluation?.improvement_notes;
+      if (Array.isArray(notes) && notes.length) {
+        const merged = [...lessons, ...notes.map((n: string) => `[PR self-eval] ${n}`)].slice(-40);
+        setLessons(merged); saveLessons(merged);
+      }
+      try { localStorage.setItem(PR_KEY, JSON.stringify(data.pr)); } catch {}
+      toast.success("PR package generated");
+    } catch (e: any) {
+      toast.error(e?.message || "PR generation failed");
+    } finally {
+      setPrLoading(false);
+    }
+  }
+
+  async function copyText(label: string, text: string) {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(label);
+      setTimeout(() => setCopied(null), 1500);
+      toast.success(`${label} copied`);
+    } catch {
+      toast.error("Copy failed");
+    }
   }
 
   return (
