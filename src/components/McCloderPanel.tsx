@@ -8,8 +8,11 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Shield, Sparkles, Activity, AlertTriangle, CheckCircle2, RefreshCw,
-  Code2, Brain, History, ChevronDown, ChevronRight, Trash2,
+  Code2, Brain, History, ChevronDown, ChevronRight, Trash2, GitPullRequest, Copy, Check,
 } from "lucide-react";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
 
 type Severity = "critical" | "high" | "medium" | "low" | "info";
