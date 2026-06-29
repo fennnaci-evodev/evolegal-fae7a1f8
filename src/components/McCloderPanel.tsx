@@ -55,6 +55,17 @@ interface StoredCycle {
 
 const STORAGE_KEY = "mccloder_cycles_v1";
 const LESSONS_KEY = "mccloder_lessons_v1";
+const PR_KEY = "mccloder_prs_v1";
+
+interface PRPackage {
+  title: string;
+  branch_name: string;
+  description: string;
+  patch_suggestions?: { file: string; change_summary: string; diff_hint?: string }[];
+  commit_message?: string;
+  self_evaluation?: { usefulness: number; safety: number; correctness_confidence: number; improvement_notes: string[] };
+  ci_notes?: string;
+}
 
 const sevColor: Record<Severity, string> = {
   critical: "bg-red-500/20 text-red-300 border-red-500/40",
