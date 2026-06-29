@@ -94,6 +94,10 @@ export function McCloderPanel() {
   const [cycles, setCycles] = useState<StoredCycle[]>([]);
   const [lessons, setLessons] = useState<string[]>([]);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [pr, setPr] = useState<PRPackage | null>(null);
+  const [prOpen, setPrOpen] = useState(false);
+  const [prLoading, setPrLoading] = useState(false);
+  const [copied, setCopied] = useState<string | null>(null);
 
   // review state
   const [code, setCode] = useState("");
