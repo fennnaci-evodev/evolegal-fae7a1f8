@@ -404,11 +404,11 @@ export function HugoDemoBubble() {
               <Input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Ask me a question..."
+                placeholder={authLoading ? "Loading…" : "Ask me a question..."}
                 className="bg-transparent border-0 focus-visible:ring-0 text-sm"
-                disabled={streaming}
+                disabled={streaming || authLoading}
               />
-              <Button type="submit" size="icon" disabled={!input.trim() || streaming} className="shrink-0 h-8 w-8">
+              <Button type="submit" size="icon" disabled={!input.trim() || streaming || authLoading} className="shrink-0 h-8 w-8">
                 <Send className="h-3.5 w-3.5" />
               </Button>
             </form>
