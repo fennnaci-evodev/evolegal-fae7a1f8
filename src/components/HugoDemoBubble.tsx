@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { InlineELoader } from "@/components/InlineELoader";
 import { HugoTypingMessage } from "@/components/HugoTypingMessage";
+import { HugoCopyButton } from "@/components/HugoCopyButton";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { lovable } from "@/integrations/lovable/index";
@@ -280,7 +281,7 @@ export function HugoDemoBubble() {
                   key={msg.id}
                   initial={{ opacity: 0, y: 6 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className={`flex ${msg.role === "user" ? "justify-end" : ""}`}
+                  className={`flex flex-col ${msg.role === "user" ? "items-end" : "items-start"}`}
                 >
                   <div className={`max-w-[85%] rounded-xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap ${
                     msg.role === "user"
@@ -298,6 +299,11 @@ export function HugoDemoBubble() {
                       msg.content
                     )}
                   </div>
+                  {msg.role === "assistant" && (
+                    <div className="mt-1 max-w-[85%] w-full flex justify-end">
+                      <HugoCopyButton content={msg.content} />
+                    </div>
+                  )}
                 </motion.div>
               ))}
 

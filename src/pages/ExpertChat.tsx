@@ -7,6 +7,7 @@ import { HugoAvatar } from "@/components/HugoAvatar";
 import { Button } from "@/components/ui/button";
 import { Send, User, Info, Mic, MicOff, Plus, Trash2, MessageCircle, FileText, ChevronDown, PanelLeftClose, PanelLeftOpen, Pencil } from "lucide-react";
 import { HugoFeedbackButtons } from "@/components/HugoFeedbackButtons";
+import { HugoCopyButton } from "@/components/HugoCopyButton";
 import { DocumentFactoryButton } from "@/components/DocumentFactoryButton";
 import { isRateLimited } from "@/lib/security";
 import { InlineELoader } from "@/components/InlineELoader";
@@ -350,8 +351,13 @@ const ExpertChat = () => {
                         <Pencil className="h-3 w-3" /> Edit
                       </button>
                     )}
-                    {msg.role === "assistant" && user && currentChatId && (
-                      <HugoFeedbackButtons messageId={msg.id} chatId={currentChatId} userId={user.id} />
+                    {msg.role === "assistant" && (
+                      <div className="flex items-center justify-between gap-2 mt-1 self-stretch max-w-[85%]">
+                        {user && currentChatId ? (
+                          <HugoFeedbackButtons messageId={msg.id} chatId={currentChatId} userId={user.id} />
+                        ) : <span />}
+                        <HugoCopyButton content={msg.content} />
+                      </div>
                     )}
                   </div>
                   {msg.role === "user" && (
