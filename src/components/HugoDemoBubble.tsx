@@ -37,6 +37,10 @@ export function HugoDemoBubble() {
   const [suggestConsilium, setSuggestConsilium] = useState(false);
   const [switchingToConsilium, setSwitchingToConsilium] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const hugoMode = useHugoMode();
+  const consiliumConfirmed = useConsiliumConfirmed();
+  const consiliumActive = hugoMode === "consilium";
+  const showConsiliumGate = open && consiliumActive && !consiliumConfirmed;
 
   const {
     messages,
