@@ -345,6 +345,17 @@ export function HugoDemoBubble() {
                   </div>
                 )
               )}
+              <AnimatePresence>
+                {suggestConsilium && !streaming && (
+                  <div className="mt-1 max-w-[92%]">
+                    <HugoConsiliumSuggestion
+                      onAccept={handleAcceptConsilium}
+                      onDismiss={() => setSuggestConsilium(false)}
+                      loading={switchingToConsilium}
+                    />
+                  </div>
+                )}
+              </AnimatePresence>
               <div ref={bottomRef} />
             </div>
 
