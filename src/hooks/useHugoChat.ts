@@ -14,6 +14,7 @@ export interface HugoMessage {
   role: "user" | "assistant";
   content: string;
   created_at?: string;
+  consilium?: boolean;
 }
 
 export interface HugoChat {
@@ -205,12 +206,15 @@ export function useHugoChat(chatId?: string | null) {
 
       const updateAssistant = (text: string) => {
         full = text;
+        // Detect Consilium marker at the very start and strip it from display.
+        const consilium = /^\s*\[CONSILIUM_ACTIVE\]\s*\n?/.test(text);
+        const display = text.replace(/^\s*\[CONSILIUM_ACTIVE\]\s*\n?/, "");
         setMessages(prev => {
           const last = prev[prev.length - 1];
           if (last?.role === "assistant" && last.id === assistantId) {
-            return prev.map((m, i) => i === prev.length - 1 ? { ...m, content: full } : m);
+            return prev.map((m, i) => i === prev.length - 1 ? { ...m, content: display, consilium } as any : m);
           }
-          return [...prev, { id: assistantId, role: "assistant", content: full }];
+          return [...prev, { id: assistantId, role: "assistant", content: display, consilium } as any];
         });
       };
 
@@ -234,8 +238,12 @@ export function useHugoChat(chatId?: string | null) {
         }
       }
 
-      // Strip metrics tags from response (internal Hugo metrics, not shown to user)
-      let finalContent = full.replace(/<!--METRICS:.*?-->/s, "").trim();
+      // Strip metrics tags and Consilium signal from the persisted response
+      const wasConsilium = /\[CONSILIUM_ACTIVE\]/.test(full);
+      let finalContent = full
+        .replace(/<!--METRICS:.*?-->/s, "")
+        .replace(/^\s*\[CONSILIUM_ACTIVE\]\s*\n?/, "")
+        .trim();
 
       // Detect precise-mode suggestion marker (auto-suggested by Hugo)
       const suggestPrecise = /\[SUGGEST_PRECISE_MODE\]/.test(finalContent);
@@ -250,7 +258,7 @@ export function useHugoChat(chatId?: string | null) {
 
       // Update displayed message with cleaned content
       setMessages(prev => prev.map((m, i) =>
-        i === prev.length - 1 && m.role === "assistant" ? { ...m, content: finalContent } : m
+        i === prev.length - 1 && m.role === "assistant" ? { ...m, content: finalContent, consilium: wasConsilium } : m
       ));
 
       // Save assistant message
