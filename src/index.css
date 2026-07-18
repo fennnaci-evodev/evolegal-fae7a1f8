@@ -48,6 +48,64 @@
     --neon-cyan: 186 100% 50%;
     --neon-purple: 270 80% 75%;
   }
+
+  /* Light Mode — "Total Negative": crisp legal-white with charcoal ink */
+  html.light {
+    --background: 0 0% 100%;
+    --foreground: 222 47% 8%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 8%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 8%;
+
+    --primary: 186 90% 32%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 270 60% 45%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 10% 38%;
+
+    --accent: 270 60% 45%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 45%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 13% 88%;
+    --input: 220 13% 92%;
+    --ring: 186 90% 32%;
+
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 222 47% 8%;
+    --sidebar-primary: 186 90% 32%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 14% 96%;
+    --sidebar-accent-foreground: 222 47% 8%;
+    --sidebar-border: 220 13% 88%;
+    --sidebar-ring: 186 90% 32%;
+
+    --neon-cyan: 186 90% 32%;
+    --neon-purple: 270 60% 45%;
+  }
+
+  /* Global smooth theme transition — cinematic wave */
+  html, body {
+    transition: background-color 500ms ease-in-out, color 500ms ease-in-out;
+  }
+  *, *::before, *::after {
+    transition-property: background-color, border-color, color, fill, stroke, box-shadow;
+    transition-duration: 500ms;
+    transition-timing-function: ease-in-out;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html, body, *, *::before, *::after {
+      transition-duration: 0ms !important;
+    }
+  }
 }
 
 @layer base {
@@ -151,6 +209,29 @@
 
   .glow-cyan {
     box-shadow: 0 0 20px hsla(186, 100%, 50%, 0.15), 0 0 60px hsla(186, 100%, 50%, 0.08);
+  }
+
+  /* Light-mode overrides for glass surfaces — crisp thin slate borders */
+  html.light .glass {
+    background: hsla(220, 30%, 100%, 0.75);
+    border: 1px solid hsla(220, 13%, 82%, 1);
+    backdrop-filter: blur(12px) saturate(1.1);
+  }
+  html.light .glass-strong {
+    background: hsla(0, 0%, 100%, 0.9);
+    border: 1px solid hsla(220, 13%, 85%, 1);
+    box-shadow: 0 4px 20px hsla(222, 47%, 8%, 0.06), inset 0 1px 0 hsla(0, 0%, 100%, 0.4);
+    backdrop-filter: blur(14px) saturate(1.1);
+  }
+  html.light .glass-card {
+    background: hsla(0, 0%, 100%, 0.85);
+    border: 1px solid hsla(220, 13%, 85%, 1);
+    box-shadow: 0 4px 20px hsla(222, 47%, 8%, 0.05);
+    backdrop-filter: blur(14px) saturate(1.1);
+  }
+  html.light .glass-card:hover {
+    border-color: hsla(186, 90%, 32%, 0.35);
+    filter: drop-shadow(0 0 6px hsla(186, 90%, 32%, 0.08));
   }
 
   .glow-purple {
@@ -330,7 +411,7 @@ img,
   width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: hsl(240 20% 4%);
+  background: hsl(var(--background));
 }
 ::-webkit-scrollbar-thumb {
   background: hsla(186, 100%, 50%, 0.2);
