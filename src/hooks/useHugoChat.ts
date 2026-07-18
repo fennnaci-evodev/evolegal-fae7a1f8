@@ -285,7 +285,7 @@ export function useHugoChat(chatId?: string | null) {
         });
       }
 
-      return { escalated: full.includes("[ESCALATE_TO_EXPERT]"), suggestPrecise, chatId: cId };
+      return { escalated: full.includes("[ESCALATE_TO_EXPERT]"), suggestPrecise, suggestConsilium, chatId: cId };
     } catch (err: any) {
       if (err.name !== "AbortError") {
         toast.error(err.message || "Something went wrong.");
