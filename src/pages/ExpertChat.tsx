@@ -105,6 +105,10 @@ const ExpertChat = () => {
       toast.error("Too many messages — please wait a moment.");
       return;
     }
+    if (getHugoModePref() === "consilium" && !consiliumConfirmed) {
+      // Gate is already visible; do nothing until user confirms.
+      return;
+    }
 
     const text = input;
     setInput("");
