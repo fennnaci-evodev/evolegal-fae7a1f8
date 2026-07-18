@@ -372,6 +372,19 @@ export function HugoDemoBubble() {
             {/* Permanent UPL Notice — sticky footer above input */}
             <HugoUPLNotice compact />
 
+            {/* Stage 2: Consilium directive anchor (only when active + confirmed) */}
+            {consiliumActive && consiliumConfirmed && (
+              <HugoConsiliumAnchor compact />
+            )}
+
+            {/* Stage 1: Consilium gatekeeper — scoped to bubble */}
+            <HugoConsiliumGate
+              open={showConsiliumGate}
+              onConfirm={confirmConsilium}
+              scope="absolute"
+              radius="1.25rem"
+            />
+
             {/* Choice overlay */}
             <AnimatePresence>
               {showChoice && (
