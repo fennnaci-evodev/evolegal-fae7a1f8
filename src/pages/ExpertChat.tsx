@@ -64,6 +64,10 @@ const ExpertChat = () => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const recognitionRef = useRef<any>(null);
   const isMobile = useIsMobile();
+  const hugoMode = useHugoMode();
+  const consiliumConfirmed = useConsiliumConfirmed();
+  const consiliumActive = hugoMode === "consilium";
+  const showConsiliumGate = consiliumActive && !consiliumConfirmed;
 
   // Load/refresh chat list when chatId or title changes
   useEffect(() => {
