@@ -113,6 +113,12 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
           </nav>
 
           <div className="border-t border-border/30 pt-4 mt-4">
+            <div className={`flex ${collapsed ? "justify-center" : "justify-between items-center px-3"} mb-2`}>
+              {!collapsed && (
+                <span className="text-[10px] uppercase tracking-wider text-muted-foreground/50">Theme</span>
+              )}
+              <ThemeToggle />
+            </div>
             {!collapsed && (
               <p className="px-3 py-2 text-[10px] text-muted-foreground/40 leading-relaxed">
                 Hugo & our Experts are here to help.
