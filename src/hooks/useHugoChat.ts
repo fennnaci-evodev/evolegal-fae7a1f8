@@ -258,7 +258,7 @@ export function useHugoChat(chatId?: string | null) {
 
       // Update displayed message with cleaned content
       setMessages(prev => prev.map((m, i) =>
-        i === prev.length - 1 && m.role === "assistant" ? { ...m, content: finalContent } : m
+        i === prev.length - 1 && m.role === "assistant" ? { ...m, content: finalContent, consilium: wasConsilium } : m
       ));
 
       // Save assistant message
