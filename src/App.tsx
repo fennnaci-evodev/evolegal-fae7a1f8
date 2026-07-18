@@ -41,8 +41,9 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <AdminModeProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <AdminModeProvider>
         <LoadingProvider>
           <TooltipProvider>
             <Toaster />
