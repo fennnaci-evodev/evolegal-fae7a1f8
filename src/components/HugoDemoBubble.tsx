@@ -8,6 +8,8 @@ import { InlineELoader } from "@/components/InlineELoader";
 import { HugoTypingMessage } from "@/components/HugoTypingMessage";
 import { HugoCopyButton } from "@/components/HugoCopyButton";
 import { HugoModeBadge, getHugoModePref } from "@/components/HugoModeBadge";
+import { HugoUPLNotice } from "@/components/HugoUPLNotice";
+import { HugoConsiliumLoader } from "@/components/HugoConsiliumLoader";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { lovable } from "@/integrations/lovable/index";
@@ -310,13 +312,20 @@ export function HugoDemoBubble() {
               ))}
 
               {streaming && messages[messages.length - 1]?.role === "user" && (
-                <div className="flex items-center gap-2">
-                  <InlineELoader size={22} />
-                  <span className="text-[10px] text-muted-foreground/60">Hugo is thinking…</span>
-                </div>
+                getHugoModePref() === "consilium" ? (
+                  <HugoConsiliumLoader compact />
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <InlineELoader size={22} />
+                    <span className="text-[10px] text-muted-foreground/60">Hugo is thinking…</span>
+                  </div>
+                )
               )}
               <div ref={bottomRef} />
             </div>
+
+            {/* Permanent UPL Notice — sticky footer above input */}
+            <HugoUPLNotice compact />
 
             {/* Choice overlay */}
             <AnimatePresence>

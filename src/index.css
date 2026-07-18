@@ -446,3 +446,21 @@ img,
     display: none !important;
   }
 }
+
+/* Consilium loader dots animation */
+@keyframes hugo-consilium-dots {
+  0%, 20% { opacity: 0.2; }
+  40% { opacity: 1; }
+  100% { opacity: 0.2; }
+}
+.hugo-consilium-dots {
+  animation: hugo-consilium-dots 1.4s ease-in-out infinite;
+}
+
+/* Markdown wrapper reset — prevent any inherited whitespace-pre-wrap from
+   forcing broken layouts inside Hugo's rendered markdown. */
+.hugo-md {
+  white-space: normal;
+}
+.hugo-md > *:first-child { margin-top: 0; }
+.hugo-md > *:last-child { margin-bottom: 0; }
