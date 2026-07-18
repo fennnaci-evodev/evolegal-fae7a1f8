@@ -77,6 +77,10 @@ export function HugoDemoBubble() {
     // sign-in prompt to users who actually have a valid session being restored.
     if (authLoading) return;
 
+    // Consilium gate: block send until user confirms directive.
+    if (getHugoModePref() === "consilium" && !consiliumConfirmed) return;
+
+
     if (!user && userMsgCount >= 1) {
       setShowAuthPrompt(true);
       return;
