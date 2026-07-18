@@ -96,6 +96,7 @@ export function HugoDemoBubble() {
 
     setInput("");
     setShowPreciseSuggest(false);
+    setSuggestConsilium(false);
     const result = await sendMessage(text, { precise: preciseMode, mode: getHugoModePref() });
 
     if (result?.escalated) {
@@ -108,9 +109,28 @@ export function HugoDemoBubble() {
       return;
     }
 
+    if (result?.suggestConsilium && getHugoModePref() !== "consilium") {
+      setSuggestConsilium(true);
+    }
+
     const newUserCount = userMsgCount + 1;
     if (newUserCount >= MESSAGES_BEFORE_CHOICE && user && !choiceDismissed) {
       setTimeout(() => setShowChoice(true), 800);
+    }
+  };
+
+  const handleAcceptConsilium = async () => {
+    if (switchingToConsilium || streaming) return;
+    setSwitchingToConsilium(true);
+    setSuggestConsilium(false);
+    setHugoModePref("consilium");
+    try {
+      const text = await editLastMessage();
+      if (text) {
+        await sendMessage(text, { precise: preciseMode, mode: "consilium" });
+      }
+    } finally {
+      setSwitchingToConsilium(false);
     }
   };
 
