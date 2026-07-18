@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Send, User, Info, Mic, MicOff, Plus, Trash2, MessageCircle, FileText, ChevronDown, PanelLeftClose, PanelLeftOpen, Pencil } from "lucide-react";
 import { HugoFeedbackButtons } from "@/components/HugoFeedbackButtons";
 import { HugoCopyButton } from "@/components/HugoCopyButton";
-import { HugoModeBadge, getHugoModePref, type HugoMode } from "@/components/HugoModeBadge";
+import { HugoModeBadge, getHugoModePref, setHugoModePref, type HugoMode } from "@/components/HugoModeBadge";
 import { DocumentFactoryButton } from "@/components/DocumentFactoryButton";
 import { isRateLimited } from "@/lib/security";
 import { InlineELoader } from "@/components/InlineELoader";
