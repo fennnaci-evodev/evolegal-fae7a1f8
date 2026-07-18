@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { InlineELoader } from "@/components/InlineELoader";
 import { HugoTypingMessage } from "@/components/HugoTypingMessage";
 import { HugoCopyButton } from "@/components/HugoCopyButton";
+import { HugoModeBadge, getHugoModePref } from "@/components/HugoModeBadge";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { lovable } from "@/integrations/lovable/index";
