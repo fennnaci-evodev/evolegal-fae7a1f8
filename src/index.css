@@ -48,6 +48,64 @@
     --neon-cyan: 186 100% 50%;
     --neon-purple: 270 80% 75%;
   }
+
+  /* Light Mode — "Total Negative": crisp legal-white with charcoal ink */
+  html.light {
+    --background: 0 0% 100%;
+    --foreground: 222 47% 8%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 8%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 8%;
+
+    --primary: 186 90% 32%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 270 60% 45%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 10% 38%;
+
+    --accent: 270 60% 45%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 45%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 13% 88%;
+    --input: 220 13% 92%;
+    --ring: 186 90% 32%;
+
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 222 47% 8%;
+    --sidebar-primary: 186 90% 32%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 14% 96%;
+    --sidebar-accent-foreground: 222 47% 8%;
+    --sidebar-border: 220 13% 88%;
+    --sidebar-ring: 186 90% 32%;
+
+    --neon-cyan: 186 90% 32%;
+    --neon-purple: 270 60% 45%;
+  }
+
+  /* Global smooth theme transition — cinematic wave */
+  html, body {
+    transition: background-color 500ms ease-in-out, color 500ms ease-in-out;
+  }
+  *, *::before, *::after {
+    transition-property: background-color, border-color, color, fill, stroke, box-shadow;
+    transition-duration: 500ms;
+    transition-timing-function: ease-in-out;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html, body, *, *::before, *::after {
+      transition-duration: 0ms !important;
+    }
+  }
 }
 
 @layer base {
