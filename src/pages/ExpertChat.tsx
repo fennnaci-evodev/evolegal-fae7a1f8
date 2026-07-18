@@ -448,6 +448,13 @@ const ExpertChat = () => {
             <HugoUPLNotice />
           </div>
 
+          {/* Stage 2: Consilium user-directive anchor (only when Consilium is active) */}
+          {consiliumActive && consiliumConfirmed && (
+            <div className="mb-2">
+              <HugoConsiliumAnchor />
+            </div>
+          )}
+
           {/* Input */}
           {editingMode && (
             <div className="flex items-center gap-2 px-3 py-1.5 text-[11px] text-muted-foreground">
