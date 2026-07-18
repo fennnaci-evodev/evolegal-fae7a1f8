@@ -237,8 +237,12 @@ export function useHugoChat(chatId?: string | null) {
         }
       }
 
-      // Strip metrics tags from response (internal Hugo metrics, not shown to user)
-      let finalContent = full.replace(/<!--METRICS:.*?-->/s, "").trim();
+      // Strip metrics tags and Consilium signal from the persisted response
+      const wasConsilium = /\[CONSILIUM_ACTIVE\]/.test(full);
+      let finalContent = full
+        .replace(/<!--METRICS:.*?-->/s, "")
+        .replace(/^\s*\[CONSILIUM_ACTIVE\]\s*\n?/, "")
+        .trim();
 
       // Detect precise-mode suggestion marker (auto-suggested by Hugo)
       const suggestPrecise = /\[SUGGEST_PRECISE_MODE\]/.test(finalContent);
