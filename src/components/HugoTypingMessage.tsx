@@ -137,25 +137,25 @@ export function HugoTypingMessage({ content, isStreaming, messageId, isNew }: Hu
     }
   }, [shouldAnimate, done, clearTimer]);
 
-  // No animation — render full content instantly
+  // No animation — render full content instantly (with markdown)
   if (!shouldAnimate && !isNew) {
-    return <span>{content}</span>;
+    return <HugoMessageMarkdown content={content} />;
   }
 
-  // Reduced motion — soft fade
+  // Reduced motion — soft fade, markdown
   if (reducedMotion && isNew) {
-    return <span className="hugo-typing-reduced">{content}</span>;
+    return (
+      <span className="hugo-typing-reduced">
+        <HugoMessageMarkdown content={content} />
+      </span>
+    );
   }
 
-  // Done — show full content with a subtle settle
+  // Done — show full content with a subtle settle, rendered as markdown
   if (done) {
     return (
       <span className={isNew ? "hugo-msg-settle" : undefined}>
-        {paragraphs.map((para, pi) => (
-          <span key={pi} style={{ display: "block", marginBottom: pi < paragraphs.length - 1 ? "0.75em" : 0 }}>
-            {para.join(" ")}
-          </span>
-        ))}
+        <HugoMessageMarkdown content={content} />
       </span>
     );
   }
