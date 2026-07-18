@@ -14,6 +14,7 @@ export interface HugoMessage {
   role: "user" | "assistant";
   content: string;
   created_at?: string;
+  consilium?: boolean;
 }
 
 export interface HugoChat {
