@@ -6,6 +6,7 @@ import { EvoLogo } from "./EvoLogo";
 import { useAuth } from "@/hooks/useAuth";
 import { useAdminMode } from "@/contexts/AdminModeContext";
 import { AdminModeToggle } from "./AdminModeToggle";
+import { ThemeToggle } from "./ThemeToggle";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const SIDEBAR_KEY = "evo_sidebar_collapsed";
