@@ -13,6 +13,8 @@ import { DocumentFactoryButton } from "@/components/DocumentFactoryButton";
 import { isRateLimited } from "@/lib/security";
 import { InlineELoader } from "@/components/InlineELoader";
 import { HugoTypingMessage } from "@/components/HugoTypingMessage";
+import { HugoUPLNotice } from "@/components/HugoUPLNotice";
+import { HugoConsiliumLoader } from "@/components/HugoConsiliumLoader";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { useHugoChat, fetchHugoChats, deleteHugoChat, type HugoChat } from "@/hooks/useHugoChat";
