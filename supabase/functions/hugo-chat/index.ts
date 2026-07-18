@@ -537,7 +537,12 @@ serve(async (req) => {
     }
 
     const preciseMode = body.precise_mode === true;
-    const basePrompt = preciseMode ? PRECISE_PROMPT : BASE_PROMPT;
+    const forcedConsilium = body.mode === "consilium";
+    const basePrompt = preciseMode
+      ? PRECISE_PROMPT
+      : forcedConsilium
+        ? CONSILIUM_PROMPT
+        : BASE_PROMPT;
 
     // Load memory + artifact and inject
     const memoryBlock = admin ? await loadMemoryContext(admin, userId, chatId) : "";
