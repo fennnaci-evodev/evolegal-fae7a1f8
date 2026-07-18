@@ -8,7 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Send, User, Info, Mic, MicOff, Plus, Trash2, MessageCircle, FileText, ChevronDown, PanelLeftClose, PanelLeftOpen, Pencil } from "lucide-react";
 import { HugoFeedbackButtons } from "@/components/HugoFeedbackButtons";
 import { HugoCopyButton } from "@/components/HugoCopyButton";
-import { HugoModeBadge, getHugoModePref, setHugoModePref, type HugoMode } from "@/components/HugoModeBadge";
+import { HugoModeBadge, getHugoModePref, setHugoModePref, useHugoMode, type HugoMode } from "@/components/HugoModeBadge";
+import { HugoConsiliumGate, useConsiliumConfirmed, confirmConsilium } from "@/components/HugoConsiliumGate";
+import { HugoConsiliumAnchor } from "@/components/HugoConsiliumAnchor";
 import { DocumentFactoryButton } from "@/components/DocumentFactoryButton";
 import { isRateLimited } from "@/lib/security";
 import { InlineELoader } from "@/components/InlineELoader";
@@ -62,6 +64,10 @@ const ExpertChat = () => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const recognitionRef = useRef<any>(null);
   const isMobile = useIsMobile();
+  const hugoMode = useHugoMode();
+  const consiliumConfirmed = useConsiliumConfirmed();
+  const consiliumActive = hugoMode === "consilium";
+  const showConsiliumGate = consiliumActive && !consiliumConfirmed;
 
   // Load/refresh chat list when chatId or title changes
   useEffect(() => {
@@ -97,6 +103,10 @@ const ExpertChat = () => {
     if (!input.trim() || streaming) return;
     if (isRateLimited("hugo_chat", 15, 60_000)) {
       toast.error("Too many messages — please wait a moment.");
+      return;
+    }
+    if (getHugoModePref() === "consilium" && !consiliumConfirmed) {
+      // Gate is already visible; do nothing until user confirms.
       return;
     }
 
@@ -438,6 +448,13 @@ const ExpertChat = () => {
             <HugoUPLNotice />
           </div>
 
+          {/* Stage 2: Consilium user-directive anchor (only when Consilium is active) */}
+          {consiliumActive && consiliumConfirmed && (
+            <div className="mb-2">
+              <HugoConsiliumAnchor />
+            </div>
+          )}
+
           {/* Input */}
           {editingMode && (
             <div className="flex items-center gap-2 px-3 py-1.5 text-[11px] text-muted-foreground">
@@ -495,6 +512,9 @@ const ExpertChat = () => {
           )}
         </div>
       </div>
+
+      {/* Stage 1: Consilium pre-flight gatekeeper */}
+      <HugoConsiliumGate open={showConsiliumGate} onConfirm={confirmConsilium} />
     </DashboardLayout>
   );
 };

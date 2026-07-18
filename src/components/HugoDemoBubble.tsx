@@ -7,7 +7,9 @@ import { Input } from "@/components/ui/input";
 import { InlineELoader } from "@/components/InlineELoader";
 import { HugoTypingMessage } from "@/components/HugoTypingMessage";
 import { HugoCopyButton } from "@/components/HugoCopyButton";
-import { HugoModeBadge, getHugoModePref, setHugoModePref } from "@/components/HugoModeBadge";
+import { HugoModeBadge, getHugoModePref, setHugoModePref, useHugoMode } from "@/components/HugoModeBadge";
+import { HugoConsiliumGate, useConsiliumConfirmed, confirmConsilium } from "@/components/HugoConsiliumGate";
+import { HugoConsiliumAnchor } from "@/components/HugoConsiliumAnchor";
 import { HugoConsiliumSuggestion } from "@/components/HugoConsiliumSuggestion";
 import { HugoUPLNotice } from "@/components/HugoUPLNotice";
 import { HugoConsiliumLoader } from "@/components/HugoConsiliumLoader";
@@ -35,6 +37,10 @@ export function HugoDemoBubble() {
   const [suggestConsilium, setSuggestConsilium] = useState(false);
   const [switchingToConsilium, setSwitchingToConsilium] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const hugoMode = useHugoMode();
+  const consiliumConfirmed = useConsiliumConfirmed();
+  const consiliumActive = hugoMode === "consilium";
+  const showConsiliumGate = open && consiliumActive && !consiliumConfirmed;
 
   const {
     messages,
@@ -70,6 +76,10 @@ export function HugoDemoBubble() {
     // Wait for auth to resolve before deciding anything — prevents flashing the
     // sign-in prompt to users who actually have a valid session being restored.
     if (authLoading) return;
+
+    // Consilium gate: block send until user confirms directive.
+    if (getHugoModePref() === "consilium" && !consiliumConfirmed) return;
+
 
     if (!user && userMsgCount >= 1) {
       setShowAuthPrompt(true);
@@ -361,6 +371,19 @@ export function HugoDemoBubble() {
 
             {/* Permanent UPL Notice — sticky footer above input */}
             <HugoUPLNotice compact />
+
+            {/* Stage 2: Consilium directive anchor (only when active + confirmed) */}
+            {consiliumActive && consiliumConfirmed && (
+              <HugoConsiliumAnchor compact />
+            )}
+
+            {/* Stage 1: Consilium gatekeeper — scoped to bubble */}
+            <HugoConsiliumGate
+              open={showConsiliumGate}
+              onConfirm={confirmConsilium}
+              scope="absolute"
+              radius="1.25rem"
+            />
 
             {/* Choice overlay */}
             <AnimatePresence>

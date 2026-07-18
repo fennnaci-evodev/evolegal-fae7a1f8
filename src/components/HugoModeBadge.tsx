@@ -15,6 +15,17 @@ export function getHugoModePref(): HugoMode {
 
 export function setHugoModePref(m: HugoMode) {
   try { localStorage.setItem(STORAGE_KEY, m); } catch { /* ignore */ }
+  try { window.dispatchEvent(new CustomEvent("hugo-mode-change", { detail: m })); } catch { /* ignore */ }
+}
+
+export function useHugoMode(): HugoMode {
+  const [mode, setMode] = useState<HugoMode>(() => getHugoModePref());
+  useEffect(() => {
+    const h = (e: Event) => setMode(((e as CustomEvent).detail as HugoMode) ?? getHugoModePref());
+    window.addEventListener("hugo-mode-change", h);
+    return () => window.removeEventListener("hugo-mode-change", h);
+  }, []);
+  return mode;
 }
 
 interface HugoModeBadgeProps {
