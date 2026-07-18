@@ -512,6 +512,9 @@ const ExpertChat = () => {
           )}
         </div>
       </div>
+
+      {/* Stage 1: Consilium pre-flight gatekeeper */}
+      <HugoConsiliumGate open={showConsiliumGate} onConfirm={confirmConsilium} />
     </DashboardLayout>
   );
 };
