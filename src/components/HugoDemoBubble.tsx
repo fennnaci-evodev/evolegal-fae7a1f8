@@ -83,14 +83,14 @@ export function HugoDemoBubble() {
 
     if (EXPERT_TRIGGER_PATTERN.test(text)) {
       setInput("");
-      await sendMessage(text, { precise: preciseMode });
+      await sendMessage(text, { precise: preciseMode, mode: getHugoModePref() });
       setShowChoice(true);
       return;
     }
 
     setInput("");
     setShowPreciseSuggest(false);
-    const result = await sendMessage(text, { precise: preciseMode });
+    const result = await sendMessage(text, { precise: preciseMode, mode: getHugoModePref() });
 
     if (result?.escalated) {
       setTimeout(() => setShowChoice(true), 300);
