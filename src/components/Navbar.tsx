@@ -6,6 +6,7 @@ import { Menu, X } from "lucide-react";
 import { EvoLogo } from "./EvoLogo";
 import { useAuth } from "@/hooks/useAuth";
 import { AdminModeToggle } from "./AdminModeToggle";
+import { ThemeToggle } from "./ThemeToggle";
 
 const links = [
   { label: "How It Works", to: "/how-it-works" },
