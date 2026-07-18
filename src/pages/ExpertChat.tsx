@@ -15,6 +15,8 @@ import { InlineELoader } from "@/components/InlineELoader";
 import { HugoTypingMessage } from "@/components/HugoTypingMessage";
 import { HugoUPLNotice } from "@/components/HugoUPLNotice";
 import { HugoConsiliumLoader } from "@/components/HugoConsiliumLoader";
+import { HugoConsiliumSuggestion } from "@/components/HugoConsiliumSuggestion";
+import { setHugoModePref } from "@/components/HugoModeBadge";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { useHugoChat, fetchHugoChats, deleteHugoChat, type HugoChat } from "@/hooks/useHugoChat";
