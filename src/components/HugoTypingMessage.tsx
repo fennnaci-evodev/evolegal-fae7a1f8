@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import { HugoMessageMarkdown } from "@/components/HugoMessageMarkdown";
 
 interface HugoTypingMessageProps {
   content: string;
