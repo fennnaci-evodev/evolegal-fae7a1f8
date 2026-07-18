@@ -161,6 +161,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
                 <item.icon className="h-4 w-4" />
               </Link>
             ))}
+            <ThemeToggle className="ml-1" />
           </div>
         </div>
 
