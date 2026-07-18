@@ -46,6 +46,7 @@ export function Navbar() {
           </div>
 
           <div className="flex items-center gap-3">
+            <ThemeToggle />
             {!loading && user && <AdminModeToggle />}
             {loading ? (
               <div className="w-[100px]" />
