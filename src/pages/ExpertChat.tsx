@@ -8,13 +8,14 @@ import { Button } from "@/components/ui/button";
 import { Send, User, Info, Mic, MicOff, Plus, Trash2, MessageCircle, FileText, ChevronDown, PanelLeftClose, PanelLeftOpen, Pencil } from "lucide-react";
 import { HugoFeedbackButtons } from "@/components/HugoFeedbackButtons";
 import { HugoCopyButton } from "@/components/HugoCopyButton";
-import { HugoModeBadge, getHugoModePref, type HugoMode } from "@/components/HugoModeBadge";
+import { HugoModeBadge, getHugoModePref, setHugoModePref, type HugoMode } from "@/components/HugoModeBadge";
 import { DocumentFactoryButton } from "@/components/DocumentFactoryButton";
 import { isRateLimited } from "@/lib/security";
 import { InlineELoader } from "@/components/InlineELoader";
 import { HugoTypingMessage } from "@/components/HugoTypingMessage";
 import { HugoUPLNotice } from "@/components/HugoUPLNotice";
 import { HugoConsiliumLoader } from "@/components/HugoConsiliumLoader";
+import { HugoConsiliumSuggestion } from "@/components/HugoConsiliumSuggestion";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { useHugoChat, fetchHugoChats, deleteHugoChat, type HugoChat } from "@/hooks/useHugoChat";
@@ -50,6 +51,8 @@ const ExpertChat = () => {
   const [listening, setListening] = useState(false);
   const [chatList, setChatList] = useState<HugoChat[]>([]);
   const [showSidebar, setShowSidebar] = useState(false);
+  const [suggestConsilium, setSuggestConsilium] = useState(false);
+  const [switchingToConsilium, setSwitchingToConsilium] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(() => {
     try { return localStorage.getItem("evo_chatlist_open") !== "false"; } catch { return true; }
   });
@@ -100,11 +103,31 @@ const ExpertChat = () => {
     const text = input;
     setInput("");
     setEditingMode(false);
+    setSuggestConsilium(false);
     const result = await sendMessage(text, { mode: getHugoModePref() });
+
+    if (result?.suggestConsilium && getHugoModePref() !== "consilium") {
+      setSuggestConsilium(true);
+    }
 
     // Navigate to the chat URL if we just created a new chat
     if (result?.chatId && !paramChatId) {
       navigate(`/dashboard/hugo/${result.chatId}`, { replace: true });
+    }
+  };
+
+  const handleAcceptConsilium = async () => {
+    if (switchingToConsilium || streaming) return;
+    setSwitchingToConsilium(true);
+    setSuggestConsilium(false);
+    setHugoModePref("consilium");
+    try {
+      const text = await editLastMessage();
+      if (text) {
+        await sendMessage(text, { mode: "consilium" });
+      }
+    } finally {
+      setSwitchingToConsilium(false);
     }
   };
 
@@ -395,6 +418,18 @@ const ExpertChat = () => {
                 )}
               </motion.div>
             )}
+
+            <AnimatePresence>
+              {suggestConsilium && !streaming && (
+                <div className="mt-1 mb-1 max-w-[85%]">
+                  <HugoConsiliumSuggestion
+                    onAccept={handleAcceptConsilium}
+                    onDismiss={() => setSuggestConsilium(false)}
+                    loading={switchingToConsilium}
+                  />
+                </div>
+              )}
+            </AnimatePresence>
             <div ref={bottomRef} />
           </div>
 

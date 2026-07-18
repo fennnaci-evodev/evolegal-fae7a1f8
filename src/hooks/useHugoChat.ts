@@ -251,6 +251,13 @@ export function useHugoChat(chatId?: string | null) {
         finalContent = finalContent.replace(/\[SUGGEST_PRECISE_MODE\]/g, "").trim();
       }
 
+      // Detect Consilium-mode suggestion marker (Blitz self-check flagged this
+      // query as complex enough to benefit from a deep multi-perspective analysis)
+      const suggestConsilium = /\[SUGGEST_CONSILIUM\]/.test(finalContent);
+      if (suggestConsilium) {
+        finalContent = finalContent.replace(/\[SUGGEST_CONSILIUM\]/g, "").trim();
+      }
+
       // Handle escalation markers
       if (finalContent.includes("[ESCALATE_TO_EXPERT]")) {
         finalContent = finalContent.replace(/\[ESCALATE_TO_EXPERT\]/g, "").trim() || "Let me connect you with an EvoLegal Expert right away.";
@@ -278,7 +285,7 @@ export function useHugoChat(chatId?: string | null) {
         });
       }
 
-      return { escalated: full.includes("[ESCALATE_TO_EXPERT]"), suggestPrecise, chatId: cId };
+      return { escalated: full.includes("[ESCALATE_TO_EXPERT]"), suggestPrecise, suggestConsilium, chatId: cId };
     } catch (err: any) {
       if (err.name !== "AbortError") {
         toast.error(err.message || "Something went wrong.");
@@ -292,7 +299,7 @@ export function useHugoChat(chatId?: string | null) {
         setMessages(prev => [...prev, errMsg]);
         await saveMessage(cId!, "assistant", errMsg.content);
       }
-      return { escalated: false, suggestPrecise: false, chatId: cId };
+      return { escalated: false, suggestPrecise: false, suggestConsilium: false, chatId: cId };
     } finally {
       setStreaming(false);
       abortRef.current = null;

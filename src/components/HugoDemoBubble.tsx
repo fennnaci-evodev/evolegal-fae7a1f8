@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input";
 import { InlineELoader } from "@/components/InlineELoader";
 import { HugoTypingMessage } from "@/components/HugoTypingMessage";
 import { HugoCopyButton } from "@/components/HugoCopyButton";
-import { HugoModeBadge, getHugoModePref } from "@/components/HugoModeBadge";
+import { HugoModeBadge, getHugoModePref, setHugoModePref } from "@/components/HugoModeBadge";
+import { HugoConsiliumSuggestion } from "@/components/HugoConsiliumSuggestion";
 import { HugoUPLNotice } from "@/components/HugoUPLNotice";
 import { HugoConsiliumLoader } from "@/components/HugoConsiliumLoader";
 import { useAuth } from "@/hooks/useAuth";
@@ -31,6 +32,8 @@ export function HugoDemoBubble() {
   const [showPreciseSuggest, setShowPreciseSuggest] = useState(false);
   const [showPreciseLimit, setShowPreciseLimit] = useState(false);
   const [preciseStatus, setPreciseStatus] = useState<PreciseStatus>({ plan: "free", dailyLimit: 2, usedToday: 0, remainingToday: 2, packCredits: 0, canConsume: true });
+  const [suggestConsilium, setSuggestConsilium] = useState(false);
+  const [switchingToConsilium, setSwitchingToConsilium] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const {
@@ -39,6 +42,7 @@ export function HugoDemoBubble() {
     currentChatId,
     sendMessage,
     startNewChat,
+    editLastMessage,
     newAssistantIds,
   } = useHugoChat();
 
@@ -92,6 +96,7 @@ export function HugoDemoBubble() {
 
     setInput("");
     setShowPreciseSuggest(false);
+    setSuggestConsilium(false);
     const result = await sendMessage(text, { precise: preciseMode, mode: getHugoModePref() });
 
     if (result?.escalated) {
@@ -104,9 +109,28 @@ export function HugoDemoBubble() {
       return;
     }
 
+    if (result?.suggestConsilium && getHugoModePref() !== "consilium") {
+      setSuggestConsilium(true);
+    }
+
     const newUserCount = userMsgCount + 1;
     if (newUserCount >= MESSAGES_BEFORE_CHOICE && user && !choiceDismissed) {
       setTimeout(() => setShowChoice(true), 800);
+    }
+  };
+
+  const handleAcceptConsilium = async () => {
+    if (switchingToConsilium || streaming) return;
+    setSwitchingToConsilium(true);
+    setSuggestConsilium(false);
+    setHugoModePref("consilium");
+    try {
+      const text = await editLastMessage();
+      if (text) {
+        await sendMessage(text, { precise: preciseMode, mode: "consilium" });
+      }
+    } finally {
+      setSwitchingToConsilium(false);
     }
   };
 
@@ -321,6 +345,17 @@ export function HugoDemoBubble() {
                   </div>
                 )
               )}
+              <AnimatePresence>
+                {suggestConsilium && !streaming && (
+                  <div className="mt-1 max-w-[92%]">
+                    <HugoConsiliumSuggestion
+                      onAccept={handleAcceptConsilium}
+                      onDismiss={() => setSuggestConsilium(false)}
+                      loading={switchingToConsilium}
+                    />
+                  </div>
+                )}
+              </AnimatePresence>
               <div ref={bottomRef} />
             </div>
 
