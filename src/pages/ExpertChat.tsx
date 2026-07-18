@@ -418,6 +418,18 @@ const ExpertChat = () => {
                 )}
               </motion.div>
             )}
+
+            <AnimatePresence>
+              {suggestConsilium && !streaming && (
+                <div className="mt-1 mb-1 max-w-[85%]">
+                  <HugoConsiliumSuggestion
+                    onAccept={handleAcceptConsilium}
+                    onDismiss={() => setSuggestConsilium(false)}
+                    loading={switchingToConsilium}
+                  />
+                </div>
+              )}
+            </AnimatePresence>
             <div ref={bottomRef} />
           </div>
 
