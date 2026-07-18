@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Send, User, Info, Mic, MicOff, Plus, Trash2, MessageCircle, FileText, ChevronDown, PanelLeftClose, PanelLeftOpen, Pencil } from "lucide-react";
 import { HugoFeedbackButtons } from "@/components/HugoFeedbackButtons";
 import { HugoCopyButton } from "@/components/HugoCopyButton";
+import { HugoModeBadge, getHugoModePref, type HugoMode } from "@/components/HugoModeBadge";
 import { DocumentFactoryButton } from "@/components/DocumentFactoryButton";
 import { isRateLimited } from "@/lib/security";
 import { InlineELoader } from "@/components/InlineELoader";
@@ -97,7 +98,7 @@ const ExpertChat = () => {
     const text = input;
     setInput("");
     setEditingMode(false);
-    const result = await sendMessage(text);
+    const result = await sendMessage(text, { mode: getHugoModePref() });
 
     // Navigate to the chat URL if we just created a new chat
     if (result?.chatId && !paramChatId) {
@@ -323,11 +324,15 @@ const ExpertChat = () => {
                   key={msg.id}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className={`group/msg flex gap-3 ${msg.role === "user" ? "justify-end" : ""}`}
+                  className={`group/msg flex gap-2 sm:gap-3 ${msg.role === "user" ? "justify-end" : ""}`}
                 >
-                  {msg.role === "assistant" && <HugoAvatar size={48} animate={false} talking={streaming && msg.id === messages[messages.length - 1]?.id} />}
-                  <div className="flex flex-col">
-                    <div className={`max-w-[85%] rounded-2xl px-5 py-4 text-sm whitespace-pre-wrap leading-relaxed ${
+                  {msg.role === "assistant" && (
+                    <div className="shrink-0">
+                      <HugoAvatar size={isMobile ? 36 : 48} animate={false} talking={streaming && msg.id === messages[messages.length - 1]?.id} />
+                    </div>
+                  )}
+                  <div className={`flex flex-col min-w-0 ${msg.role === "user" ? "items-end" : "items-start"} max-w-[calc(100%-3rem)] sm:max-w-[85%]`}>
+                    <div className={`w-fit max-w-full rounded-2xl px-4 py-3 sm:px-5 sm:py-4 text-sm whitespace-pre-wrap leading-relaxed break-words ${
                       msg.role === "user"
                         ? "bg-primary text-primary-foreground rounded-br-md"
                         : "glass rounded-bl-md"
@@ -352,17 +357,20 @@ const ExpertChat = () => {
                       </button>
                     )}
                     {msg.role === "assistant" && (
-                      <div className="flex items-center justify-between gap-2 mt-1 self-stretch max-w-[85%]">
-                        {user && currentChatId ? (
-                          <HugoFeedbackButtons messageId={msg.id} chatId={currentChatId} userId={user.id} />
-                        ) : <span />}
+                      <div className="flex items-center justify-between gap-2 mt-1 w-full flex-wrap">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          {user && currentChatId ? (
+                            <HugoFeedbackButtons messageId={msg.id} chatId={currentChatId} userId={user.id} />
+                          ) : null}
+                          <HugoModeBadge consilium={(msg as any).consilium} />
+                        </div>
                         <HugoCopyButton content={msg.content} />
                       </div>
                     )}
                   </div>
                   {msg.role === "user" && (
-                    <div className="h-12 w-12 rounded-full bg-accent/10 flex items-center justify-center shrink-0 mt-1" style={{ imageRendering: "auto" }}>
-                      <User className="h-6 w-6 text-accent" />
+                    <div className={`rounded-full bg-accent/10 flex items-center justify-center shrink-0 mt-1 ${isMobile ? "h-9 w-9" : "h-12 w-12"}`} style={{ imageRendering: "auto" }}>
+                      <User className={isMobile ? "h-4 w-4 text-accent" : "h-6 w-6 text-accent"} />
                     </div>
                   )}
                 </motion.div>

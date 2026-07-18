@@ -150,7 +150,7 @@ export function useHugoChat(chatId?: string | null) {
   }, []);
 
   // Stream and persist
-  const sendMessage = useCallback(async (text: string, opts?: { precise?: boolean }) => {
+  const sendMessage = useCallback(async (text: string, opts?: { precise?: boolean; mode?: "auto" | "blitz" | "consilium" }) => {
     if (!text.trim() || streaming || !user) return;
 
     let cId = currentChatId;
@@ -185,7 +185,7 @@ export function useHugoChat(chatId?: string | null) {
           "Content-Type": "application/json",
           Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
-        body: JSON.stringify({ messages: apiMessages, chat_id: cId, user_id: user.id, precise_mode: !!opts?.precise }),
+        body: JSON.stringify({ messages: apiMessages, chat_id: cId, user_id: user.id, precise_mode: !!opts?.precise, mode: opts?.mode ?? "auto" }),
         signal: controller.signal,
       });
 

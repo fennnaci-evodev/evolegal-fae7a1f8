@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { InlineELoader } from "@/components/InlineELoader";
 import { HugoTypingMessage } from "@/components/HugoTypingMessage";
 import { HugoCopyButton } from "@/components/HugoCopyButton";
+import { HugoModeBadge, getHugoModePref } from "@/components/HugoModeBadge";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { lovable } from "@/integrations/lovable/index";
@@ -82,14 +83,14 @@ export function HugoDemoBubble() {
 
     if (EXPERT_TRIGGER_PATTERN.test(text)) {
       setInput("");
-      await sendMessage(text, { precise: preciseMode });
+      await sendMessage(text, { precise: preciseMode, mode: getHugoModePref() });
       setShowChoice(true);
       return;
     }
 
     setInput("");
     setShowPreciseSuggest(false);
-    const result = await sendMessage(text, { precise: preciseMode });
+    const result = await sendMessage(text, { precise: preciseMode, mode: getHugoModePref() });
 
     if (result?.escalated) {
       setTimeout(() => setShowChoice(true), 300);
@@ -281,9 +282,9 @@ export function HugoDemoBubble() {
                   key={msg.id}
                   initial={{ opacity: 0, y: 6 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className={`flex flex-col ${msg.role === "user" ? "items-end" : "items-start"}`}
+                  className={`flex flex-col min-w-0 ${msg.role === "user" ? "items-end" : "items-start"}`}
                 >
-                  <div className={`max-w-[85%] rounded-xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap ${
+                  <div className={`w-fit max-w-[88%] rounded-2xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap break-words ${
                     msg.role === "user"
                       ? "bg-primary text-primary-foreground rounded-br-sm"
                       : "glass rounded-bl-sm"
@@ -300,7 +301,8 @@ export function HugoDemoBubble() {
                     )}
                   </div>
                   {msg.role === "assistant" && (
-                    <div className="mt-1 max-w-[85%] w-full flex justify-end">
+                    <div className="mt-1 max-w-[88%] w-full flex items-center justify-between gap-2 flex-wrap">
+                      <HugoModeBadge consilium={(msg as any).consilium} />
                       <HugoCopyButton content={msg.content} />
                     </div>
                   )}
