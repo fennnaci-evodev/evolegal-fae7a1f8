@@ -32,6 +32,8 @@ export function HugoDemoBubble() {
   const [showPreciseSuggest, setShowPreciseSuggest] = useState(false);
   const [showPreciseLimit, setShowPreciseLimit] = useState(false);
   const [preciseStatus, setPreciseStatus] = useState<PreciseStatus>({ plan: "free", dailyLimit: 2, usedToday: 0, remainingToday: 2, packCredits: 0, canConsume: true });
+  const [suggestConsilium, setSuggestConsilium] = useState(false);
+  const [switchingToConsilium, setSwitchingToConsilium] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const {
@@ -40,6 +42,7 @@ export function HugoDemoBubble() {
     currentChatId,
     sendMessage,
     startNewChat,
+    editLastMessage,
     newAssistantIds,
   } = useHugoChat();
 
