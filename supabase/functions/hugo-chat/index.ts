@@ -615,6 +615,7 @@ serve(async (req) => {
 
     const preciseMode = body.precise_mode === true;
     const forcedConsilium = body.mode === "consilium";
+    const forcedBlitz = body.mode === "blitz";
 
     // Turn-aware Consilium: count the user's turns in the outgoing payload.
     // Turn 1 → INIT (Case Foundation). Turn 2+ → FOLLOWUP (Dialogue Mode).
@@ -627,7 +628,9 @@ serve(async (req) => {
       ? PRECISE_PROMPT
       : forcedConsilium
         ? consiliumPrompt
-        : BASE_PROMPT;
+        : forcedBlitz
+          ? BLITZ_PROMPT
+          : BASE_PROMPT;
 
     // Load memory + artifact and inject
     const memoryBlock = admin ? await loadMemoryContext(admin, userId, chatId) : "";
