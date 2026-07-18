@@ -82,6 +82,7 @@ const App = () => {
         </LoadingProvider>
         </AdminModeProvider>
       </AuthProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 };
