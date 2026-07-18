@@ -24,7 +24,7 @@ interface HugoModeBadgeProps {
   onChange?: (mode: HugoMode) => void;
 }
 
-const OPTIONS: { key: HugoMode; label: string; icon: React.ComponentType<{ className?: string }>; hint: string; color: string }[] = [
+const OPTIONS: { key: HugoMode; label: string; icon: React.ComponentType<any>; hint: string; color: string }[] = [
   { key: "auto", label: "Auto", icon: Sparkles, hint: "Hugo decides", color: "hsl(186 100% 60%)" },
   { key: "blitz", label: "Blitz", icon: Zap, hint: "Fast circuit", color: "hsl(48 100% 65%)" },
   { key: "consilium", label: "Consilium", icon: Brain, hint: "Deep deliberation", color: "hsl(270 95% 75%)" },
