@@ -98,7 +98,7 @@ const ExpertChat = () => {
     const text = input;
     setInput("");
     setEditingMode(false);
-    const result = await sendMessage(text);
+    const result = await sendMessage(text, { mode: getHugoModePref() });
 
     // Navigate to the chat URL if we just created a new chat
     if (result?.chatId && !paramChatId) {
