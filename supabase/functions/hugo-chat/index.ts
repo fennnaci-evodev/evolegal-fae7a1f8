@@ -571,10 +571,18 @@ serve(async (req) => {
 
     const preciseMode = body.precise_mode === true;
     const forcedConsilium = body.mode === "consilium";
+
+    // Turn-aware Consilium: count the user's turns in the outgoing payload.
+    // Turn 1 → INIT (Case Foundation). Turn 2+ → FOLLOWUP (Dialogue Mode).
+    const userTurnsInPayload = chatMessages.filter((m) => m.role === "user").length;
+    const consiliumPrompt = userTurnsInPayload <= 1
+      ? CONSILIUM_INIT_PROMPT
+      : CONSILIUM_FOLLOWUP_PROMPT;
+
     const basePrompt = preciseMode
       ? PRECISE_PROMPT
       : forcedConsilium
-        ? CONSILIUM_PROMPT
+        ? consiliumPrompt
         : BASE_PROMPT;
 
     // Load memory + artifact and inject
