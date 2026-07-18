@@ -103,11 +103,31 @@ const ExpertChat = () => {
     const text = input;
     setInput("");
     setEditingMode(false);
+    setSuggestConsilium(false);
     const result = await sendMessage(text, { mode: getHugoModePref() });
+
+    if (result?.suggestConsilium && getHugoModePref() !== "consilium") {
+      setSuggestConsilium(true);
+    }
 
     // Navigate to the chat URL if we just created a new chat
     if (result?.chatId && !paramChatId) {
       navigate(`/dashboard/hugo/${result.chatId}`, { replace: true });
+    }
+  };
+
+  const handleAcceptConsilium = async () => {
+    if (switchingToConsilium || streaming) return;
+    setSwitchingToConsilium(true);
+    setSuggestConsilium(false);
+    setHugoModePref("consilium");
+    try {
+      const text = await editLastMessage();
+      if (text) {
+        await sendMessage(text, { mode: "consilium" });
+      }
+    } finally {
+      setSwitchingToConsilium(false);
     }
   };
 
