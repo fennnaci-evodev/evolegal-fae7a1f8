@@ -205,12 +205,15 @@ export function useHugoChat(chatId?: string | null) {
 
       const updateAssistant = (text: string) => {
         full = text;
+        // Detect Consilium marker at the very start and strip it from display.
+        const consilium = /^\s*\[CONSILIUM_ACTIVE\]\s*\n?/.test(text);
+        const display = text.replace(/^\s*\[CONSILIUM_ACTIVE\]\s*\n?/, "");
         setMessages(prev => {
           const last = prev[prev.length - 1];
           if (last?.role === "assistant" && last.id === assistantId) {
-            return prev.map((m, i) => i === prev.length - 1 ? { ...m, content: full } : m);
+            return prev.map((m, i) => i === prev.length - 1 ? { ...m, content: display, consilium } as any : m);
           }
-          return [...prev, { id: assistantId, role: "assistant", content: full }];
+          return [...prev, { id: assistantId, role: "assistant", content: display, consilium } as any];
         });
       };
 
