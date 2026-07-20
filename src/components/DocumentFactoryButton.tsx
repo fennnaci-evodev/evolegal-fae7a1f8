@@ -128,7 +128,12 @@ export function DocumentFactoryButton({ topic, chatId, requestId, conversationCo
               </button>
 
               <div className="mb-5">
-                <h3 className="text-lg font-display font-semibold">Generate Document</h3>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className="text-lg font-display font-semibold">Generate Document</h3>
+                  <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full border border-primary/30 text-primary/90 bg-primary/5">
+                    Self-Help Framework
+                  </span>
+                </div>
                 <p className="text-xs text-muted-foreground mt-1">
                   Select a document type for: <span className="text-foreground font-medium">{topic}</span>
                 </p>
@@ -139,7 +144,12 @@ export function DocumentFactoryButton({ topic, chatId, requestId, conversationCo
                   <div className="glass rounded-xl p-4 flex items-center gap-3">
                     <FileText className="h-8 w-8 text-primary shrink-0" />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">{generatedTitle}</p>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="text-sm font-medium truncate">{generatedTitle}</p>
+                        <span className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded-full border border-primary/30 text-primary/90 bg-primary/5 shrink-0">
+                          Draft Framework
+                        </span>
+                      </div>
                       <p className="text-xs text-muted-foreground">Ready for download</p>
                     </div>
                   </div>
@@ -192,12 +202,17 @@ export function DocumentFactoryButton({ topic, chatId, requestId, conversationCo
                     >
                       <div className="flex items-center gap-3">
                         <FileText className="h-5 w-5 text-primary shrink-0 group-hover:scale-110 transition-transform" />
-                        <div className="flex-1">
-                          <p className="text-sm font-medium">{doc.label}</p>
-                          <p className="text-xs text-muted-foreground">{doc.desc}</p>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <p className="text-sm font-medium">{doc.label}</p>
+                            <span className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded-full border border-primary/30 text-primary/90 bg-primary/5">
+                              {doc.badge}
+                            </span>
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-0.5">{doc.desc}</p>
                         </div>
                         {generating === doc.id && (
-                          <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                          <Loader2 className="h-4 w-4 animate-spin text-primary shrink-0" />
                         )}
                       </div>
                     </button>
@@ -205,9 +220,11 @@ export function DocumentFactoryButton({ topic, chatId, requestId, conversationCo
                 </div>
               )}
 
-              <p className="text-[9px] text-muted-foreground/50 mt-4 text-center leading-relaxed">
-                All generated documents contain general information only. No personalized legal advice is provided.
-              </p>
+              <div className="mt-5 pt-4 border-t border-border/40">
+                <p className="text-[9px] text-muted-foreground/60 leading-relaxed text-center">
+                  {COMPLIANCE_DISCLAIMER}
+                </p>
+              </div>
             </motion.div>
           </motion.div>
         )}
@@ -215,3 +232,4 @@ export function DocumentFactoryButton({ topic, chatId, requestId, conversationCo
     </>
   );
 }
+
