@@ -1,6 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
-import { LOGO_JPEG_B64, LOGO_W, LOGO_H } from "./logoAsset.ts";
 
 // Convert base64 JPEG bytes into an ASCII-hex string for PDF embedding.
 function logoHex(): string {
