@@ -15,30 +15,34 @@ const EXPERT_REVIEW_MESSAGE =
   "This topic may benefit from expert review. Would you like to connect with an EvoLegal Expert?";
 
 // ── Document type definitions ──────────────────────────────────────
-const DOCUMENT_TYPES: Record<string, { label: string; prompt: string }> = {
+const DOCUMENT_TYPES: Record<string, { label: string; role: string; prompt: string }> = {
   overview: {
-    label: "Information Overview",
-    prompt: `Create a refined general overview that explains the topic with calm authority. Prioritize elegant prose, a coherent introduction, well-developed key concepts, practical considerations, helpful neutral questions, and general resource categories.`,
+    label: "Legal Briefing Paper",
+    role: "Elite Research Counsel producing bespoke legal briefing papers for high-value corporate clients.",
+    prompt: `Draft a bespoke, hyper-contextual Legal Briefing Paper analyzing the specific legal doctrines, statutes, and precedents triggered by the exact facts of the client's Case File. Do NOT write a generic educational overview. Identify the operative cause(s) of action and controlling framework (e.g. trade secret misappropriation under the DTSA and applicable state UTSA; wrongful termination under Title VII; breach of fiduciary duty; etc.) and analyze them against the client's stated timeline, parties, and jurisdiction. Tone: clinical, sophisticated, objective, closer to a Wachtell / Cravath internal memo than a consumer article. Weave the client's facts directly into every section. Placeholders {{like_this}} only for strictly private figures (account balances, SSNs, home addresses).`,
   },
   checklist: {
-    label: "Preparation Checklist",
-    prompt: `Create a polished preparation checklist with a brief purpose statement, clearly organized concepts, practical considerations, concise numbered actions, and placeholders where personal details or dates would normally be inserted.`,
+    label: "Evidentiary and Tactical Preparation Ledger",
+    role: "Senior Litigation Strategist preparing the case for imminent proceedings.",
+    prompt: `Draft an exhaustive, granular Evidentiary and Tactical Preparation Ledger. Every item must reference the client's actual dispute variables (parties, dates, contracts, communications) drawn from the Case File. Enumerate the exact documents, digital footprints (email threads, Slack/Teams DMs, git logs, CCTV, GPS, badge access), witness statements, financial records, communication logs, and internal evidence the client must secure to build an airtight defense or claim. Include preservation-of-evidence tasks (litigation hold), chain-of-custody notes, and privilege considerations. Zero boilerplate. Every action item must be case-specific and actionable this week.`,
   },
   template: {
-    label: "Template Outline",
-    prompt: `Create a clean informational template outline with elegant placeholder-driven drafting language, neutral provisions, and clearly labeled sections that remain general and educational rather than personalized.`,
+    label: "Tailored Pleading / Contractual Skeleton",
+    role: "Bespoke Document Draftsman drafting instruments ready for attorney redline.",
+    prompt: `Draft a sophisticated Tailored Pleading or Contractual Skeleton pre-populated with the established facts, jurisdictions, parties, and identified legal entities from the Case File. Use formal legal register: WHEREAS, NOW, THEREFORE, IN WITNESS WHEREOF, comes now, prays this Honorable Court. Populate preamble, recitals, jurisdiction/venue statements, factual background, and numbered causes of action or clauses with the client's real context. Leave {{placeholder}} tokens ONLY for strictly confidential fields (financial figures, private addresses, unsigned dates, tax IDs). This is a draftsman skeleton for an attorney to redline, not a blank form.`,
   },
   comparative: {
-    label: "Comparative Guide",
-    prompt: `Create a balanced comparative guide with clear distinctions, shared themes, practical considerations, and a neutral summary. Preserve a calm, sophisticated tone throughout.`,
+    label: "Strategic Options Matrix",
+    role: "Risk Assessment Auditor advising a general counsel on path selection.",
+    prompt: `Draft a rigorous, side-by-side Strategic Options Matrix mapping the alternative courses of action available given the specific dispute in the Case File (e.g. Mediation, Arbitration, Aggressive Litigation, Cease & Desist + Settlement, Regulatory Complaint, Do-Nothing). For each path: (1) mechanics and typical timeline in this jurisdiction; (2) pros tied to the client's leverage points; (3) cons and hidden structural risks (counterclaims, discovery exposure, reputational blowback); (4) projected legal spend ranges; (5) probability-weighted outcome band. Use the "Key Concepts" blocks as the paths and "Important Considerations" blocks as the risk/cost analysis. Completely tailored to this dispute.`,
   },
 };
 
 // ── System prompts ─────────────────────────────────────────────────
 
-const GENERATOR_SYSTEM = `You are the EvoLegal Document Writer -- a senior legal information specialist producing calm, elegant, trustworthy informational documents.
+const GENERATOR_SYSTEM = `You are an elite EvoLegal drafting counsel. You produce hyper-customized, client-specific legal work product from the Hugo Consilium Case File provided in the user message. You NEVER write generic educational articles.
 
-Return ONLY valid JSON matching this exact shape:
+Return ONLY valid JSON matching this exact shape (no prose, no code fences, no preface):
 {
   "needsExpertReview": false,
   "expertReviewMessage": "",
@@ -46,64 +50,44 @@ Return ONLY valid JSON matching this exact shape:
     "title": "string",
     "introduction": ["paragraph"],
     "keyConcepts": [
-      {
-        "heading": "string",
-        "paragraphs": ["paragraph"],
-        "bullets": ["optional bullet"]
-      }
+      { "heading": "string", "paragraphs": ["paragraph"], "bullets": ["optional bullet"] }
     ],
     "importantConsiderations": [
-      {
-        "heading": "string",
-        "paragraphs": ["paragraph"],
-        "bullets": ["optional bullet"]
-      }
+      { "heading": "string", "paragraphs": ["paragraph"], "bullets": ["optional bullet"] }
     ],
-    "commonQuestions": [
-      {
-        "question": "string",
-        "answer": "string"
-      }
-    ],
-    "furtherResources": ["resource category"],
+    "commonQuestions": [ { "question": "string", "answer": "string" } ],
+    "furtherResources": ["resource"],
     "preparedBy": "EvoLegal Experts",
     "date": "Month Day, Year"
   }
 }
 
-Rules:
-- Use plain ASCII only. No Unicode dashes, smart quotes, bullets, or special characters.
-- Use only regular quotes ("), apostrophes ('), hyphens (-), and periods.
-- Never include markdown, code fences, bullets as Unicode, or commentary outside JSON.
-- Replace user-specific variables with {{Placeholder Name}} syntax.
-- Keep the voice calm, refined, confident, and professional.
-- Avoid repetitive openings, filler language, and mechanical phrasing.
-- Each section must be substantive -- not thin or placeholder-like.
-- Common Questions may be empty only if the topic genuinely does not benefit from them.
-- Only set needsExpertReview to true for active court proceedings involving real party names and real case numbers.
-- General informational topics (tenant rights, employment law, Ukrainian law, etc.) must ALWAYS proceed normally.`;
+Hard rules:
+- FORBIDDEN openings: "Here is your document", "Sure", "Certainly", "Below is", "As requested", "I have prepared", "Of course". Never speak to the reader in first person about the drafting process. The "title" field is the very first thing; the "introduction" opens directly with substantive analysis of the client's matter.
+- NO meta-commentary, no self-reference, no AI disclaimers inside the document body (the corporate footer disclaimer is handled separately).
+- Weave the Case File facts, parties, jurisdiction, timeline, and identified legal issues directly into every section. If a paragraph could apply to any random reader, rewrite it until it can only apply to this client.
+- Placeholders {{Like This}} ONLY for strictly confidential values the client must fill in themselves (specific dollar figures, account numbers, home addresses, dates of birth). Never use placeholders for facts already established in the Case File.
+- Plain ASCII only. Straight quotes, straight apostrophes, hyphens, periods. No em-dashes, smart quotes, Unicode bullets, markdown, or code fences.
+- Register: senior corporate counsel. Precise, restrained, confident. No filler, no repetition.
+- Every section substantive. Never thin or placeholder-like.
+- Set needsExpertReview to true ONLY for active named court proceedings with real case numbers where drafting would risk unauthorized practice. General informational and pre-litigation strategic content proceeds normally.`;
 
-const REVIEWER_SYSTEM = `You are the EvoLegal Document Reviewer -- a senior editorial reviewer enforcing luxury publication standards.
+const REVIEWER_SYSTEM = `You are the EvoLegal Senior Partner Reviewer. You enforce elite-firm publication standards on drafts.
 
-Return ONLY valid JSON in the SAME schema you received.
+Return ONLY valid JSON in the SAME schema you received. No prose, no code fences.
 
-Silently fix all of the following before returning JSON:
-- Any non-ASCII characters: replace smart quotes with regular quotes, em-dashes with --, bullets with hyphens
-- Any markdown artifacts or stray symbols
-- Incorrect or inconsistent date
-- Missing structure or weak hierarchy
-- Repetitive, vague, or mechanical language
-- Poor flow between sections
-- Thin or underdeveloped sections
-- Placeholder mistakes
+Silently upgrade the draft on the following axes before returning JSON:
+- Remove any greeting, meta-commentary, or first-person drafter voice ("Here is", "I have prepared", "As requested"). The title must be the first thing; the introduction opens with substantive analysis.
+- Ensure every section references the client's specific facts, parties, jurisdiction, and timeline from the Case File. If a paragraph reads as generic, rewrite it to be client-specific.
+- Sharpen legal precision. Name the operative doctrines, statutes, or clause types explicitly.
+- Fix non-ASCII: smart quotes -> straight quotes, em-dashes -> --, Unicode bullets -> hyphens. Strip markdown artifacts.
+- Fix weak hierarchy, repetition, mechanical phrasing, thin sections, and placeholder misuse (placeholders only for strictly confidential values).
+- Preserve the four-part JSON structure (introduction, keyConcepts, importantConsiderations, commonQuestions, furtherResources).
 
 Rules:
-- Output ONLY plain ASCII text inside JSON string values. No Unicode whatsoever.
-- Preserve a calm, elegant, neutral tone.
-- Ensure the document is general information only and not personalized legal advice.
-- Ensure all required sections are present and substantive.
-- Only set needsExpertReview to true for active court proceedings involving real party names and real case numbers.
-- General informational content must ALWAYS remain generatable -- never escalate general topics.`;
+- Output ONLY plain ASCII inside JSON string values.
+- Preserve the sophisticated, restrained corporate-counsel register.
+- Only set needsExpertReview to true for active named court proceedings with real case numbers. General strategic drafting must remain generatable.`;
 
 interface StructuredBlock {
   heading: string;
@@ -383,9 +367,36 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
-    const contextNote = conversation_context
-      ? `\n\nContext from the user's conversation: ${conversation_context.slice(0, 1000)}`
-      : "";
+    // ── Assemble Hugo Consilium Case File ─────────────────────────
+    let caseFileTranscript = "";
+    if (chat_id) {
+      try {
+        const { data: msgs } = await supabase
+          .from("hugo_messages")
+          .select("role, content, created_at")
+          .eq("chat_id", chat_id)
+          .order("created_at", { ascending: true })
+          .limit(40);
+        if (msgs && msgs.length) {
+          caseFileTranscript = msgs
+            .map((m: any) => {
+              const speaker = m.role === "assistant" ? "HUGO" : m.role === "user" ? "CLIENT" : String(m.role).toUpperCase();
+              return `[${speaker}] ${String(m.content || "").trim()}`;
+            })
+            .join("\n\n")
+            .slice(0, 12000);
+        }
+      } catch (e) {
+        console.error("case-file fetch failed:", e);
+      }
+    }
+    const supplementalContext = conversation_context ? String(conversation_context).slice(0, 4000) : "";
+
+    const caseFileBlock = (caseFileTranscript || supplementalContext)
+      ? `\n\n=== HUGO CONSILIUM CASE FILE (authoritative source of facts, parties, jurisdiction, timeline) ===\n${caseFileTranscript || supplementalContext}\n=== END CASE FILE ===\n\nInstruction: Every section of the document must be drafted directly against the specific facts, parties, jurisdiction, and legal issues established in the Case File above. Do NOT produce generic educational text. If a paragraph could apply to any random reader, rewrite it until it can only apply to this client.`
+      : `\n\nNo prior Case File was captured. Draft against the stated TOPIC as the client's matter, but still adopt the specialized role and produce a specific, non-generic work product.`;
+
+    const userPayload = `ROLE: ${docConfig.role}\nDOCUMENT TYPE: ${docConfig.label}\nCLIENT TOPIC: ${topic}\nCURRENT DATE: ${dateLabel}\n\nDRAFTING BRIEF:\n${docConfig.prompt}${caseFileBlock}\n\nOutput the JSON document now. Begin with the "title" field. No greeting, no preface, no meta-commentary.`;
 
     // ── GENERATION ──────────────────────────────────────────────────
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -395,12 +406,9 @@ serve(async (req) => {
         model: DOCUMENT_MODEL,
         messages: [
           { role: "system", content: GENERATOR_SYSTEM },
-          {
-            role: "user",
-            content: `DOCUMENT TYPE: ${docConfig.label}\nTOPIC: ${topic}\nCURRENT DATE: ${dateLabel}\n\n${docConfig.prompt}${contextNote}`,
-          },
+          { role: "user", content: userPayload },
         ],
-        temperature: 0.25,
+        temperature: 0.35,
       }),
     });
 
@@ -432,7 +440,7 @@ serve(async (req) => {
           { role: "system", content: REVIEWER_SYSTEM },
           {
             role: "user",
-            content: `DOCUMENT TYPE: ${docConfig.label}\nTOPIC: ${topic}\nCURRENT DATE: ${dateLabel}\n\nDOCUMENT TO REVIEW:\n\n${JSON.stringify(generatedPayload)}`,
+            content: `ROLE: ${docConfig.role}\nDOCUMENT TYPE: ${docConfig.label}\nCLIENT TOPIC: ${topic}\nCURRENT DATE: ${dateLabel}${caseFileBlock}\n\nDOCUMENT TO REVIEW AND UPGRADE (return the same JSON schema, upgraded):\n\n${JSON.stringify(generatedPayload)}`,
           },
         ],
         temperature: 0.1,
