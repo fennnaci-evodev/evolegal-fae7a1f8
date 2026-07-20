@@ -1,20 +1,37 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
-import { LOGO_JPEG_B64, LOGO_W, LOGO_H } from "./logoAsset.ts";
 
-// Convert base64 JPEG bytes into an ASCII-hex string for PDF embedding.
-function logoHex(): string {
-  const bin = atob(LOGO_JPEG_B64);
-  const hex: string[] = [];
-  for (let i = 0; i < bin.length; i++) {
-    hex.push(bin.charCodeAt(i).toString(16).padStart(2, "0"));
+// Draw the geometric EvoLegal "E" as vector rectangles, rotated -35° around
+// the logo's center, in electric cyan. Returns a PDF content-stream fragment.
+function drawEvoLogoVector(cxPt: number, cyPt: number, sizePt: number): string {
+  const s = sizePt / 40;
+  const theta = (-35 * Math.PI) / 180;
+  const cos = Math.cos(theta);
+  const sin = Math.sin(theta);
+  // Compose: translate(cx,cy) · rotate(θ) · scale(s,-s) · translate(-20,-20)
+  const a = s * cos;
+  const b = s * sin;
+  const c = s * sin;
+  const d = -s * cos;
+  const e = cxPt - (a * 20 + c * 20);
+  const f = cyPt - (b * 20 + d * 20);
+  const rects: [number, number, number, number][] = [
+    [8, 6, 4.5, 28],
+    [12.5, 6, 19.5, 4.5],
+    [12.5, 17.75, 13.5, 4.5],
+    [12.5, 29.5, 19.5, 4.5],
+  ];
+  const fmt = (n: number) => n.toFixed(4);
+  let out = "q\n";
+  out += `${fmt(a)} ${fmt(b)} ${fmt(c)} ${fmt(d)} ${fmt(e)} ${fmt(f)} cm\n`;
+  out += "0 0.898 1 rg\n"; // #00e5ff
+  for (const [rx, ry, rw, rh] of rects) {
+    out += `${rx} ${ry} ${rw} ${rh} re f\n`;
   }
-  // Break into 80-char lines for readability; ASCIIHexDecode ignores whitespace.
-  const flat = hex.join("");
-  const lines: string[] = [];
-  for (let i = 0; i < flat.length; i += 80) lines.push(flat.slice(i, i + 80));
-  return lines.join("\n");
+  out += "Q\n";
+  return out;
 }
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -771,26 +788,11 @@ function generatePDF(title: string, content: string, disclaimer: string, dateLab
   startObj(2); write("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>"); write("endobj");
   startObj(3); write("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Oblique /Encoding /WinAnsiEncoding >>"); write("endobj");
 
-  const imageObjId = 4;
-  const pageObjStart = 5;
+  const pageObjStart = 4;
   const contentObjStart = pageObjStart + totalPages;
   const pagesObjId = contentObjStart + totalPages;
   const catalogObjId = pagesObjId + 1;
 
-  // ── Image XObject: pre-rendered EvoLegal "E" logo (JPEG, ASCIIHex-encoded) ──
-  const logoHexStr = logoHex();
-  const logoStreamText = logoHexStr + "\n>";
-  const logoStreamLen = new TextEncoder().encode(logoStreamText).length;
-  startObj(imageObjId);
-  write(
-    `<< /Type /XObject /Subtype /Image /Width ${LOGO_W} /Height ${LOGO_H} ` +
-    `/ColorSpace /DeviceRGB /BitsPerComponent 8 ` +
-    `/Filter [/ASCIIHexDecode /DCTDecode] /Length ${logoStreamLen} >>`,
-  );
-  write("stream");
-  write(logoStreamText);
-  write("endstream");
-  write("endobj");
 
   const disclaimerWrapped = wrapText(disclaimer, 95);
 
@@ -810,20 +812,17 @@ function generatePDF(title: string, content: string, disclaimer: string, dateLab
     stream += `${ML} ${PH - headerH} m ${PW - MR} ${PH - headerH} l S\n`;
     stream += "Q\n";
 
-    // ── EvoLegal logo image (pre-rotated cyan "E" JPEG XObject) ─────
-    // Placed as a raster to guarantee identical geometry to the landing hero.
-    const logoSize = 26;              // display size in PDF points
-    const logoX = ML;                 // left aligned with content margin
-    const logoY = PH - 12 - logoSize; // sits inside the dark header band
-    stream += "q\n";
-    stream += `${logoSize} 0 0 ${logoSize} ${logoX} ${logoY} cm\n`;
-    stream += "/Im1 Do\n";
-    stream += "Q\n";
+    // ── EvoLegal logo — clean vector "E" (rotated -35°, electric cyan) ─────
+    const logoSize = 28;
+    const logoX = ML;
+    const logoY = PH - 12 - logoSize;
+    stream += drawEvoLogoVector(logoX + logoSize / 2, logoY + logoSize / 2, logoSize);
 
-    // Brand name "EvoLegal" — vertically centered next to the logo
+    // Brand name "EvoLegal" — upright, unaffected by icon rotation
     stream += "BT\n1 1 1 rg\n/F2 14 Tf\n";
-    stream += `${logoX + logoSize + 8} ${logoY + logoSize / 2 - 5} Td\n`;
+    stream += `${logoX + logoSize + 10} ${logoY + logoSize / 2 - 5} Td\n`;
     stream += `(${pdfEncode("EvoLegal")}) Tj\nET\n`;
+
 
     // Page number
     stream += "BT\n0.55 0.58 0.65 rg\n/F1 8 Tf\n";
@@ -872,7 +871,7 @@ function generatePDF(title: string, content: string, disclaimer: string, dateLab
 
     // Page object
     startObj(pageObjStart + p);
-    write(`<< /Type /Page /Parent ${pagesObjId} 0 R /MediaBox [0 0 ${PW} ${PH}] /Contents ${contentId} 0 R /Resources << /Font << /F1 1 0 R /F2 2 0 R /F3 3 0 R >> /XObject << /Im1 ${imageObjId} 0 R >> >> >>`);
+    write(`<< /Type /Page /Parent ${pagesObjId} 0 R /MediaBox [0 0 ${PW} ${PH}] /Contents ${contentId} 0 R /Resources << /Font << /F1 1 0 R /F2 2 0 R /F3 3 0 R >> >> >>`);
     write("endobj");
   }
 
