@@ -424,6 +424,7 @@ serve(async (req) => {
           { role: "user", content: userPayload },
         ],
         temperature: 0.35,
+        max_tokens: 7000,
       }),
     });
 
@@ -459,6 +460,7 @@ serve(async (req) => {
           },
         ],
         temperature: 0.1,
+        max_tokens: 7000,
       }),
     });
 
