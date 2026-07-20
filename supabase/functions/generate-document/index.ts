@@ -1,19 +1,37 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
-// Convert base64 JPEG bytes into an ASCII-hex string for PDF embedding.
-function logoHex(): string {
-  const bin = atob(LOGO_JPEG_B64);
-  const hex: string[] = [];
-  for (let i = 0; i < bin.length; i++) {
-    hex.push(bin.charCodeAt(i).toString(16).padStart(2, "0"));
+// Draw the geometric EvoLegal "E" as vector rectangles, rotated -35° around
+// the logo's center, in electric cyan. Returns a PDF content-stream fragment.
+function drawEvoLogoVector(cxPt: number, cyPt: number, sizePt: number): string {
+  const s = sizePt / 40;
+  const theta = (-35 * Math.PI) / 180;
+  const cos = Math.cos(theta);
+  const sin = Math.sin(theta);
+  // Compose: translate(cx,cy) · rotate(θ) · scale(s,-s) · translate(-20,-20)
+  const a = s * cos;
+  const b = s * sin;
+  const c = s * sin;
+  const d = -s * cos;
+  const e = cxPt - (a * 20 + c * 20);
+  const f = cyPt - (b * 20 + d * 20);
+  const rects: [number, number, number, number][] = [
+    [8, 6, 4.5, 28],
+    [12.5, 6, 19.5, 4.5],
+    [12.5, 17.75, 13.5, 4.5],
+    [12.5, 29.5, 19.5, 4.5],
+  ];
+  const fmt = (n: number) => n.toFixed(4);
+  let out = "q\n";
+  out += `${fmt(a)} ${fmt(b)} ${fmt(c)} ${fmt(d)} ${fmt(e)} ${fmt(f)} cm\n`;
+  out += "0 0.898 1 rg\n"; // #00e5ff
+  for (const [rx, ry, rw, rh] of rects) {
+    out += `${rx} ${ry} ${rw} ${rh} re f\n`;
   }
-  // Break into 80-char lines for readability; ASCIIHexDecode ignores whitespace.
-  const flat = hex.join("");
-  const lines: string[] = [];
-  for (let i = 0; i < flat.length; i += 80) lines.push(flat.slice(i, i + 80));
-  return lines.join("\n");
+  out += "Q\n";
+  return out;
 }
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
