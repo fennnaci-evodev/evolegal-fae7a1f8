@@ -6,11 +6,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 const DOCUMENT_TYPES = [
-  { id: "overview", label: "Information Overview", desc: "General educational overview of the topic" },
-  { id: "checklist", label: "Preparation Checklist", desc: "Structured checklist to help organize your approach" },
-  { id: "template", label: "Template Outline", desc: "Blank framework with placeholder fields" },
-  { id: "comparative", label: "Comparative Guide", desc: "Side-by-side comparison of approaches or frameworks" },
+  { id: "overview", label: "Information Overview", badge: "Self-Help Outline", desc: "Educational overview of relevant frameworks and considerations" },
+  { id: "checklist", label: "Preparation Checklist", badge: "Draft Framework", desc: "Organizational checklist of materials commonly gathered" },
+  { id: "template", label: "Template Outline", badge: "Draft Framework", desc: "Structural template with fillable placeholders you control" },
+  { id: "comparative", label: "Comparative Guide", badge: "Self-Help Outline", desc: "Neutral side-by-side comparison of alternative approaches" },
 ] as const;
+
+const COMPLIANCE_DISCLAIMER =
+  "EvoLegal is an automated self-help platform providing legal information and document frameworks. This document is an educational draft generated based on user-inputted parameters, does not constitute legal advice, and does not establish an attorney-client relationship. Review by qualified human counsel is recommended before formal execution.";
+
 
 interface DocumentFactoryProps {
   topic: string;
