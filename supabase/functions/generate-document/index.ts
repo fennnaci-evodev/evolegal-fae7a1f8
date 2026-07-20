@@ -812,20 +812,17 @@ function generatePDF(title: string, content: string, disclaimer: string, dateLab
     stream += `${ML} ${PH - headerH} m ${PW - MR} ${PH - headerH} l S\n`;
     stream += "Q\n";
 
-    // ── EvoLegal logo image (pre-rotated cyan "E" JPEG XObject) ─────
-    // Placed as a raster to guarantee identical geometry to the landing hero.
-    const logoSize = 26;              // display size in PDF points
-    const logoX = ML;                 // left aligned with content margin
-    const logoY = PH - 12 - logoSize; // sits inside the dark header band
-    stream += "q\n";
-    stream += `${logoSize} 0 0 ${logoSize} ${logoX} ${logoY} cm\n`;
-    stream += "/Im1 Do\n";
-    stream += "Q\n";
+    // ── EvoLegal logo — clean vector "E" (rotated -35°, electric cyan) ─────
+    const logoSize = 28;
+    const logoX = ML;
+    const logoY = PH - 12 - logoSize;
+    stream += drawEvoLogoVector(logoX + logoSize / 2, logoY + logoSize / 2, logoSize);
 
-    // Brand name "EvoLegal" — vertically centered next to the logo
+    // Brand name "EvoLegal" — upright, unaffected by icon rotation
     stream += "BT\n1 1 1 rg\n/F2 14 Tf\n";
-    stream += `${logoX + logoSize + 8} ${logoY + logoSize / 2 - 5} Td\n`;
+    stream += `${logoX + logoSize + 10} ${logoY + logoSize / 2 - 5} Td\n`;
     stream += `(${pdfEncode("EvoLegal")}) Tj\nET\n`;
+
 
     // Page number
     stream += "BT\n0.55 0.58 0.65 rg\n/F1 8 Tf\n";
