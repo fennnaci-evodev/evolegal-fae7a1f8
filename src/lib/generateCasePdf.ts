@@ -59,49 +59,53 @@ export function generateCasePdf(data: CasePdfData) {
   doc.setLineWidth(0.8);
   doc.line(margin, 48, w - margin, 48);
 
-  // Draw solid filled slanted "E" logo (rotated -28°, neon cyan, geometric)
-  const logoCx = margin + 8;
+  // Draw exact geometric "E" logo from official SVG asset (rotated -35°, neon cyan)
+  const logoCx = margin + 9;
   const logoCy = 28;
-  const eW = 14;
-  const eH = 20;
-  const barH = 4;
-  const stemW = 5;
-  const midW = 11;
-  const angle = -28 * (Math.PI / 180);
+  const angle = -35 * (Math.PI / 180);
+  const scale = 0.42;
   const cosA = Math.cos(angle);
   const sinA = Math.sin(angle);
-  // Local coordinates centered on the logo
-  const localPts: [number, number][] = [
-    [-eW / 2, -eH / 2], [eW / 2, -eH / 2], [eW / 2, -eH / 2 + barH],
-    [-eW / 2 + stemW, -eH / 2 + barH], [-eW / 2 + stemW, -barH / 2],
-    [-eW / 2 + midW, -barH / 2], [-eW / 2 + midW, barH / 2],
-    [-eW / 2 + stemW, barH / 2], [-eW / 2 + stemW, eH / 2 - barH],
-    [eW / 2, eH / 2 - barH], [eW / 2, eH / 2], [-eW / 2, eH / 2],
+
+  // Official SVG rectangles: [x, y, width, height] on a 40x40 viewBox
+  const rects: [number, number, number, number][] = [
+    [8, 6, 5, 28],      // main vertical spine
+    [13, 6, 19, 5],     // top bar
+    [13, 17.5, 13, 5],  // middle bar
+    [13, 29, 19, 5],    // bottom bar
   ];
-  const worldPts = localPts.map(([px, py]) => [
-    logoCx + cosA * px - sinA * py,
-    logoCy + sinA * px + cosA * py,
-  ] as [number, number]);
-  // Soft neon glow: draw slightly larger, lower-alpha halo via wider stroke
-  doc.setDrawColor(0, 229, 255);
-  doc.setLineWidth(1.6);
-  const gs = (doc as any).GState ? new (doc as any).GState({ opacity: 0.35 }) : null;
-  if (gs) (doc as any).setGState(gs);
-  for (let i = 0; i < worldPts.length; i++) {
-    const [x1, y1] = worldPts[i];
-    const [x2, y2] = worldPts[(i + 1) % worldPts.length];
-    doc.line(x1, y1, x2, y2);
+
+  function drawRotatedRects(opacity: number, scaleMult: number = 1) {
+    const s = scale * scaleMult;
+    const gs = (doc as any).GState ? new (doc as any).GState({ opacity }) : null;
+    if (gs) (doc as any).setGState(gs);
+    doc.setFillColor(0, 229, 255);
+
+    for (const [rx, ry, rw, rh] of rects) {
+      const localPts: [number, number][] = [
+        [rx, ry],
+        [rx + rw, ry],
+        [rx + rw, ry + rh],
+        [rx, ry + rh],
+      ];
+      const worldPts = localPts.map(([px, py]) => [
+        logoCx + ((px - 20) * s * cosA - (py - 20) * s * sinA),
+        logoCy + ((px - 20) * s * sinA + (py - 20) * s * cosA),
+      ] as [number, number]);
+
+      const linesArr: [number, number][] = [];
+      for (let i = 1; i < worldPts.length; i++) {
+        linesArr.push([worldPts[i][0] - worldPts[i - 1][0], worldPts[i][1] - worldPts[i - 1][1]]);
+      }
+      linesArr.push([worldPts[0][0] - worldPts[worldPts.length - 1][0], worldPts[0][1] - worldPts[worldPts.length - 1][1]]);
+      (doc as any).lines(linesArr, worldPts[0][0], worldPts[0][1], [1, 1], "F", true);
+    }
   }
-  const gs2 = (doc as any).GState ? new (doc as any).GState({ opacity: 1 }) : null;
-  if (gs2) (doc as any).setGState(gs2);
-  // Solid cyan fill via polygon
-  doc.setFillColor(0, 229, 255);
-  const linesArr: [number, number][] = [];
-  for (let i = 1; i < worldPts.length; i++) {
-    linesArr.push([worldPts[i][0] - worldPts[i - 1][0], worldPts[i][1] - worldPts[i - 1][1]]);
-  }
-  linesArr.push([worldPts[0][0] - worldPts[worldPts.length - 1][0], worldPts[0][1] - worldPts[worldPts.length - 1][1]]);
-  (doc as any).lines(linesArr, worldPts[0][0], worldPts[0][1], [1, 1], "F", true);
+
+  // Soft neon glow behind the solid mark
+  drawRotatedRects(0.3, 1.1);
+  // Solid cyan core
+  drawRotatedRects(1, 1);
 
   // Brand name
   doc.setFont("helvetica", "bold");
