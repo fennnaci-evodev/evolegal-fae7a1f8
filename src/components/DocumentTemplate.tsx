@@ -188,6 +188,7 @@ export const DocumentTemplate = forwardRef<HTMLDivElement, Props>(
                 margin: "0 0 12px 0",
                 color: paletteText,
                 fontSize: 12.5,
+                lineHeight: 1.5,
                 breakInside: "auto",
                 pageBreakInside: "auto",
                 orphans: 2,
@@ -249,9 +250,10 @@ export const DocumentTemplate = forwardRef<HTMLDivElement, Props>(
                     key={`sec-${i}-p-${j}`}
                     data-evolegal-block="paragraph"
                     style={{
-                      margin: "0 0 10px 0",
+                      margin: "0 0 12px 0",
                       color: paletteText,
                       fontSize: 12.5,
+                      lineHeight: 1.5,
                       breakInside: "auto",
                       pageBreakInside: "auto",
                       orphans: 2,
