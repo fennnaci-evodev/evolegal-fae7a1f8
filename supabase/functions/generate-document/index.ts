@@ -872,7 +872,7 @@ function generatePDF(title: string, content: string, disclaimer: string, dateLab
 
     // Page object
     startObj(pageObjStart + p);
-    write(`<< /Type /Page /Parent ${pagesObjId} 0 R /MediaBox [0 0 ${PW} ${PH}] /Contents ${contentId} 0 R /Resources << /Font << /F1 1 0 R /F2 2 0 R /F3 3 0 R >> >> >>`);
+    write(`<< /Type /Page /Parent ${pagesObjId} 0 R /MediaBox [0 0 ${PW} ${PH}] /Contents ${contentId} 0 R /Resources << /Font << /F1 1 0 R /F2 2 0 R /F3 3 0 R >> /XObject << /Im1 ${imageObjId} 0 R >> >> >>`);
     write("endobj");
   }
 
