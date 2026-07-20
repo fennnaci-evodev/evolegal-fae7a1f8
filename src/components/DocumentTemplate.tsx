@@ -188,6 +188,7 @@ export const DocumentTemplate = forwardRef<HTMLDivElement, Props>(
                 margin: "0 0 12px 0",
                 color: paletteText,
                 fontSize: 12.5,
+                lineHeight: 1.5,
                 breakInside: "auto",
                 pageBreakInside: "auto",
                 orphans: 2,
