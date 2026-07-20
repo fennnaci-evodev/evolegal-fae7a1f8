@@ -99,6 +99,7 @@ export const DocumentTemplate = forwardRef<HTMLDivElement, Props>(
       >
         {/* ── Header ─────────────────────────────────────────────── */}
         <header
+          data-evolegal-block="header"
           style={{
             display: "flex",
             alignItems: "center",
@@ -106,6 +107,8 @@ export const DocumentTemplate = forwardRef<HTMLDivElement, Props>(
             paddingBottom: 18,
             borderBottom: `1px solid ${paletteRule}`,
             marginBottom: 28,
+            breakInside: "avoid",
+            pageBreakInside: "avoid",
           }}
         >
           <EvoLogoSVG size={44} />
