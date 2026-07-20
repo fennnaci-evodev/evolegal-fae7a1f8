@@ -771,10 +771,26 @@ function generatePDF(title: string, content: string, disclaimer: string, dateLab
   startObj(2); write("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>"); write("endobj");
   startObj(3); write("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Oblique /Encoding /WinAnsiEncoding >>"); write("endobj");
 
-  const pageObjStart = 4;
+  const imageObjId = 4;
+  const pageObjStart = 5;
   const contentObjStart = pageObjStart + totalPages;
   const pagesObjId = contentObjStart + totalPages;
   const catalogObjId = pagesObjId + 1;
+
+  // ── Image XObject: pre-rendered EvoLegal "E" logo (JPEG, ASCIIHex-encoded) ──
+  const logoHexStr = logoHex();
+  const logoStreamText = logoHexStr + "\n>";
+  const logoStreamLen = new TextEncoder().encode(logoStreamText).length;
+  startObj(imageObjId);
+  write(
+    `<< /Type /XObject /Subtype /Image /Width ${LOGO_W} /Height ${LOGO_H} ` +
+    `/ColorSpace /DeviceRGB /BitsPerComponent 8 ` +
+    `/Filter [/ASCIIHexDecode /DCTDecode] /Length ${logoStreamLen} >>`,
+  );
+  write("stream");
+  write(logoStreamText);
+  write("endstream");
+  write("endobj");
 
   const disclaimerWrapped = wrapText(disclaimer, 95);
 
