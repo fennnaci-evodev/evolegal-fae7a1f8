@@ -58,45 +58,50 @@ export async function exportDocumentPdf(payload: DocumentPayload): Promise<Blob>
     const pageW = pdf.internal.pageSize.getWidth();
     const pageH = pdf.internal.pageSize.getHeight();
 
-    // Map CSS px (the DOM node's coordinate space) into PDF pt.
+    // Professional A4 margins: 25mm top/bottom, 20mm left/right.
+    // 1mm = 2.83465pt
+    const MM = 2.83465;
+    const marginTop = 25 * MM;
+    const marginBottom = 25 * MM;
+    const marginLeft = 20 * MM;
+    const marginRight = 20 * MM;
+    const usableW = pageW - marginLeft - marginRight;
+    const usableH = pageH - marginTop - marginBottom;
+
+    // Map CSS px (the DOM node's coordinate space) into PDF pt using the
+    // usable (inner) width so the content sits inside the printable area.
     const cssWidthPx = node.getBoundingClientRect().width;
-    const cssToPt = pageW / cssWidthPx;
-    const pageHpxCss = pageH / cssToPt; // page height expressed in CSS px
+    const cssToPt = usableW / cssWidthPx;
+    const pageHpxCss = usableH / cssToPt; // usable page height expressed in CSS px
     const totalHpxCss = rootRect.height;
 
     // Compute break offsets (in CSS px) so that no block straddles a page.
-    // A "keep with next" block is fused with the following block for placement.
     const breaks: number[] = [0];
-    let cursor = 0; // top of current page in CSS px
+    let cursor = 0;
 
     for (let i = 0; i < blocks.length; i++) {
-      // Fuse consecutive keep-with-next blocks into a single logical unit
       let j = i;
       while (j < blocks.length - 1 && blocks[j].keepWithNext) j++;
       const unitTop = blocks[i].top;
       const unitBottom = blocks[j].bottom;
       const unitHeight = unitBottom - unitTop;
 
-      // If unit doesn't fit on remaining space, start a new page at unitTop.
       const remaining = cursor + pageHpxCss - unitTop;
       if (unitHeight > remaining && unitTop > cursor + 1) {
-        // Only push if unit itself fits on a full page; otherwise let it flow (oversized).
         if (unitHeight <= pageHpxCss) {
           breaks.push(unitTop);
           cursor = unitTop;
         }
       }
-      i = j; // skip fused blocks
+      i = j;
     }
     breaks.push(totalHpxCss);
 
-    // Deduplicate & sort
     const uniqueBreaks = Array.from(new Set(breaks.map((v) => Math.round(v)))).sort(
       (a, b) => a - b,
     );
 
-    // Rasterize each page slice from the master canvas.
-    const canvasScale = canvas.width / cssWidthPx; // px per CSS px
+    const canvasScale = canvas.width / cssWidthPx;
     for (let p = 0; p < uniqueBreaks.length - 1; p++) {
       const topCss = uniqueBreaks[p];
       const nextCss = uniqueBreaks[p + 1];
@@ -115,9 +120,8 @@ export async function exportDocumentPdf(payload: DocumentPayload): Promise<Blob>
 
       const dataUrl = slice.toDataURL("image/jpeg", 0.95);
       if (p > 0) pdf.addPage();
-      const imgW = pageW;
       const imgH = sliceHeightCss * cssToPt;
-      pdf.addImage(dataUrl, "JPEG", 0, 0, imgW, imgH);
+      pdf.addImage(dataUrl, "JPEG", marginLeft, marginTop, usableW, imgH);
     }
 
     return pdf.output("blob");
