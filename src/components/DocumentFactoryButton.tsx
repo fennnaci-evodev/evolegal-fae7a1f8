@@ -4,6 +4,8 @@ import { FileText, Download, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { exportDocumentPdf, downloadPdfBlob } from "@/lib/exportDocumentPdf";
+import { DocumentTemplate, type DocumentPayload } from "@/components/DocumentTemplate";
 
 const DOCUMENT_TYPES = [
   { id: "overview", label: "Information Overview", badge: "Self-Help Outline", desc: "Educational overview of relevant frameworks and considerations" },
@@ -14,7 +16,6 @@ const DOCUMENT_TYPES = [
 
 const COMPLIANCE_DISCLAIMER =
   "EvoLegal is an automated self-help platform providing legal information and document frameworks. This document is an educational draft generated based on user-inputted parameters, does not constitute legal advice, and does not establish an attorney-client relationship. Review by qualified human counsel is recommended before formal execution.";
-
 
 interface DocumentFactoryProps {
   topic: string;
@@ -28,8 +29,7 @@ interface DocumentFactoryProps {
 export function DocumentFactoryButton({ topic, chatId, requestId, conversationContext, autoOpen, onClose }: DocumentFactoryProps) {
   const [open, setOpen] = useState(autoOpen ?? false);
   const [generating, setGenerating] = useState<string | null>(null);
-  const [generatedUrl, setGeneratedUrl] = useState<string | null>(null);
-  const [generatedTitle, setGeneratedTitle] = useState("");
+  const [payload, setPayload] = useState<DocumentPayload | null>(null);
 
   const handleClose = () => {
     if (!generating) {
@@ -40,7 +40,7 @@ export function DocumentFactoryButton({ topic, chatId, requestId, conversationCo
 
   const handleGenerate = async (docType: string) => {
     setGenerating(docType);
-    setGeneratedUrl(null);
+    setPayload(null);
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
@@ -72,18 +72,63 @@ export function DocumentFactoryButton({ topic, chatId, requestId, conversationCo
         return;
       }
 
-      // Handle risk escalation — AI refused to generate
       if (data.escalated) {
         toast.info(data.message || "This topic requires expert review. Please connect with an EvoLegal Expert.");
         setOpen(false);
         return;
       }
 
-      setGeneratedUrl(data.file_url);
-      setGeneratedTitle(data.title);
+      if (!data.payload) {
+        toast.error("Document payload missing.");
+        return;
+      }
+
+      setPayload(data.payload as DocumentPayload);
       toast.success("Here is a general informational template that many people find useful as a starting point.");
     } catch (err: any) {
       toast.error(err.message || "Something went wrong.");
+    } finally {
+      setGenerating(null);
+    }
+  };
+
+  const handleDownload = async () => {
+    if (!payload) return;
+    try {
+      setGenerating("__export__");
+      const blob = await exportDocumentPdf(payload);
+      const safe = (payload.documentTitle || "EvoLegal_Document")
+        .replace(/[^a-zA-Z0-9]+/g, "_")
+        .slice(0, 80);
+      downloadPdfBlob(blob, `${safe}.pdf`);
+
+      // Best-effort persistence to Supabase (non-blocking)
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const path = `${user.id}/${Date.now()}_${safe}.pdf`;
+          const { error: upErr } = await supabase.storage
+            .from("generated-documents")
+            .upload(path, blob, { contentType: "application/pdf", upsert: false });
+          if (!upErr) {
+            const { data: urlData } = supabase.storage.from("generated-documents").getPublicUrl(path);
+            await supabase.from("generated_documents").insert({
+              user_id: user.id,
+              chat_id: chatId || null,
+              request_id: requestId || null,
+              document_type: "generated",
+              title: payload.documentTitle,
+              topic,
+              file_path: path,
+              file_url: urlData.publicUrl,
+            });
+          }
+        }
+      } catch (e) {
+        console.warn("Persistence skipped:", e);
+      }
+    } catch (e: any) {
+      toast.error(e.message || "PDF export failed.");
     } finally {
       setGenerating(null);
     }
@@ -118,7 +163,7 @@ export function DocumentFactoryButton({ topic, chatId, requestId, conversationCo
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="glass-strong w-full max-w-lg p-6 relative"
+              className="glass-strong w-full max-w-2xl p-6 relative max-h-[92vh] overflow-y-auto"
             >
               <button
                 onClick={handleClose}
@@ -139,57 +184,52 @@ export function DocumentFactoryButton({ topic, chatId, requestId, conversationCo
                 </p>
               </div>
 
-              {generatedUrl ? (
+              {payload ? (
                 <div className="space-y-4">
                   <div className="glass rounded-xl p-4 flex items-center gap-3">
                     <FileText className="h-8 w-8 text-primary shrink-0" />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <p className="text-sm font-medium truncate">{generatedTitle}</p>
+                        <p className="text-sm font-medium truncate">{payload.documentTitle}</p>
                         <span className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded-full border border-primary/30 text-primary/90 bg-primary/5 shrink-0">
                           Draft Framework
                         </span>
                       </div>
-                      <p className="text-xs text-muted-foreground">Ready for download</p>
+                      <p className="text-xs text-muted-foreground">Ready for export</p>
                     </div>
                   </div>
+
+                  {/* Live in-modal preview using the sealed template */}
+                  <div className="rounded-xl overflow-hidden border border-border/40 bg-white">
+                    <div className="max-h-[50vh] overflow-y-auto">
+                      <div style={{ transform: "scale(0.55)", transformOrigin: "top left", width: 794 }}>
+                        <DocumentTemplate payload={payload} />
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="flex gap-2">
                     <Button
                       className="flex-1 gap-2"
                       variant="hero"
-                      onClick={() => {
-                        const link = document.createElement("a");
-                        link.href = generatedUrl!;
-                        link.target = "_blank";
-                        link.rel = "noopener noreferrer";
-                        link.setAttribute("download", generatedTitle || "EvoLegal_Document.pdf");
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-                      }}
+                      disabled={generating === "__export__"}
+                      onClick={handleDownload}
                     >
-                      <Download className="h-4 w-4" />
+                      {generating === "__export__" ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Download className="h-4 w-4" />
+                      )}
                       Download PDF
                     </Button>
                     <Button
-                      variant="outline"
-                      onClick={() => {
-                        navigator.clipboard.writeText(generatedUrl!);
-                        toast.success("Download link copied to clipboard!");
-                      }}
-                      title="Copy download link"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setPayload(null)}
                     >
-                      Copy Link
+                      Generate Another
                     </Button>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="w-full mt-2 text-xs"
-                    onClick={() => { setGeneratedUrl(null); setGeneratedTitle(""); }}
-                  >
-                    Generate Another
-                  </Button>
                 </div>
               ) : (
                 <div className="grid gap-2">
@@ -232,4 +272,3 @@ export function DocumentFactoryButton({ topic, chatId, requestId, conversationCo
     </>
   );
 }
-
