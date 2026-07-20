@@ -111,7 +111,7 @@ export function generateCasePdf(data: CasePdfData) {
   doc.setFont("helvetica", "bold");
   doc.setFontSize(18);
   doc.setTextColor(255, 255, 255);
-  doc.text("EvoLegal", margin + 22, 32);
+  doc.text("EvoLegal", margin + 24, 32);
 
   // Subtitle
   doc.setFontSize(9);
