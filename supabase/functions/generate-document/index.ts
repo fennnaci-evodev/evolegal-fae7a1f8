@@ -367,9 +367,36 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
-    const contextNote = conversation_context
-      ? `\n\nContext from the user's conversation: ${conversation_context.slice(0, 1000)}`
-      : "";
+    // ── Assemble Hugo Consilium Case File ─────────────────────────
+    let caseFileTranscript = "";
+    if (chat_id) {
+      try {
+        const { data: msgs } = await supabase
+          .from("hugo_messages")
+          .select("role, content, created_at")
+          .eq("chat_id", chat_id)
+          .order("created_at", { ascending: true })
+          .limit(40);
+        if (msgs && msgs.length) {
+          caseFileTranscript = msgs
+            .map((m: any) => {
+              const speaker = m.role === "assistant" ? "HUGO" : m.role === "user" ? "CLIENT" : String(m.role).toUpperCase();
+              return `[${speaker}] ${String(m.content || "").trim()}`;
+            })
+            .join("\n\n")
+            .slice(0, 12000);
+        }
+      } catch (e) {
+        console.error("case-file fetch failed:", e);
+      }
+    }
+    const supplementalContext = conversation_context ? String(conversation_context).slice(0, 4000) : "";
+
+    const caseFileBlock = (caseFileTranscript || supplementalContext)
+      ? `\n\n=== HUGO CONSILIUM CASE FILE (authoritative source of facts, parties, jurisdiction, timeline) ===\n${caseFileTranscript || supplementalContext}\n=== END CASE FILE ===\n\nInstruction: Every section of the document must be drafted directly against the specific facts, parties, jurisdiction, and legal issues established in the Case File above. Do NOT produce generic educational text. If a paragraph could apply to any random reader, rewrite it until it can only apply to this client.`
+      : `\n\nNo prior Case File was captured. Draft against the stated TOPIC as the client's matter, but still adopt the specialized role and produce a specific, non-generic work product.`;
+
+    const userPayload = `ROLE: ${docConfig.role}\nDOCUMENT TYPE: ${docConfig.label}\nCLIENT TOPIC: ${topic}\nCURRENT DATE: ${dateLabel}\n\nDRAFTING BRIEF:\n${docConfig.prompt}${caseFileBlock}\n\nOutput the JSON document now. Begin with the "title" field. No greeting, no preface, no meta-commentary.`;
 
     // ── GENERATION ──────────────────────────────────────────────────
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -379,12 +406,9 @@ serve(async (req) => {
         model: DOCUMENT_MODEL,
         messages: [
           { role: "system", content: GENERATOR_SYSTEM },
-          {
-            role: "user",
-            content: `DOCUMENT TYPE: ${docConfig.label}\nTOPIC: ${topic}\nCURRENT DATE: ${dateLabel}\n\n${docConfig.prompt}${contextNote}`,
-          },
+          { role: "user", content: userPayload },
         ],
-        temperature: 0.25,
+        temperature: 0.35,
       }),
     });
 
