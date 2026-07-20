@@ -143,35 +143,44 @@ export const DocumentTemplate = forwardRef<HTMLDivElement, Props>(
         </header>
 
         {/* ── Title ─────────────────────────────────────────────── */}
-        <h1
-          style={{
-            fontFamily: '"Space Grotesk", sans-serif',
-            fontSize: 26,
-            fontWeight: 700,
-            lineHeight: 1.2,
-            letterSpacing: -0.6,
-            margin: 0,
-            color: paletteText,
-          }}
-        >
-          {documentTitle}
-        </h1>
-        <div
-          style={{
-            marginTop: 10,
-            width: 56,
-            height: 3,
-            background: paletteAccent,
-            borderRadius: 2,
-          }}
-        />
+        <div data-evolegal-block="title" style={{ breakInside: "avoid", pageBreakInside: "avoid" }}>
+          <h1
+            style={{
+              fontFamily: '"Space Grotesk", sans-serif',
+              fontSize: 26,
+              fontWeight: 700,
+              lineHeight: 1.2,
+              letterSpacing: -0.6,
+              margin: 0,
+              color: paletteText,
+            }}
+          >
+            {documentTitle}
+          </h1>
+          <div
+            style={{
+              marginTop: 10,
+              width: 56,
+              height: 3,
+              background: paletteAccent,
+              borderRadius: 2,
+            }}
+          />
+        </div>
 
         {/* ── Introduction ──────────────────────────────────────── */}
         <section style={{ marginTop: 24 }}>
           {splitParagraphs(introduction).map((p, i) => (
             <p
               key={`intro-${i}`}
-              style={{ margin: "0 0 12px 0", color: paletteText, fontSize: 12.5 }}
+              data-evolegal-block="paragraph"
+              style={{
+                margin: "0 0 12px 0",
+                color: paletteText,
+                fontSize: 12.5,
+                breakInside: "avoid",
+                pageBreakInside: "avoid",
+              }}
             >
               {p}
             </p>
