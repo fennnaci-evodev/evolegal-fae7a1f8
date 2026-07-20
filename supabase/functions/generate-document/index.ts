@@ -1,5 +1,20 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { LOGO_JPEG_B64, LOGO_W, LOGO_H } from "./logoAsset.ts";
+
+// Convert base64 JPEG bytes into an ASCII-hex string for PDF embedding.
+function logoHex(): string {
+  const bin = atob(LOGO_JPEG_B64);
+  const hex: string[] = [];
+  for (let i = 0; i < bin.length; i++) {
+    hex.push(bin.charCodeAt(i).toString(16).padStart(2, "0"));
+  }
+  // Break into 80-char lines for readability; ASCIIHexDecode ignores whitespace.
+  const flat = hex.join("");
+  const lines: string[] = [];
+  for (let i = 0; i < flat.length; i += 80) lines.push(flat.slice(i, i + 80));
+  return lines.join("\n");
+}
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
