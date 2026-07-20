@@ -188,51 +188,72 @@ export const DocumentTemplate = forwardRef<HTMLDivElement, Props>(
         </section>
 
         {/* ── Sections ──────────────────────────────────────────── */}
-        {sections.map((s, i) => (
-          <section
-            key={`sec-${i}`}
-            style={{ marginTop: 26, breakInside: "avoid", pageBreakInside: "avoid" }}
-          >
-            <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 8 }}>
-              <span
+        {sections.map((s, i) => {
+          const paras = splitParagraphs(s.sectionContent);
+          return (
+            <section key={`sec-${i}`} style={{ marginTop: 26 }}>
+              <div
+                data-evolegal-block="section-heading"
+                data-evolegal-keep-with-next="true"
                 style={{
-                  fontFamily: '"Space Grotesk", sans-serif',
-                  fontSize: 10,
-                  fontWeight: 700,
-                  color: paletteAccent,
-                  letterSpacing: 1.2,
+                  display: "flex",
+                  alignItems: "baseline",
+                  gap: 10,
+                  marginBottom: 8,
+                  breakInside: "avoid",
+                  pageBreakInside: "avoid",
+                  pageBreakAfter: "avoid",
+                  breakAfter: "avoid",
                 }}
               >
-                {String(i + 1).padStart(2, "0")}
-              </span>
-              <h2
-                style={{
-                  fontFamily: '"Space Grotesk", sans-serif',
-                  fontSize: 15,
-                  fontWeight: 700,
-                  letterSpacing: -0.2,
-                  margin: 0,
-                  color: paletteText,
-                }}
-              >
-                {s.sectionTitle}
-              </h2>
-            </div>
-            <div style={{ borderLeft: `2px solid ${paletteRule}`, paddingLeft: 14 }}>
-              {splitParagraphs(s.sectionContent).map((p, j) => (
-                <p
-                  key={`sec-${i}-p-${j}`}
-                  style={{ margin: "0 0 10px 0", color: paletteText, fontSize: 12.5 }}
+                <span
+                  style={{
+                    fontFamily: '"Space Grotesk", sans-serif',
+                    fontSize: 10,
+                    fontWeight: 700,
+                    color: paletteAccent,
+                    letterSpacing: 1.2,
+                  }}
                 >
-                  {p}
-                </p>
-              ))}
-            </div>
-          </section>
-        ))}
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <h2
+                  style={{
+                    fontFamily: '"Space Grotesk", sans-serif',
+                    fontSize: 15,
+                    fontWeight: 700,
+                    letterSpacing: -0.2,
+                    margin: 0,
+                    color: paletteText,
+                  }}
+                >
+                  {s.sectionTitle}
+                </h2>
+              </div>
+              <div style={{ borderLeft: `2px solid ${paletteRule}`, paddingLeft: 14 }}>
+                {paras.map((p, j) => (
+                  <p
+                    key={`sec-${i}-p-${j}`}
+                    data-evolegal-block="paragraph"
+                    style={{
+                      margin: "0 0 10px 0",
+                      color: paletteText,
+                      fontSize: 12.5,
+                      breakInside: "avoid",
+                      pageBreakInside: "avoid",
+                    }}
+                  >
+                    {p}
+                  </p>
+                ))}
+              </div>
+            </section>
+          );
+        })}
 
         {/* ── Footer ────────────────────────────────────────────── */}
         <footer
+          data-evolegal-block="footer"
           style={{
             marginTop: 40,
             paddingTop: 16,
@@ -240,6 +261,8 @@ export const DocumentTemplate = forwardRef<HTMLDivElement, Props>(
             fontSize: 9.5,
             color: paletteMuted,
             lineHeight: 1.5,
+            breakInside: "avoid",
+            pageBreakInside: "avoid",
           }}
         >
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
