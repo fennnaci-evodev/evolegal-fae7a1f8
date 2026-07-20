@@ -6,9 +6,9 @@ import { DocumentTemplate, type DocumentPayload } from "@/components/DocumentTem
 
 /**
  * Renders the sealed DocumentTemplate off-screen, rasterizes it once, then
- * paginates with natural text flow: paragraphs can split at line boundaries
- * (respecting orphans/widows = 2), while headings stay glued to the block
- * that follows them. Uniform 20mm top/bottom margins.
+ * paginates strictly at block boundaries. Paragraphs/list-like text blocks are
+ * protected as atomic units so page seams never slice through a line of text.
+ * Uniform 20mm top/bottom/side margins.
  */
 export async function exportDocumentPdf(payload: DocumentPayload): Promise<Blob> {
   const host = document.createElement("div");
@@ -36,16 +36,7 @@ export async function exportDocumentPdf(payload: DocumentPayload): Promise<Blob>
       node.querySelectorAll<HTMLElement>("[data-evolegal-block]"),
     );
 
-    // A "unit" is either atomic (heading/header/footer/title) or a splittable
-    // paragraph exposing its line rects for orphan/widow-safe breaks.
-    type Unit =
-      | { kind: "atomic"; top: number; bottom: number; gluedToNext: boolean }
-      | {
-          kind: "paragraph";
-          top: number;
-          bottom: number;
-          lines: { top: number; bottom: number }[];
-        };
+    type Unit = { top: number; bottom: number; gluedToNext: boolean };
 
     const units: Unit[] = blockEls.map((el) => {
       const r = el.getBoundingClientRect();
@@ -53,37 +44,9 @@ export async function exportDocumentPdf(payload: DocumentPayload): Promise<Blob>
       const bottom = r.bottom - rootRect.top;
       const kind = el.dataset.evolegalBlock;
 
-      if (kind === "paragraph") {
-        // Extract per-line rectangles via Range API.
-        const range = document.createRange();
-        range.selectNodeContents(el);
-        const rects = Array.from(range.getClientRects()).filter(
-          (rr) => rr.width > 0 && rr.height > 0,
-        );
-        // Merge rects that share the same line (same top rounded).
-        const linesMap = new Map<number, { top: number; bottom: number }>();
-        for (const rr of rects) {
-          const key = Math.round(rr.top);
-          const t = rr.top - rootRect.top;
-          const b = rr.bottom - rootRect.top;
-          const prev = linesMap.get(key);
-          if (prev) {
-            prev.top = Math.min(prev.top, t);
-            prev.bottom = Math.max(prev.bottom, b);
-          } else {
-            linesMap.set(key, { top: t, bottom: b });
-          }
-        }
-        const lines = Array.from(linesMap.values()).sort((a, b) => a.top - b.top);
-        if (lines.length === 0) {
-          return { kind: "atomic", top, bottom, gluedToNext: false };
-        }
-        return { kind: "paragraph", top, bottom, lines };
-      }
-
       // Section headings must stay with the paragraph that follows.
       const gluedToNext = kind === "section-heading" || kind === "title" || kind === "header";
-      return { kind: "atomic", top, bottom, gluedToNext };
+      return { top, bottom, gluedToNext };
     });
 
     const canvas = await html2canvas(node, {
@@ -113,9 +76,7 @@ export async function exportDocumentPdf(payload: DocumentPayload): Promise<Blob>
     const pageHpxCss = usableH / cssToPt;
     const totalHpxCss = rootRect.height;
 
-    // Compute break points (CSS px) with orphan/widow protection and heading glue.
-    const ORPHANS = 2;
-    const WIDOWS = 2;
+    // Compute break points (CSS px) at block boundaries with heading glue.
     const breaks: number[] = [0];
     let cursor = 0;
 
@@ -126,41 +87,12 @@ export async function exportDocumentPdf(payload: DocumentPayload): Promise<Blob>
       const limit = pageBottomAllowed();
       if (u.bottom <= limit) continue; // fits on current page
 
-      if (u.kind === "paragraph") {
-        // Find how many lines fit on the current page.
-        let fitCount = 0;
-        for (const ln of u.lines) {
-          if (ln.bottom <= limit) fitCount++;
-          else break;
-        }
-        const remaining = u.lines.length - fitCount;
-
-        if (
-          fitCount >= ORPHANS &&
-          remaining >= WIDOWS &&
-          fitCount < u.lines.length
-        ) {
-          // Split mid-paragraph: break at the top of the first line that doesn't fit.
-          const breakAt = u.lines[fitCount].top;
-          breaks.push(breakAt);
-          cursor = breakAt;
-          i--; // re-evaluate remaining lines of same paragraph
-          continue;
-        }
-        // Not enough lines to satisfy widow/orphan: push whole paragraph.
-        if (u.top > cursor + 1) {
-          breaks.push(u.top);
-          cursor = u.top;
-        }
-        continue;
-      }
-
-      // Atomic block: push to next page, honoring heading→next glue.
+      // Push to next page, honoring heading→next glue and paragraph boundaries.
       let start = i;
       // If we're pushing an atomic that is glued-from-previous, walk back.
       while (start > 0) {
         const prev = units[start - 1];
-        if (prev.kind === "atomic" && prev.gluedToNext && prev.bottom > cursor) start--;
+        if (prev.gluedToNext && prev.bottom > cursor) start--;
         else break;
       }
       const pushTop = units[start].top;

@@ -82,8 +82,10 @@ export const DocumentTemplate = forwardRef<HTMLDivElement, Props>(
     return (
       <div
         ref={ref}
+        className="document-container"
         data-evolegal-document
         style={{
+          display: "block",
           width: 794, // ~ A4 @ 96dpi
           minHeight: 1123,
           background: paletteBg,
@@ -97,6 +99,45 @@ export const DocumentTemplate = forwardRef<HTMLDivElement, Props>(
           letterSpacing: 0.005,
         }}
       >
+        <style>{`
+          @page {
+            size: A4;
+            margin-top: 20mm !important;
+            margin-bottom: 20mm !important;
+            margin-left: 20mm !important;
+            margin-right: 20mm !important;
+          }
+
+          @media print {
+            /* Kill flexbox/grid to fix horizontal character slicing */
+            .document-body-wrapper, 
+            .document-container,
+            main,
+            section, 
+            article, 
+            div {
+              display: block !important;
+              float: none !important;
+              position: relative !important;
+            }
+
+            /* Prevent text lines from being sliced in half horizontally */
+            p, li, blockquote {
+              page-break-inside: avoid !important;
+              break-inside: avoid-page !important;
+              break-inside: avoid !important;
+              position: relative !important;
+              margin-bottom: 12px !important;
+            }
+
+            /* Keep headings attached to the text below them */
+            h1, h2, h3, h4 {
+              page-break-after: avoid !important;
+              break-after: avoid !important;
+              display: block !important;
+            }
+          }
+        `}</style>
         {/* ── Header ─────────────────────────────────────────────── */}
         <header
           data-evolegal-block="header"
@@ -179,7 +220,7 @@ export const DocumentTemplate = forwardRef<HTMLDivElement, Props>(
         </div>
 
         {/* ── Introduction ──────────────────────────────────────── */}
-        <section style={{ marginTop: 24 }}>
+        <main className="document-body-wrapper" style={{ display: "block", marginTop: 24 }}>
           {splitParagraphs(introduction).map((p, i) => (
             <p
               key={`intro-${i}`}
@@ -189,8 +230,9 @@ export const DocumentTemplate = forwardRef<HTMLDivElement, Props>(
                 color: paletteText,
                 fontSize: 12.5,
                 lineHeight: 1.5,
-                breakInside: "auto",
-                pageBreakInside: "auto",
+                breakInside: "avoid",
+                pageBreakInside: "avoid",
+                position: "relative",
                 orphans: 2,
                 widows: 2,
               }}
@@ -198,13 +240,13 @@ export const DocumentTemplate = forwardRef<HTMLDivElement, Props>(
               {p}
             </p>
           ))}
-        </section>
+        </main>
 
         {/* ── Sections ──────────────────────────────────────────── */}
         {sections.map((s, i) => {
           const paras = splitParagraphs(s.sectionContent);
           return (
-            <section key={`sec-${i}`} style={{ marginTop: 26 }}>
+            <section key={`sec-${i}`} style={{ display: "block", marginTop: 26 }}>
               <div
                 data-evolegal-block="section-heading"
                 style={{
@@ -244,7 +286,7 @@ export const DocumentTemplate = forwardRef<HTMLDivElement, Props>(
                   {s.sectionTitle}
                 </h2>
               </div>
-              <div style={{ borderLeft: `2px solid ${paletteRule}`, paddingLeft: 14 }}>
+              <article style={{ display: "block", borderLeft: `2px solid ${paletteRule}`, paddingLeft: 14 }}>
                 {paras.map((p, j) => (
                   <p
                     key={`sec-${i}-p-${j}`}
@@ -254,8 +296,9 @@ export const DocumentTemplate = forwardRef<HTMLDivElement, Props>(
                       color: paletteText,
                       fontSize: 12.5,
                       lineHeight: 1.5,
-                      breakInside: "auto",
-                      pageBreakInside: "auto",
+                      breakInside: "avoid",
+                      pageBreakInside: "avoid",
+                      position: "relative",
                       orphans: 2,
                       widows: 2,
                     }}
@@ -263,7 +306,7 @@ export const DocumentTemplate = forwardRef<HTMLDivElement, Props>(
                     {p}
                   </p>
                 ))}
-              </div>
+              </article>
             </section>
           );
         })}
