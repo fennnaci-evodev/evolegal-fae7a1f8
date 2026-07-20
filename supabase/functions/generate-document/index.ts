@@ -440,7 +440,7 @@ serve(async (req) => {
           { role: "system", content: REVIEWER_SYSTEM },
           {
             role: "user",
-            content: `DOCUMENT TYPE: ${docConfig.label}\nTOPIC: ${topic}\nCURRENT DATE: ${dateLabel}\n\nDOCUMENT TO REVIEW:\n\n${JSON.stringify(generatedPayload)}`,
+            content: `ROLE: ${docConfig.role}\nDOCUMENT TYPE: ${docConfig.label}\nCLIENT TOPIC: ${topic}\nCURRENT DATE: ${dateLabel}${caseFileBlock}\n\nDOCUMENT TO REVIEW AND UPGRADE (return the same JSON schema, upgraded):\n\n${JSON.stringify(generatedPayload)}`,
           },
         ],
         temperature: 0.1,
