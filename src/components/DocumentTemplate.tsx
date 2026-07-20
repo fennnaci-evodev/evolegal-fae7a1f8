@@ -109,6 +109,8 @@ export const DocumentTemplate = forwardRef<HTMLDivElement, Props>(
             marginBottom: 28,
             breakInside: "avoid",
             pageBreakInside: "avoid",
+            breakAfter: "avoid",
+            pageBreakAfter: "avoid",
           }}
         >
           <EvoLogoSVG size={44} />
@@ -143,7 +145,15 @@ export const DocumentTemplate = forwardRef<HTMLDivElement, Props>(
         </header>
 
         {/* ── Title ─────────────────────────────────────────────── */}
-        <div data-evolegal-block="title" style={{ breakInside: "avoid", pageBreakInside: "avoid" }}>
+        <div
+          data-evolegal-block="title"
+          style={{
+            breakInside: "avoid",
+            pageBreakInside: "avoid",
+            breakAfter: "avoid",
+            pageBreakAfter: "avoid",
+          }}
+        >
           <h1
             style={{
               fontFamily: '"Space Grotesk", sans-serif',
@@ -178,8 +188,10 @@ export const DocumentTemplate = forwardRef<HTMLDivElement, Props>(
                 margin: "0 0 12px 0",
                 color: paletteText,
                 fontSize: 12.5,
-                breakInside: "avoid",
-                pageBreakInside: "avoid",
+                breakInside: "auto",
+                pageBreakInside: "auto",
+                orphans: 2,
+                widows: 2,
               }}
             >
               {p}
@@ -194,7 +206,6 @@ export const DocumentTemplate = forwardRef<HTMLDivElement, Props>(
             <section key={`sec-${i}`} style={{ marginTop: 26 }}>
               <div
                 data-evolegal-block="section-heading"
-                data-evolegal-keep-with-next="true"
                 style={{
                   display: "flex",
                   alignItems: "baseline",
@@ -225,6 +236,8 @@ export const DocumentTemplate = forwardRef<HTMLDivElement, Props>(
                     letterSpacing: -0.2,
                     margin: 0,
                     color: paletteText,
+                    breakAfter: "avoid",
+                    pageBreakAfter: "avoid",
                   }}
                 >
                   {s.sectionTitle}
@@ -239,8 +252,10 @@ export const DocumentTemplate = forwardRef<HTMLDivElement, Props>(
                       margin: "0 0 10px 0",
                       color: paletteText,
                       fontSize: 12.5,
-                      breakInside: "avoid",
-                      pageBreakInside: "avoid",
+                      breakInside: "auto",
+                      pageBreakInside: "auto",
+                      orphans: 2,
+                      widows: 2,
                     }}
                   >
                     {p}
@@ -275,5 +290,6 @@ export const DocumentTemplate = forwardRef<HTMLDivElement, Props>(
     );
   },
 );
+
 
 DocumentTemplate.displayName = "DocumentTemplate";
