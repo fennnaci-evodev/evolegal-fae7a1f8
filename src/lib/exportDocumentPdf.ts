@@ -6,8 +6,9 @@ import { DocumentTemplate, type DocumentPayload } from "@/components/DocumentTem
 
 /**
  * Renders the sealed DocumentTemplate off-screen, rasterizes it once, then
- * paginates by real block boundaries (headers, paragraphs, sections, footer)
- * so no line of text is ever sliced across a page break.
+ * paginates with natural text flow: paragraphs can split at line boundaries
+ * (respecting orphans/widows = 2), while headings stay glued to the block
+ * that follows them. Uniform 20mm top/bottom margins.
  */
 export async function exportDocumentPdf(payload: DocumentPayload): Promise<Blob> {
   const host = document.createElement("div");
@@ -30,19 +31,59 @@ export async function exportDocumentPdf(payload: DocumentPayload): Promise<Blob>
     const node = host.querySelector("[data-evolegal-document]") as HTMLElement | null;
     if (!node) throw new Error("DocumentTemplate did not mount");
 
-    // Collect block rects (in CSS px, relative to the document node) BEFORE rasterizing.
     const rootRect = node.getBoundingClientRect();
     const blockEls = Array.from(
       node.querySelectorAll<HTMLElement>("[data-evolegal-block]"),
     );
-    type Block = { top: number; bottom: number; keepWithNext: boolean };
-    const blocks: Block[] = blockEls.map((el) => {
+
+    // A "unit" is either atomic (heading/header/footer/title) or a splittable
+    // paragraph exposing its line rects for orphan/widow-safe breaks.
+    type Unit =
+      | { kind: "atomic"; top: number; bottom: number; gluedToNext: boolean }
+      | {
+          kind: "paragraph";
+          top: number;
+          bottom: number;
+          lines: { top: number; bottom: number }[];
+        };
+
+    const units: Unit[] = blockEls.map((el) => {
       const r = el.getBoundingClientRect();
-      return {
-        top: r.top - rootRect.top,
-        bottom: r.bottom - rootRect.top,
-        keepWithNext: el.dataset.evolegalKeepWithNext === "true",
-      };
+      const top = r.top - rootRect.top;
+      const bottom = r.bottom - rootRect.top;
+      const kind = el.dataset.evolegalBlock;
+
+      if (kind === "paragraph") {
+        // Extract per-line rectangles via Range API.
+        const range = document.createRange();
+        range.selectNodeContents(el);
+        const rects = Array.from(range.getClientRects()).filter(
+          (rr) => rr.width > 0 && rr.height > 0,
+        );
+        // Merge rects that share the same line (same top rounded).
+        const linesMap = new Map<number, { top: number; bottom: number }>();
+        for (const rr of rects) {
+          const key = Math.round(rr.top);
+          const t = rr.top - rootRect.top;
+          const b = rr.bottom - rootRect.top;
+          const prev = linesMap.get(key);
+          if (prev) {
+            prev.top = Math.min(prev.top, t);
+            prev.bottom = Math.max(prev.bottom, b);
+          } else {
+            linesMap.set(key, { top: t, bottom: b });
+          }
+        }
+        const lines = Array.from(linesMap.values()).sort((a, b) => a.top - b.top);
+        if (lines.length === 0) {
+          return { kind: "atomic", top, bottom, gluedToNext: false };
+        }
+        return { kind: "paragraph", top, bottom, lines };
+      }
+
+      // Section headings must stay with the paragraph that follows.
+      const gluedToNext = kind === "section-heading" || kind === "title" || kind === "header";
+      return { kind: "atomic", top, bottom, gluedToNext };
     });
 
     const canvas = await html2canvas(node, {
@@ -58,42 +99,76 @@ export async function exportDocumentPdf(payload: DocumentPayload): Promise<Blob>
     const pageW = pdf.internal.pageSize.getWidth();
     const pageH = pdf.internal.pageSize.getHeight();
 
-    // Professional A4 margins: 25mm top/bottom, 20mm left/right.
-    // 1mm = 2.83465pt
+    // Uniform 20mm safety margins top/bottom, 20mm sides.
     const MM = 2.83465;
-    const marginTop = 25 * MM;
-    const marginBottom = 25 * MM;
+    const marginTop = 20 * MM;
+    const marginBottom = 20 * MM;
     const marginLeft = 20 * MM;
     const marginRight = 20 * MM;
     const usableW = pageW - marginLeft - marginRight;
     const usableH = pageH - marginTop - marginBottom;
 
-    // Map CSS px (the DOM node's coordinate space) into PDF pt using the
-    // usable (inner) width so the content sits inside the printable area.
-    const cssWidthPx = node.getBoundingClientRect().width;
+    const cssWidthPx = rootRect.width;
     const cssToPt = usableW / cssWidthPx;
-    const pageHpxCss = usableH / cssToPt; // usable page height expressed in CSS px
+    const pageHpxCss = usableH / cssToPt;
     const totalHpxCss = rootRect.height;
 
-    // Compute break offsets (in CSS px) so that no block straddles a page.
+    // Compute break points (CSS px) with orphan/widow protection and heading glue.
+    const ORPHANS = 2;
+    const WIDOWS = 2;
     const breaks: number[] = [0];
     let cursor = 0;
 
-    for (let i = 0; i < blocks.length; i++) {
-      let j = i;
-      while (j < blocks.length - 1 && blocks[j].keepWithNext) j++;
-      const unitTop = blocks[i].top;
-      const unitBottom = blocks[j].bottom;
-      const unitHeight = unitBottom - unitTop;
+    const pageBottomAllowed = () => cursor + pageHpxCss;
 
-      const remaining = cursor + pageHpxCss - unitTop;
-      if (unitHeight > remaining && unitTop > cursor + 1) {
-        if (unitHeight <= pageHpxCss) {
-          breaks.push(unitTop);
-          cursor = unitTop;
+    for (let i = 0; i < units.length; i++) {
+      const u = units[i];
+      const limit = pageBottomAllowed();
+      if (u.bottom <= limit) continue; // fits on current page
+
+      if (u.kind === "paragraph") {
+        // Find how many lines fit on the current page.
+        let fitCount = 0;
+        for (const ln of u.lines) {
+          if (ln.bottom <= limit) fitCount++;
+          else break;
         }
+        const remaining = u.lines.length - fitCount;
+
+        if (
+          fitCount >= ORPHANS &&
+          remaining >= WIDOWS &&
+          fitCount < u.lines.length
+        ) {
+          // Split mid-paragraph: break at the top of the first line that doesn't fit.
+          const breakAt = u.lines[fitCount].top;
+          breaks.push(breakAt);
+          cursor = breakAt;
+          i--; // re-evaluate remaining lines of same paragraph
+          continue;
+        }
+        // Not enough lines to satisfy widow/orphan: push whole paragraph.
+        if (u.top > cursor + 1) {
+          breaks.push(u.top);
+          cursor = u.top;
+        }
+        continue;
       }
-      i = j;
+
+      // Atomic block: push to next page, honoring heading→next glue.
+      let start = i;
+      // If we're pushing an atomic that is glued-from-previous, walk back.
+      while (start > 0) {
+        const prev = units[start - 1];
+        if (prev.kind === "atomic" && prev.gluedToNext && prev.bottom > cursor) start--;
+        else break;
+      }
+      const pushTop = units[start].top;
+      if (pushTop > cursor + 1) {
+        breaks.push(pushTop);
+        cursor = pushTop;
+      }
+      i = start - 1; // continue loop from `start`
     }
     breaks.push(totalHpxCss);
 
