@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { PlayCircle, FileText, Download, Clock, Lock } from "lucide-react";
+import { PlayCircle, FileText, Download, Clock, Lock, Scale } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { fadeUp } from "@/lib/animations";
 
@@ -133,8 +133,9 @@ const Library = () => {
         )}
 
         <div className="glass-card p-4">
-          <p className="text-xs text-muted-foreground/60 text-center">
-            ⚖ All content is for general informational purposes only. Downloadable materials contain full disclaimers. Laws vary by state — always consult a licensed professional in your jurisdiction.
+          <p className="text-xs text-muted-foreground/60 text-center inline-flex items-center justify-center gap-1.5">
+            <Scale className="h-3 w-3 shrink-0" />
+            <span>All content is for general informational purposes only. Downloadable materials contain full disclaimers. Laws vary by state — always consult a licensed professional in your jurisdiction.</span>
           </p>
         </div>
       </div>

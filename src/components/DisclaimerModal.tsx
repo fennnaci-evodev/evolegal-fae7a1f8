@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { Scale } from "lucide-react";
 
 export function DisclaimerModal() {
   const [open, setOpen] = useState(false);
