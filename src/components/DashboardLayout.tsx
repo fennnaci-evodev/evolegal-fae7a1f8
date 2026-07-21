@@ -8,6 +8,7 @@ import { useAdminMode } from "@/contexts/AdminModeContext";
 import { AdminModeToggle } from "./AdminModeToggle";
 import { ThemeToggle } from "./ThemeToggle";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { BackButton } from "./BackButton";
 
 const SIDEBAR_KEY = "evo_sidebar_collapsed";
 
@@ -152,9 +153,12 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
 
         {/* Mobile header */}
         <div className="md:hidden fixed top-0 left-0 right-0 z-40 glass-strong border-b border-border/30 px-4 py-3 flex items-center justify-between" style={{ borderRadius: 0 }}>
-          <Link to="/">
-            <EvoLogo size="sm" animate={false} showText={false} />
-          </Link>
+          <div className="flex items-center gap-2">
+            <BackButton />
+            <Link to="/">
+              <EvoLogo size="sm" animate={false} showText={false} />
+            </Link>
+          </div>
           <div className="flex gap-1">
             {allNavItems.slice(0, 5).map((item) => (
               <Link
