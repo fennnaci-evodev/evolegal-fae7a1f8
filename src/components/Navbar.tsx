@@ -75,15 +75,37 @@ export function Navbar() {
               <div className="w-[100px]" />
             ) : user ? (
               <Link to="/dashboard">
-                <Button size="sm" variant="hero">Dashboard</Button>
+                <Button
+                  size="sm"
+                  variant="hero"
+                  className="rounded-full px-5 border border-cyan-300/30"
+                  style={{
+                    background: "linear-gradient(135deg, #00F2FE 0%, #7A5CFF 100%)",
+                    color: "#0a0f1e",
+                    boxShadow: "0 0 15px rgba(0, 242, 254, 0.3), inset 0 1px 0 rgba(255,255,255,0.25)",
+                  }}
+                >
+                  Dashboard
+                </Button>
               </Link>
             ) : (
               <>
                 <Link to="/auth" className="hidden sm:block">
-                  <Button variant="ghost" size="sm">Sign In</Button>
+                  <Button variant="ghost" size="sm" className="rounded-full text-slate-300 hover:text-[#00F2FE]">Sign In</Button>
                 </Link>
                 <Link to="/auth">
-                  <Button size="sm" variant="hero">Get Started</Button>
+                  <Button
+                    size="sm"
+                    variant="hero"
+                    className="rounded-full px-5 border border-cyan-300/30"
+                    style={{
+                      background: "linear-gradient(135deg, #00F2FE 0%, #7A5CFF 100%)",
+                      color: "#0a0f1e",
+                      boxShadow: "0 0 15px rgba(0, 242, 254, 0.3), inset 0 1px 0 rgba(255,255,255,0.25)",
+                    }}
+                  >
+                    Get Started
+                  </Button>
                 </Link>
               </>
             )}
