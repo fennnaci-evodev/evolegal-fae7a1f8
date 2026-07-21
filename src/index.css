@@ -92,20 +92,23 @@
     --neon-purple: 270 60% 45%;
   }
 
-  /* Global smooth theme transition — cinematic wave */
-  html, body {
-    transition: background-color 500ms ease-in-out, color 500ms ease-in-out;
+  /* Native color-scheme hint for form controls / scrollbars */
+  html { color-scheme: light dark; }
+
+  /* Instant theme swap — universal transitions cause massive layout thrash */
+  .no-transitions,
+  .no-transitions *,
+  .no-transitions *::before,
+  .no-transitions *::after {
+    -webkit-transition: none !important;
+    -moz-transition: none !important;
+    -ms-transition: none !important;
+    -o-transition: none !important;
+    transition: none !important;
+    animation-duration: 0ms !important;
+    animation-delay: 0ms !important;
   }
-  *, *::before, *::after {
-    transition-property: background-color, border-color, color, fill, stroke, box-shadow;
-    transition-duration: 500ms;
-    transition-timing-function: ease-in-out;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    html, body, *, *::before, *::after {
-      transition-duration: 0ms !important;
-    }
-  }
+
 }
 
 @layer base {
