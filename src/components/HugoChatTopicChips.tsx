@@ -1,12 +1,13 @@
 import { motion } from "framer-motion";
+import { Bitcoin, Home, Users, HeartPulse, ClipboardList, Briefcase, type LucideIcon } from "lucide-react";
 
-const topics = [
-  { label: "Crypto Law", emoji: "₿" },
-  { label: "Rent Dispute", emoji: "🏠" },
-  { label: "Family Matter", emoji: "👨‍👩‍👧" },
-  { label: "Personal Injury", emoji: "⚕️" },
-  { label: "Insurance Claim", emoji: "📋" },
-  { label: "Employment Law", emoji: "💼" },
+const topics: { label: string; icon: LucideIcon }[] = [
+  { label: "Crypto Law", icon: Bitcoin },
+  { label: "Rent Dispute", icon: Home },
+  { label: "Family Matter", icon: Users },
+  { label: "Personal Injury", icon: HeartPulse },
+  { label: "Insurance Claim", icon: ClipboardList },
+  { label: "Employment Law", icon: Briefcase },
 ];
 
 interface Props {
@@ -25,7 +26,7 @@ export function HugoChatTopicChips({ onSelect }: Props) {
           onClick={() => onSelect(`Tell me about ${t.label} in the US`)}
           className="glass rounded-full px-4 py-2 text-xs text-muted-foreground hover:text-foreground hover:border-primary/20 transition-all flex items-center gap-1.5"
         >
-          <span>{t.emoji}</span>
+          <t.icon className="h-3.5 w-3.5" />
           <span>{t.label}</span>
         </motion.button>
       ))}
