@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { fetchHugoChats, deleteHugoChat, type HugoChat } from "@/hooks/useHugoChat";
 import { HugoAvatar } from "@/components/HugoAvatar";
 import { toast } from "sonner";
+import { WavingHand } from "@/components/WavingHand";
 
 const quickActions = [
   { icon: PlayCircle, title: "Video Lectures", desc: "Watch expert explanations", to: "/dashboard/library" },
@@ -151,7 +152,10 @@ const Dashboard = () => {
     <DashboardLayout>
       <div className="max-w-5xl mx-auto space-y-8">
         <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
-          <h1 className="text-2xl md:text-3xl font-display font-bold mb-2">Welcome back 👋</h1>
+          <h1 className="text-2xl md:text-3xl font-display font-bold mb-2 flex items-center gap-2">
+            <span>Welcome back</span>
+            <WavingHand />
+          </h1>
           <p className="text-muted-foreground">Continue your legal education journey.</p>
         </motion.div>
 

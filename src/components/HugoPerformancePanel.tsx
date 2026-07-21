@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
-import { TrendingUp, TrendingDown, Activity, Shield, Brain, MessageCircle, FileText, Target, ThumbsUp, ThumbsDown } from "lucide-react";
+import { TrendingUp, TrendingDown, Activity, Shield, Brain, MessageCircle, FileText, Target, ThumbsUp, ThumbsDown, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface MetricRow {
@@ -242,7 +242,7 @@ export function HugoPerformancePanel() {
           {/* Ethics */}
           {current.ethicsFlags.length > 0 && (
             <div className="glass rounded-xl p-3 border border-red-500/20">
-              <p className="text-[10px] font-semibold text-red-400 uppercase tracking-wider mb-2">⚠ Ethics Flags</p>
+              <p className="text-[10px] font-semibold text-red-400 uppercase tracking-wider mb-2 flex items-center gap-1"><AlertTriangle className="h-3 w-3" />Ethics Flags</p>
               {current.ethicsFlags.slice(0, 5).map((flag, i) => (
                 <p key={i} className="text-[10px] text-muted-foreground">{flag}</p>
               ))}

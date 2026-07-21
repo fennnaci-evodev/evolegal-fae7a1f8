@@ -7,6 +7,7 @@ import { EvoLogo } from "./EvoLogo";
 import { useAuth } from "@/hooks/useAuth";
 import { AdminModeToggle } from "./AdminModeToggle";
 import { ThemeToggle } from "./ThemeToggle";
+import { BackButton } from "./BackButton";
 
 const links = [
   { label: "How It Works", to: "/how-it-works" },
@@ -33,9 +34,12 @@ export function Navbar() {
         }}
       >
         <div className="container mx-auto flex items-center justify-between py-2 px-6">
-          <Link to="/" className="flex items-center gap-2 relative z-10">
-            <EvoLogo size="sm" animate={false} showText />
-          </Link>
+          <div className="flex items-center gap-1.5 relative z-10">
+            <div className="lg:hidden"><BackButton /></div>
+            <Link to="/" className="flex items-center gap-2">
+              <EvoLogo size="sm" animate={false} showText />
+            </Link>
+          </div>
 
           {/* Desktop links */}
           <div className="hidden lg:flex items-center gap-7">
