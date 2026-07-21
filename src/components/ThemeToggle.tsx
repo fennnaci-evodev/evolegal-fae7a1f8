@@ -15,7 +15,7 @@ export function ThemeToggle({ className = "" }: Props) {
       onClick={toggleTheme}
       aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
       title={isDark ? "Switch to light mode" : "Switch to dark mode"}
-      className={`relative inline-flex items-center justify-center h-9 w-9 rounded-full border border-border/40 bg-background/40 text-foreground/70 hover:text-foreground hover:border-border/70 transition-all duration-300 backdrop-blur ${className}`}
+      className={`cyber-button cyber-ghost relative inline-flex items-center justify-center h-9 w-9 ${className}`}
     >
       <AnimatePresence mode="wait" initial={false}>
         {isDark ? (
