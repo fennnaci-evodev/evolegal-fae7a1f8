@@ -33,7 +33,7 @@ export function DisclaimerModal() {
           >
             <div className="flex items-center gap-3">
               <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
-                <span className="text-primary text-lg">⚖</span>
+                <Scale className="h-4 w-4 text-primary" />
               </div>
               <h2 className="text-lg font-display font-semibold text-foreground">Before You Begin</h2>
             </div>

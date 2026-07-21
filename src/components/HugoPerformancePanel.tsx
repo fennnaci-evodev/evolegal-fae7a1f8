@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
-import { TrendingUp, TrendingDown, Activity, Shield, Brain, MessageCircle, FileText, Target, ThumbsUp, ThumbsDown } from "lucide-react";
+import { TrendingUp, TrendingDown, Activity, Shield, Brain, MessageCircle, FileText, Target, ThumbsUp, ThumbsDown, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface MetricRow {
