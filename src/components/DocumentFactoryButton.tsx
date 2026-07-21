@@ -111,7 +111,9 @@ export function DocumentFactoryButton({ topic, chatId, requestId, conversationCo
             .from("generated-documents")
             .upload(path, blob, { contentType: "application/pdf", upsert: false });
           if (!upErr) {
-            const { data: urlData } = supabase.storage.from("generated-documents").getPublicUrl(path);
+            const { data: urlData } = await supabase.storage
+              .from("generated-documents")
+              .createSignedUrl(path, 60 * 60 * 24 * 7);
             await supabase.from("generated_documents").insert({
               user_id: user.id,
               chat_id: chatId || null,
@@ -120,7 +122,7 @@ export function DocumentFactoryButton({ topic, chatId, requestId, conversationCo
               title: payload.documentTitle,
               topic,
               file_path: path,
-              file_url: urlData.publicUrl,
+              file_url: urlData?.signedUrl ?? null,
             });
           }
         }
