@@ -24,26 +24,49 @@ export function Navbar() {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50 glass-strong" style={{ borderRadius: 0, borderTop: "none", borderLeft: "none", borderRight: "none" }}>
+      <nav
+        className="fixed top-0 left-0 right-0 z-50"
+        style={{
+          background: "rgba(10, 15, 30, 0.4)",
+          backdropFilter: "blur(12px)",
+          WebkitBackdropFilter: "blur(12px)",
+          borderBottom: "1px solid hsla(186, 100%, 50%, 0.10)",
+          boxShadow: "0 1px 0 0 hsla(186, 100%, 60%, 0.06), 0 8px 32px -12px hsla(240, 30%, 2%, 0.6)",
+        }}
+      >
         <div className="container mx-auto flex items-center justify-between py-2 px-6">
           <Link to="/" className="flex items-center gap-2 relative z-10">
             <EvoLogo size="sm" animate={false} showText />
           </Link>
 
           {/* Desktop links */}
-          <div className="hidden lg:flex items-center gap-6">
-            {links.map((l) => (
-              <Link
-                key={l.to}
-                to={l.to}
-                className={`text-sm transition-colors duration-200 ${
-                  location.pathname === l.to ? "text-primary" : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {l.label}
-              </Link>
-            ))}
+          <div className="hidden lg:flex items-center gap-7">
+            {links.map((l) => {
+              const active = location.pathname === l.to;
+              return (
+                <Link
+                  key={l.to}
+                  to={l.to}
+                  className={`relative text-xs font-medium uppercase tracking-widest transition-colors duration-200 group ${
+                    active ? "text-primary" : "text-slate-300 hover:text-[#00F2FE]"
+                  }`}
+                  style={{ color: active ? undefined : undefined }}
+                >
+                  {l.label}
+                  <span
+                    className={`pointer-events-none absolute left-0 right-0 -bottom-1 h-[2px] rounded-full transition-all duration-300 ${
+                      active ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                    }`}
+                    style={{
+                      background: "linear-gradient(90deg, transparent, #00F2FE, transparent)",
+                      boxShadow: "0 0 8px rgba(0, 242, 254, 0.7)",
+                    }}
+                  />
+                </Link>
+              );
+            })}
           </div>
+
 
           <div className="flex items-center gap-3">
             <ThemeToggle />
@@ -52,15 +75,37 @@ export function Navbar() {
               <div className="w-[100px]" />
             ) : user ? (
               <Link to="/dashboard">
-                <Button size="sm" variant="hero">Dashboard</Button>
+                <Button
+                  size="sm"
+                  variant="hero"
+                  className="rounded-full px-5 border border-cyan-300/30"
+                  style={{
+                    background: "linear-gradient(135deg, #00F2FE 0%, #7A5CFF 100%)",
+                    color: "#0a0f1e",
+                    boxShadow: "0 0 15px rgba(0, 242, 254, 0.3), inset 0 1px 0 rgba(255,255,255,0.25)",
+                  }}
+                >
+                  Dashboard
+                </Button>
               </Link>
             ) : (
               <>
                 <Link to="/auth" className="hidden sm:block">
-                  <Button variant="ghost" size="sm">Sign In</Button>
+                  <Button variant="ghost" size="sm" className="rounded-full text-slate-300 hover:text-[#00F2FE]">Sign In</Button>
                 </Link>
                 <Link to="/auth">
-                  <Button size="sm" variant="hero">Get Started</Button>
+                  <Button
+                    size="sm"
+                    variant="hero"
+                    className="rounded-full px-5 border border-cyan-300/30"
+                    style={{
+                      background: "linear-gradient(135deg, #00F2FE 0%, #7A5CFF 100%)",
+                      color: "#0a0f1e",
+                      boxShadow: "0 0 15px rgba(0, 242, 254, 0.3), inset 0 1px 0 rgba(255,255,255,0.25)",
+                    }}
+                  >
+                    Get Started
+                  </Button>
                 </Link>
               </>
             )}
