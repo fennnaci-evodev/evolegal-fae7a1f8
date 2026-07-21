@@ -193,23 +193,30 @@ export function HugoDemoBubble() {
 
   return (
     <>
-      {/* Floating trigger */}
-      <AnimatePresence>
-        {!open && (
-          <motion.button
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0, opacity: 0 }}
-            transition={{ delay: 2, type: "spring", stiffness: 260, damping: 20 }}
-            onClick={() => setOpen(true)}
-            className="fixed bottom-6 right-6 z-50 flex items-center justify-center h-14 w-14 rounded-full bg-primary shadow-lg hover:scale-110 transition-transform"
-            style={{ boxShadow: "0 0 28px hsla(186, 100%, 50%, 0.35)" }}
-            aria-label="Chat with Hugo"
+      {/* Floating trigger — Hugo Prism */}
+      {!open && (
+        <button
+          onClick={() => setOpen(true)}
+          className="hugo-prism"
+          aria-label="Chat with Hugo"
+        >
+          <span className="hugo-prism__glint" aria-hidden="true" />
+          <svg
+            className="hugo-prism__glyph"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
           >
-            <MessageCircle className="h-6 w-6 text-primary-foreground" />
-          </motion.button>
-        )}
-      </AnimatePresence>
+            <path d="M6 4v16" />
+            <path d="M18 4v16" />
+            <path d="M6 12h12" />
+          </svg>
+        </button>
+      )}
 
       {/* Chat window */}
       <AnimatePresence>
