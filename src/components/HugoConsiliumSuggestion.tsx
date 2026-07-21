@@ -19,7 +19,7 @@ export function HugoConsiliumSuggestion({ onAccept, onDismiss, loading }: HugoCo
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 6 }}
       transition={{ duration: 0.25, ease: "easeOut" }}
-      className="relative w-full max-w-full rounded-2xl border p-3 sm:p-3.5 flex items-start gap-3 backdrop-blur-md"
+      className="relative w-full max-w-full rounded-2xl border p-3 sm:p-3.5 flex items-start gap-3 bg-background/90"
       style={{
         borderColor: "hsla(270, 95%, 75%, 0.28)",
         background:

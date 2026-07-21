@@ -14,6 +14,8 @@ const STORAGE_KEY = "evo_theme";
 
 function applyThemeClass(theme: Theme) {
   const root = document.documentElement;
+  // Suppress all transitions during the swap to avoid layout thrash on every DOM node.
+  root.classList.add("no-transitions");
   if (theme === "light") {
     root.classList.add("light");
     root.classList.remove("dark");
@@ -24,7 +26,14 @@ function applyThemeClass(theme: Theme) {
     root.style.colorScheme = "dark";
   }
   root.setAttribute("data-theme", theme);
+  // Force a reflow, then remove on the next frame so styles apply instantly with 0ms lag.
+  // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+  root.offsetHeight;
+  requestAnimationFrame(() => {
+    root.classList.remove("no-transitions");
+  });
 }
+
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(() => {
