@@ -11,15 +11,15 @@ import { ArrowRight, PlayCircle, BookOpen, MessageCircle, Shield, Zap, Globe, Ch
 
 import { fadeUp } from "@/lib/animations";
 const offerings = [
-  { icon: PlayCircle, title: "Video Lectures", desc: "Expert-led explanations on key US & UK legal topics, broken down for real understanding." },
-  { icon: BookOpen, title: "Guides & Resources", desc: "Step-by-step guides, generic templates, and preparation toolkits with full context." },
-  { icon: MessageCircle, title: "Expert Consultations", desc: "Talk to Hugo and our team — fast, affordable, and always here to help." },
+  { icon: PlayCircle, title: "Contract Audit", desc: "Spot hidden risks and imbalanced clauses in seconds." },
+  { icon: BookOpen, title: "Clear Guides", desc: "Concise walkthroughs and templates you can actually use." },
+  { icon: MessageCircle, title: "Ask Hugo", desc: "A calm, articulate co-pilot for everyday legal questions." },
 ];
 
 const whyUs = [
-  { icon: Zap, title: "Instant Access", desc: "No waiting rooms. Get resources the moment you need them." },
-  { icon: Shield, title: "Fully Transparent", desc: "Clear pricing, no hidden fees, easy cancel anytime." },
-  { icon: Globe, title: "US & UK Focus", desc: "Unique dual-jurisdiction coverage — for US residents anywhere dealing with UK matters or general US topics." },
+  { icon: Zap, title: "Answers in Seconds", desc: "No waiting rooms. No bureaucracy." },
+  { icon: Shield, title: "Transparent", desc: "Flat pricing. Cancel anytime." },
+  { icon: Globe, title: "US & UK Coverage", desc: "Dual-jurisdiction clarity, built for Americans." },
 ];
 
 const topics = [
