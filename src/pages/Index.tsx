@@ -76,7 +76,7 @@ const Index = () => {
 
       {/* Hero */}
       <section className="relative pt-28 pb-20 md:pt-40 md:pb-32 px-6">
-        <div className="container mx-auto text-center relative z-10 max-w-4xl">
+        <div className="container mx-auto text-center relative z-10 max-w-5xl">
           <motion.div
             className="relative mb-10"
             initial={{ opacity: 0 }}
@@ -90,7 +90,27 @@ const Index = () => {
             className="text-3xl md:text-5xl lg:text-6xl font-display font-bold leading-tight mb-6 hero-headline-glow"
             initial="hidden" animate="visible" variants={fadeUp} custom={1}
           >
-            <span className="hero-neon-cycle hero-neon-emphasis">EVOLEGAL — THE FUTURE OF LEGAL INTELLIGENCE</span>
+            <span className="hero-neon-cycle hero-neon-emphasis">
+              EVOLEGAL
+              <span className="hero-logo-separator" aria-hidden="true">
+                <svg width="28" height="28" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <linearGradient id="hero-sep-main" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="hsl(186 100% 58%)" />
+                      <stop offset="50%" stopColor="hsl(186 100% 50%)" />
+                      <stop offset="100%" stopColor="hsl(195 100% 55%)" />
+                    </linearGradient>
+                    <linearGradient id="hero-sep-rim" x1="100%" y1="0%" x2="0%" y2="100%">
+                      <stop offset="0%" stopColor="hsla(270 80% 75% / 0.35)" />
+                      <stop offset="100%" stopColor="hsla(270 80% 75% / 0)" />
+                    </linearGradient>
+                  </defs>
+                  <path d="M22 10 L78 10 L78 23 L38 23 L38 43 L70 43 L70 56 L38 56 L38 77 L78 77 L78 90 L22 90 Z" fill="url(#hero-sep-main)" />
+                  <path d="M22 10 L78 10 L78 23 L38 23 L38 43 L70 43 L70 56 L38 56 L38 77 L78 77 L78 90 L22 90 Z" fill="url(#hero-sep-rim)" />
+                </svg>
+              </span>
+              THE FUTURE OF LEGAL INTELLIGENCE
+            </span>
           </motion.h1>
 
           <motion.div

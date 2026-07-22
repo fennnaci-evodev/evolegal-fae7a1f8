@@ -572,6 +572,31 @@ img,
           drop-shadow(0 0 64px hsla(270, 80%, 75%, 0.18));
 }
 
+.hero-logo-separator {
+  display: inline-block;
+  vertical-align: middle;
+  width: 28px;
+  height: 28px;
+  margin: 0 0.75rem;
+  transform: translate3d(0, -2px, 0) rotate(-33deg);
+  filter: drop-shadow(0 0 8px rgba(0, 234, 255, 0.45))
+          drop-shadow(0 0 18px rgba(192, 132, 252, 0.25));
+  will-change: transform;
+}
+
+html.light .hero-logo-separator {
+  filter: drop-shadow(0 0 6px rgba(0, 170, 200, 0.35))
+          drop-shadow(0 0 14px rgba(120, 80, 200, 0.18));
+}
+
+@media (max-width: 640px) {
+  .hero-logo-separator {
+    width: 20px;
+    height: 20px;
+    margin: 0 0.5rem;
+  }
+}
+
 html.light .hero-neon-emphasis {
   filter: drop-shadow(0 0 18px hsla(186, 90%, 32%, 0.18))
           drop-shadow(0 0 40px hsla(270, 60%, 45%, 0.12));
