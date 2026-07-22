@@ -12,7 +12,7 @@ const steps = [
     icon: FileText,
     number: "01",
     title: "Share Your Question",
-    desc: "Describe the topic you'd like to understand — share key facts, upload documents, and optionally select your state for context. Available for residents anywhere.",
+    desc: "Describe the topic you'd like to understand — share key facts, upload documents, and optionally select your state for context. Available for US residents anywhere.",
   },
   {
     icon: Search,
@@ -24,7 +24,7 @@ const steps = [
     icon: UserCheck,
     number: "03",
     title: "Expert Review & Delivery",
-    desc: "Every response is reviewed by an EvoLegal Expert for accuracy and completeness, then delivered to your portal. You will get your answer as soon as possible — it always depends on the complexity of your case.\u00a0",
+    desc: "Every response is reviewed by an EvoLegal Expert for accuracy and completeness, then delivered to your portal. You will get your answer as soon as possible — it always depends on the complexity of your case. Typical turnaround: 4 hours for Pro, 8 hours for Basic.",
   },
 ];
 
@@ -41,7 +41,7 @@ const HowItWorks = () => {
               How <span className="text-gradient">EvoLegal</span> Works
             </h1>
             <p className="text-lg text-muted-foreground max-w-lg mx-auto">
-              Three simple steps from question to clarity — Hugo and our Experts are here to help nationwide.
+              Three simple steps from question to clarity — Hugo and our Experts are here to help, for Americans nationwide.
             </p>
           </motion.div>
 
