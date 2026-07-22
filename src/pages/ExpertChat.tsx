@@ -476,7 +476,7 @@ const ExpertChat = () => {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
-              placeholder="Ask Hugo about a legal topic..."
+              placeholder="Ask Hugo anything…"
               className="chat-input-plain flex-1 bg-transparent border-0 resize-none text-sm placeholder:text-muted-foreground focus:outline-none leading-relaxed"
               disabled={streaming}
               rows={1}
