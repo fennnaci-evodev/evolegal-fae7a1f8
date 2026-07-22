@@ -486,7 +486,7 @@ export function HugoDemoBubble() {
               <Input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder={authLoading ? "Loading…" : "Ask me a question..."}
+                placeholder={authLoading ? "Loading…" : "Ask Hugo anything…"}
                 className="bg-transparent border-0 focus-visible:ring-0 text-sm"
                 disabled={streaming || authLoading}
               />
