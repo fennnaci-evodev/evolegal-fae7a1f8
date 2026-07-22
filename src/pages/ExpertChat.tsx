@@ -338,9 +338,9 @@ const ExpertChat = () => {
                 <HugoRecallBanner onResume={handleSelectChat} hidden={!!currentChatId} />
                 <ScalesOfJustice />
                 <div>
-                  <h3 className="text-lg font-display font-semibold mb-1">Talk to Hugo</h3>
+                  <h3 className="text-lg font-display font-semibold mb-1">Ask Hugo</h3>
                   <p className="text-xs text-muted-foreground max-w-sm">
-                    Ask about legal processes, terms, or concepts. Hugo provides detailed, structured insights.
+                    Legal clarity in seconds — calm, precise, actionable.
                   </p>
                 </div>
                 <HugoChatTopicChips onSelect={(q) => setInput(q)} />
@@ -476,7 +476,7 @@ const ExpertChat = () => {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
-              placeholder="Ask Hugo about a legal topic..."
+              placeholder="Ask Hugo anything…"
               className="chat-input-plain flex-1 bg-transparent border-0 resize-none text-sm placeholder:text-muted-foreground focus:outline-none leading-relaxed"
               disabled={streaming}
               rows={1}

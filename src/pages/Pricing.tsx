@@ -20,7 +20,7 @@ const plans = [
       "Basic articles & guides",
       "Generic document templates",
     ],
-    cta: "Start Free",
+    cta: "Get Started",
     highlight: false,
   },
   {

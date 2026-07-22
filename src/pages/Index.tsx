@@ -11,15 +11,15 @@ import { ArrowRight, PlayCircle, BookOpen, MessageCircle, Shield, Zap, Globe, Ch
 
 import { fadeUp } from "@/lib/animations";
 const offerings = [
-  { icon: PlayCircle, title: "Video Lectures", desc: "Expert-led explanations on key US & UK legal topics, broken down for real understanding." },
-  { icon: BookOpen, title: "Guides & Resources", desc: "Step-by-step guides, generic templates, and preparation toolkits with full context." },
-  { icon: MessageCircle, title: "Expert Consultations", desc: "Talk to Hugo and our team — fast, affordable, and always here to help." },
+  { icon: PlayCircle, title: "Contract Audit", desc: "Spot hidden risks and imbalanced clauses in seconds." },
+  { icon: BookOpen, title: "Clear Guides", desc: "Concise walkthroughs and templates you can actually use." },
+  { icon: MessageCircle, title: "Ask Hugo", desc: "A calm, articulate co-pilot for everyday legal questions." },
 ];
 
 const whyUs = [
-  { icon: Zap, title: "Instant Access", desc: "No waiting rooms. Get resources the moment you need them." },
-  { icon: Shield, title: "Fully Transparent", desc: "Clear pricing, no hidden fees, easy cancel anytime." },
-  { icon: Globe, title: "US & UK Focus", desc: "Unique dual-jurisdiction coverage — for US residents anywhere dealing with UK matters or general US topics." },
+  { icon: Zap, title: "Answers in Seconds", desc: "No waiting rooms. No bureaucracy." },
+  { icon: Shield, title: "Transparent", desc: "Flat pricing. Cancel anytime." },
+  { icon: Globe, title: "US & UK Coverage", desc: "Dual-jurisdiction clarity, built for Americans." },
 ];
 
 const topics = [
@@ -43,7 +43,7 @@ const plans = [
     period: "",
     desc: "Explore the basics",
     features: ["Unlimited articles", "3 videos/month", "1 short chat session/month", "Community resources"],
-    cta: "Start Free",
+    cta: "Get Started",
     highlight: false,
   },
   {
@@ -90,7 +90,7 @@ const Index = () => {
             className="text-3xl md:text-5xl lg:text-6xl font-display font-bold leading-tight mb-6 hero-headline-glow"
             initial="hidden" animate="visible" variants={fadeUp} custom={1}
           >
-            <span className="hero-neon-cycle">EVOLEGAL — THE FUTURE OF LEGAL INTELLIGENCE</span>
+            <span className="hero-neon-cycle">LEGAL CLARITY IN SECONDS.</span>
           </motion.h1>
 
           <motion.div
@@ -98,10 +98,10 @@ const Index = () => {
             initial="hidden" animate="visible" variants={fadeUp} custom={2}
           >
             <p className="text-base md:text-lg font-display font-medium hero-sub-glow leading-relaxed">
-              Talk to Hugo — Your Expert Manager for Clear Insights on US & English Law.
+              Scan contracts, uncover hidden risks, and get actionable answers — without the bureaucracy.
             </p>
             <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
-              We're here to help you understand your options clearly — video lectures, guides & expert support for Americans nationwide.
+              Hugo is your calm, articulate co-pilot for US & UK legal matters.
             </p>
           </motion.div>
 
@@ -111,12 +111,12 @@ const Index = () => {
           >
             <Link to="/auth">
               <Button variant="hero" size="xl">
-                Start Free <ArrowRight className="ml-2 h-5 w-5" />
+                Ask Hugo <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
-            <Link to="/blog/tenant-landlord-basics">
+            <Link to="/how-it-works">
               <Button variant="glass" size="xl">
-                See Samples
+                See How It Works
               </Button>
             </Link>
           </motion.div>
@@ -125,8 +125,9 @@ const Index = () => {
             className="text-xs text-muted-foreground/40"
             initial="hidden" animate="visible" variants={fadeUp} custom={4}
           >
-            Hugo & our Experts provide general informational resources and support.
+            General informational resources reviewed by EvoLegal Experts.
           </motion.p>
+
         </div>
       </section>
 
@@ -137,7 +138,7 @@ const Index = () => {
         <div className="container mx-auto max-w-6xl">
           <motion.div className="text-center mb-14" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
             <h2 className="text-3xl md:text-4xl font-display font-bold mb-3">What We Offer</h2>
-            <p className="text-muted-foreground max-w-md mx-auto">Resources to help you understand legal processes, terminology, and your options.</p>
+            <p className="text-muted-foreground max-w-md mx-auto">Everything you need to move forward with confidence.</p>
           </motion.div>
 
           <div className="grid md:grid-cols-3 gap-5">
@@ -163,7 +164,7 @@ const Index = () => {
         <div className="container mx-auto max-w-6xl">
           <motion.div className="text-center mb-14" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
             <h2 className="text-3xl md:text-4xl font-display font-bold mb-3">Why EvoLegal</h2>
-            <p className="text-muted-foreground max-w-md mx-auto">Simpler, faster, and more affordable than traditional platforms — for US residents anywhere.</p>
+            <p className="text-muted-foreground max-w-md mx-auto">Precision engineering meets effortless simplicity.</p>
           </motion.div>
 
           <div className="grid md:grid-cols-3 gap-5">
@@ -290,11 +291,11 @@ const Index = () => {
       <section className="py-20 px-6 relative z-10">
         <div className="container mx-auto max-w-2xl text-center">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
-            <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">Ready to Understand Your Rights?</h2>
-            <p className="text-muted-foreground mb-8">Join thousands gaining clarity on legal processes — start free today.</p>
+            <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">Clarity Is One Question Away.</h2>
+            <p className="text-muted-foreground mb-8">Start your first analysis in seconds. No card required.</p>
             <Link to="/auth">
               <Button variant="hero" size="xl">
-                Get Started Free <ArrowRight className="ml-2 h-5 w-5" />
+                Ask Hugo <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
           </motion.div>
