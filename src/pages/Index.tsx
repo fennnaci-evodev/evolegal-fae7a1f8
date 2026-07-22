@@ -164,7 +164,7 @@ const Index = () => {
         <div className="container mx-auto max-w-6xl">
           <motion.div className="text-center mb-14" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
             <h2 className="text-3xl md:text-4xl font-display font-bold mb-3">Why EvoLegal</h2>
-            <p className="text-muted-foreground max-w-md mx-auto">Simpler, faster, and more affordable than traditional platforms — for US residents anywhere.</p>
+            <p className="text-muted-foreground max-w-md mx-auto">Precision engineering meets effortless simplicity.</p>
           </motion.div>
 
           <div className="grid md:grid-cols-3 gap-5">
