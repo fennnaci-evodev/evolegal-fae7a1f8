@@ -83,7 +83,7 @@ const HowItWorks = () => {
             </p>
             <Link to="/auth">
               <Button variant="hero" size="lg">
-                Try It Now <ArrowRight className="ml-2 h-4 w-4" />
+                Ask Hugo <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
           </motion.div>
