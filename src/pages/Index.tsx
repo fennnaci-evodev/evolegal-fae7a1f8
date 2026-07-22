@@ -90,7 +90,7 @@ const Index = () => {
             className="text-3xl md:text-5xl lg:text-6xl font-display font-bold leading-tight mb-6 hero-headline-glow"
             initial="hidden" animate="visible" variants={fadeUp} custom={1}
           >
-            <span className="hero-neon-cycle">LEGAL CLARITY IN SECONDS.</span>
+            <span className="hero-neon-cycle uppercase tracking-widest">EVOLEGAL&nbsp;&mdash; THE FUTURE OF LEGAL INTELLIGENCE</span>
           </motion.h1>
 
           <motion.div
