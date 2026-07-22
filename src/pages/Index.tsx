@@ -291,11 +291,11 @@ const Index = () => {
       <section className="py-20 px-6 relative z-10">
         <div className="container mx-auto max-w-2xl text-center">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
-            <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">Ready to Understand Your Rights?</h2>
-            <p className="text-muted-foreground mb-8">Join thousands gaining clarity on legal processes — start free today.</p>
+            <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">Clarity Is One Question Away.</h2>
+            <p className="text-muted-foreground mb-8">Start your first analysis in seconds. No card required.</p>
             <Link to="/auth">
               <Button variant="hero" size="xl">
-                Get Started Free <ArrowRight className="ml-2 h-5 w-5" />
+                Ask Hugo <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
           </motion.div>
