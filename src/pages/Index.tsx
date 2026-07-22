@@ -43,7 +43,7 @@ const plans = [
     period: "",
     desc: "Explore the basics",
     features: ["Unlimited articles", "3 videos/month", "1 short chat session/month", "Community resources"],
-    cta: "Start Free",
+    cta: "Get Started",
     highlight: false,
   },
   {
