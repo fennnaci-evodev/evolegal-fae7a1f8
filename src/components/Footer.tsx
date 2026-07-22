@@ -28,7 +28,7 @@ export function Footer() {
           <div className="md:col-span-2">
             <EvoLogo size="sm" animate={false} showText />
             <p className="text-sm text-muted-foreground mt-4 max-w-sm leading-relaxed">
-              Clear insights on English (UK) law & US legal concepts. General education, preparation resources, and informational support for Americans nationwide.
+              Clear insights on English (UK) law & US legal concepts. General education, preparation resources, and informational support nationwide.
             </p>
           </div>
           {footerLinks.map((group) => (
