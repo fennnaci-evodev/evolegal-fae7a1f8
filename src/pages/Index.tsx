@@ -90,7 +90,7 @@ const Index = () => {
             className="text-3xl md:text-5xl lg:text-6xl font-display font-bold leading-tight mb-6 hero-headline-glow"
             initial="hidden" animate="visible" variants={fadeUp} custom={1}
           >
-            <span className="hero-neon-cycle">EVOLEGAL — THE FUTURE OF LEGAL INTELLIGENCE</span>
+            <span className="hero-neon-cycle">LEGAL CLARITY IN SECONDS.</span>
           </motion.h1>
 
           <motion.div
@@ -98,10 +98,10 @@ const Index = () => {
             initial="hidden" animate="visible" variants={fadeUp} custom={2}
           >
             <p className="text-base md:text-lg font-display font-medium hero-sub-glow leading-relaxed">
-              Talk to Hugo — Your Expert Manager for Clear Insights on US & English Law.
+              Scan contracts, uncover hidden risks, and get actionable answers — without the bureaucracy.
             </p>
             <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
-              We're here to help you understand your options clearly — video lectures, guides & expert support for Americans nationwide.
+              Hugo is your calm, articulate co-pilot for US & UK legal matters.
             </p>
           </motion.div>
 
@@ -111,12 +111,12 @@ const Index = () => {
           >
             <Link to="/auth">
               <Button variant="hero" size="xl">
-                Start Free <ArrowRight className="ml-2 h-5 w-5" />
+                Ask Hugo <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
-            <Link to="/blog/tenant-landlord-basics">
+            <Link to="/how-it-works">
               <Button variant="glass" size="xl">
-                See Samples
+                See How It Works
               </Button>
             </Link>
           </motion.div>
@@ -125,8 +125,9 @@ const Index = () => {
             className="text-xs text-muted-foreground/40"
             initial="hidden" animate="visible" variants={fadeUp} custom={4}
           >
-            Hugo & our Experts provide general informational resources and support.
+            General informational resources reviewed by EvoLegal Experts.
           </motion.p>
+
         </div>
       </section>
 
