@@ -76,7 +76,7 @@ const Index = () => {
 
       {/* Hero */}
       <section className="relative pt-28 pb-20 md:pt-40 md:pb-32 px-6">
-        <div className="container mx-auto text-center relative z-10 max-w-4xl">
+        <div className="container mx-auto text-center relative z-10 max-w-5xl">
           <motion.div
             className="relative mb-10"
             initial={{ opacity: 0 }}
