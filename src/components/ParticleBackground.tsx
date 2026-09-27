@@ -2,12 +2,20 @@ import { useEffect, useRef } from "react";
 import { useTheme } from "@/contexts/ThemeContext";
 
 type NeuralNode = {
-  x: number; y: number; vx: number; vy: number; radius: number;
-  depth: number; phase: number; driftRate: number; accent: boolean;
+  anchorX: number;
+  anchorY: number;
+  x: number;
+  y: number;
+  offsetX: number;
+  offsetY: number;
+  radius: number;
+  depth: number;
+  phase: number;
+  accent: boolean;
 };
 
 type NeuralLink = { from: number; to: number; strength: number; phase: number };
-type Signal = { linkIndex: number; progress: number; speed: number };
+type Signal = { linkIndex: number; progress: number; speed: number; delay: number };
 
 export function ParticleBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -22,9 +30,7 @@ export function ParticleBackground() {
     if (!ctx) return;
 
     let animationId = 0;
-    let lastFrame = 0;
     let lastDrawTime = 0;
-    let frame = 0;
     let width = window.innerWidth;
     let height = window.innerHeight;
     let nodes: NeuralNode[] = [];
@@ -39,46 +45,76 @@ export function ParticleBackground() {
 
     const createNodes = () => {
       const isMobile = width < 768;
-      const count = isMobile ? Math.max(24, Math.min(34, Math.floor(width / 12))) : Math.min(76, Math.floor(width / 20));
-      nodes = Array.from({ length: count }, (_, index) => {
-        const depth = 0.45 + Math.random() * 0.55;
-        const edgeBias = isMobile && index % 3 !== 0;
-        const x = edgeBias
-          ? (Math.random() < 0.5 ? Math.random() * width * 0.28 : width * (0.72 + Math.random() * 0.28))
-          : Math.random() * width;
+      const targetCount = isMobile
+        ? Math.max(24, Math.min(32, Math.floor(width / 13)))
+        : Math.min(72, Math.floor(width / 21));
+      const columns = Math.max(4, Math.round(Math.sqrt(targetCount * (width / height))));
+      const rows = Math.ceil(targetCount / columns);
+      const cellWidth = width / columns;
+      const cellHeight = height / rows;
+
+      nodes = Array.from({ length: targetCount }, (_, index) => {
+        const column = index % columns;
+        const row = Math.floor(index / columns);
+        const seed = ((index * 47) % 101) / 101;
+        const depth = 0.5 + (((index * 29) % 53) / 53) * 0.5;
+        const anchorX = (column + 0.5 + (seed - 0.5) * 0.42) * cellWidth;
+        const anchorY = (row + 0.5 + ((((index * 71) % 97) / 97) - 0.5) * 0.42) * cellHeight;
         return {
-          x,
-          y: Math.random() * height,
-          vx: (Math.random() - 0.5) * (isMobile ? 10 : 16) * depth,
-          vy: (Math.random() - 0.5) * (isMobile ? 8 : 12) * depth,
-          radius: 0.65 + depth * 1.15,
+          anchorX,
+          anchorY,
+          x: anchorX,
+          y: anchorY,
+          offsetX: 0,
+          offsetY: 0,
+          radius: 0.7 + depth * 1.05,
           depth,
-          phase: Math.random() * Math.PI * 2,
-          driftRate: 0.00018 + Math.random() * 0.00022,
-          accent: Math.random() > 0.76,
+          phase: seed * Math.PI * 2,
+          accent: index % 5 === 1,
         };
       });
     };
 
-    const buildLinks = () => {
+    const buildStableLinks = () => {
       const isMobile = width < 768;
-      const reach = isMobile ? 118 : 170;
+      const neighborCount = isMobile ? 2 : 3;
+      const edgeKeys = new Set<string>();
       const nextLinks: NeuralLink[] = [];
+
       nodes.forEach((node, from) => {
-        nodes
-          .map((candidate, to) => ({ to, distance: Math.hypot(node.x - candidate.x, node.y - candidate.y) }))
-          .filter(({ to, distance }) => to > from && distance < reach)
-          .sort((a, b) => a.distance - b.distance)
-          .slice(0, isMobile ? 2 : 3)
-          .forEach(({ to, distance }) => nextLinks.push({
-            from,
+        const nearest = nodes
+          .map((candidate, to) => ({
             to,
-            strength: 1 - distance / reach,
-            phase: ((from * 17 + to * 31) % 23) / 23 * Math.PI * 2,
-          }));
+            distance: Math.hypot(node.anchorX - candidate.anchorX, node.anchorY - candidate.anchorY),
+          }))
+          .filter(({ to }) => to !== from)
+          .sort((a, b) => a.distance - b.distance)
+          .slice(0, neighborCount);
+
+        nearest.forEach(({ to, distance }) => {
+          const low = Math.min(from, to);
+          const high = Math.max(from, to);
+          const key = `${low}:${high}`;
+          if (edgeKeys.has(key)) return;
+          edgeKeys.add(key);
+          const expectedSpacing = Math.hypot(width / Math.max(4, Math.round(Math.sqrt(nodes.length * (width / height)))), height / Math.ceil(nodes.length / Math.max(4, Math.round(Math.sqrt(nodes.length * (width / height))))));
+          nextLinks.push({
+            from: low,
+            to: high,
+            strength: Math.max(0.28, 1 - distance / (expectedSpacing * 1.8)),
+            phase: ((low * 17 + high * 31) % 23) / 23 * Math.PI * 2,
+          });
+        });
       });
+
       links = nextLinks;
-      signals = signals.filter(({ linkIndex }) => linkIndex < links.length);
+      const signalCount = isMobile ? 4 : 8;
+      signals = Array.from({ length: signalCount }, (_, index) => ({
+        linkIndex: links.length ? (index * 7) % links.length : 0,
+        progress: (index / signalCount) * 0.9,
+        speed: 0.075 + (index % 4) * 0.009,
+        delay: index * 0.35,
+      }));
     };
 
     const resize = () => {
@@ -91,7 +127,7 @@ export function ParticleBackground() {
       canvas.style.height = `${height}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       createNodes();
-      buildLinks();
+      buildStableLinks();
     };
     resize();
     window.addEventListener("resize", resize);
@@ -106,54 +142,73 @@ export function ParticleBackground() {
     window.addEventListener("pointermove", onPointerMove, { passive: true });
     document.documentElement.addEventListener("pointerleave", onPointerLeave);
 
+    const positionNodes = (time: number, moving: boolean) => {
+      const seconds = time / 1000;
+      nodes.forEach((node, index) => {
+        const localPhase = node.phase + index * 0.11;
+        const sharedX = Math.sin(seconds * 0.115) * 5.5;
+        const sharedY = Math.cos(seconds * 0.09) * 4;
+        const localX = moving ? Math.sin(seconds * (0.16 + node.depth * 0.035) + localPhase) * (5 + node.depth * 4) : 0;
+        const localY = moving ? Math.cos(seconds * (0.13 + node.depth * 0.03) + localPhase * 0.83) * (4 + node.depth * 3) : 0;
+        let targetOffsetX = 0;
+        let targetOffsetY = 0;
+
+        if (moving && pointer.active) {
+          const naturalX = node.anchorX + sharedX + localX;
+          const naturalY = node.anchorY + sharedY + localY;
+          const dx = naturalX - pointer.x;
+          const dy = naturalY - pointer.y;
+          const distance = Math.hypot(dx, dy);
+          if (distance > 0 && distance < 140) {
+            const force = (1 - distance / 140) * 15;
+            targetOffsetX = (dx / distance) * force;
+            targetOffsetY = (dy / distance) * force;
+          }
+        }
+
+        node.offsetX += (targetOffsetX - node.offsetX) * 0.075;
+        node.offsetY += (targetOffsetY - node.offsetY) * 0.075;
+        node.x = node.anchorX + (moving ? sharedX + localX : 0) + node.offsetX;
+        node.y = node.anchorY + (moving ? sharedY + localY : 0) + node.offsetY;
+      });
+    };
+
     const draw = (time: number, moving: boolean, deltaSeconds = 0) => {
       ctx.clearRect(0, 0, width, height);
       const isLight = themeRef.current === "light";
       const isMobile = width < 768;
-
-      if (moving) nodes.forEach((node) => {
-        const curveX = Math.sin(time * node.driftRate + node.phase) * 2.4 * node.depth;
-        const curveY = Math.cos(time * node.driftRate * 0.82 + node.phase) * 1.8 * node.depth;
-        node.x += (node.vx + curveX) * deltaSeconds;
-        node.y += (node.vy + curveY) * deltaSeconds;
-        if (node.x < -8) node.x = width + 8;
-        if (node.x > width + 8) node.x = -8;
-        if (node.y < -8) node.y = height + 8;
-        if (node.y > height + 8) node.y = -8;
-        if (pointer.active) {
-          const dx = node.x - pointer.x;
-          const dy = node.y - pointer.y;
-          const distance = Math.hypot(dx, dy);
-          if (distance > 0 && distance < 130) {
-            node.x += (dx / distance) * 0.18;
-            node.y += (dy / distance) * 0.18;
-          }
-        }
-      });
+      positionNodes(time, moving);
 
       links.forEach((link) => {
         const from = nodes[link.from];
         const to = nodes[link.to];
         if (!from || !to) return;
+        const currentDistance = Math.hypot(from.x - to.x, from.y - to.y);
+        const distanceFade = Math.max(0.55, 1 - currentDistance / (isMobile ? 230 : 320));
+        const breath = moving ? 0.82 + Math.sin(time * 0.00055 + link.phase) * 0.08 : 0.82;
         ctx.beginPath();
         ctx.moveTo(from.x, from.y);
         ctx.lineTo(to.x, to.y);
-        const breath = moving ? 0.72 + (Math.sin(time * 0.0011 + link.phase) + 1) * 0.14 : 0.85;
-        ctx.strokeStyle = color("--primary", link.strength * breath * (isLight ? 0.13 : isMobile ? 0.22 : 0.18));
+        ctx.strokeStyle = color("--primary", link.strength * distanceFade * breath * (isLight ? 0.15 : isMobile ? 0.24 : 0.2));
         ctx.lineWidth = 0.55 + link.strength * 0.45;
         ctx.stroke();
       });
 
-      if (moving && links.length && signals.length < (isMobile ? 4 : 8) && Math.random() < 0.045) {
-        signals.push({ linkIndex: Math.floor(Math.random() * links.length), progress: 0, speed: 0.12 + Math.random() * 0.08 });
-      }
-
-      signals = signals.filter((signal) => {
+      signals.forEach((signal) => {
+        if (!moving || !links.length) return;
+        signal.delay -= deltaSeconds;
+        if (signal.delay > 0) return;
         const link = links[signal.linkIndex];
-        if (!link) return false;
+        if (!link) return;
         const from = nodes[link.from];
         const to = nodes[link.to];
-        signal.progress += signal.speed * deltaSeconds * (isMobile ? 0.82 : 1);
+        signal.progress += signal.speed * deltaSeconds;
+        if (signal.progress >= 1) {
+          signal.progress = 0;
+          signal.delay = 0.35 + ((signal.linkIndex * 13) % 8) * 0.08;
+          signal.linkIndex = (signal.linkIndex + 7) % links.length;
+          return;
+        }
         const x = from.x + (to.x - from.x) * signal.progress;
         const y = from.y + (to.y - from.y) * signal.progress;
         const glow = ctx.createRadialGradient(x, y, 0, x, y, isMobile ? 7 : 9);
@@ -164,12 +219,11 @@ export function ParticleBackground() {
         ctx.beginPath();
         ctx.arc(x, y, isMobile ? 7 : 9, 0, Math.PI * 2);
         ctx.fill();
-        return signal.progress < 1;
       });
 
       nodes.forEach((node) => {
-        const pulse = moving ? (Math.sin(time * 0.00075 + node.phase) + 1) * 0.5 : 0.45;
-        const alpha = (isLight ? 0.28 : 0.44) * node.depth + pulse * 0.12;
+        const pulse = moving ? (Math.sin(time * 0.00065 + node.phase) + 1) * 0.5 : 0.45;
+        const alpha = (isLight ? 0.28 : 0.44) * node.depth + pulse * 0.1;
         if (node.depth > 0.78) {
           const glowRadius = node.radius * 5.5;
           const glow = ctx.createRadialGradient(node.x, node.y, 0, node.x, node.y, glowRadius);
@@ -188,13 +242,10 @@ export function ParticleBackground() {
     };
 
     const animate = (time: number) => {
-      const targetInterval = width < 768 ? 1000 / 30 : 1000 / 50;
-      if (time - lastFrame >= targetInterval) {
-        const deltaSeconds = lastDrawTime ? Math.min((time - lastDrawTime) / 1000, 0.05) : targetInterval / 1000;
-        lastFrame = time;
+      const targetInterval = width < 768 ? 1000 / 40 : 1000 / 60;
+      if (time - lastDrawTime >= targetInterval) {
+        const deltaSeconds = lastDrawTime ? Math.min((time - lastDrawTime) / 1000, 0.04) : targetInterval / 1000;
         lastDrawTime = time;
-        frame += 1;
-        if (frame % 12 === 0) buildLinks();
         draw(time, true, deltaSeconds);
       }
       animationId = requestAnimationFrame(animate);
@@ -209,7 +260,6 @@ export function ParticleBackground() {
       if (document.hidden) {
         cancelAnimationFrame(animationId);
       } else {
-        lastFrame = 0;
         lastDrawTime = 0;
         animationId = requestAnimationFrame(animate);
       }
