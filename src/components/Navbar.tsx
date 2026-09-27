@@ -2,7 +2,18 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Menu, X } from "lucide-react";
+import {
+  BadgeDollarSign,
+  BriefcaseBusiness,
+  ChevronRight,
+  CircleHelp,
+  LogIn,
+  Mail,
+  Menu,
+  Newspaper,
+  Workflow,
+  X,
+} from "lucide-react";
 import { EvoLogo } from "./EvoLogo";
 import { useAuth } from "@/hooks/useAuth";
 import { AdminModeToggle } from "./AdminModeToggle";
@@ -10,12 +21,12 @@ import { ThemeToggle } from "./ThemeToggle";
 import { BackButton } from "./BackButton";
 
 const links = [
-  { label: "How It Works", to: "/how-it-works" },
-  { label: "Services", to: "/services" },
-  { label: "Pricing", to: "/pricing" },
-  { label: "Blog", to: "/blog" },
-  { label: "FAQ", to: "/faq" },
-  { label: "Contact", to: "/contact" },
+  { label: "How It Works", to: "/how-it-works", icon: Workflow },
+  { label: "Services", to: "/services", icon: BriefcaseBusiness },
+  { label: "Pricing", to: "/pricing", icon: BadgeDollarSign },
+  { label: "Blog", to: "/blog", icon: Newspaper },
+  { label: "FAQ", to: "/faq", icon: CircleHelp },
+  { label: "Contact", to: "/contact", icon: Mail },
 ];
 
 export function Navbar() {
@@ -87,12 +98,18 @@ export function Navbar() {
                 </Link>
               </>
             )}
-            <button
-              className="lg:hidden p-2 text-muted-foreground hover:text-foreground transition-colors"
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="lg:hidden h-10 w-10 rounded-full border border-border/60 bg-muted/30 text-muted-foreground hover:bg-muted/60 hover:text-foreground"
               onClick={() => setMobileOpen(!mobileOpen)}
+              aria-label={mobileOpen ? "Close navigation" : "Open navigation"}
+              aria-expanded={mobileOpen}
+              aria-controls="mobile-navigation"
             >
               {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </button>
+            </Button>
           </div>
         </div>
       </nav>
@@ -101,39 +118,67 @@ export function Navbar() {
       {/* Mobile menu */}
       <AnimatePresence>
         {mobileOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="fixed top-16 left-0 right-0 z-40 glass-strong p-6 lg:hidden"
-            style={{ borderRadius: "0 0 1.25rem 1.25rem" }}
-          >
-            <div className="flex flex-col gap-3">
-              {links.map((l) => (
-                <Link
-                  key={l.to}
-                  to={l.to}
-                  onClick={() => setMobileOpen(false)}
-                  className={`py-2 px-3 rounded-lg text-sm transition-colors ${
-                    location.pathname === l.to
-                      ? "text-primary bg-primary/5"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/30"
-                  }`}
-                >
-                  {l.label}
-                </Link>
-              ))}
-              {!loading && user ? (
-                <Link to="/dashboard" onClick={() => setMobileOpen(false)}>
-                  <Button variant="hero" className="w-full" size="sm">Dashboard</Button>
-                </Link>
-              ) : (
-                <Link to="/auth" onClick={() => setMobileOpen(false)}>
-                  <Button variant="ghost" className="w-full justify-start" size="sm">Sign In</Button>
-                </Link>
-              )}
-            </div>
-          </motion.div>
+          <div className="fixed inset-0 z-40 lg:hidden">
+            <motion.button
+              type="button"
+              aria-label="Close navigation"
+              className="absolute inset-0 top-[65px] bg-background/60 backdrop-blur-[2px]"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.18 }}
+              onClick={() => setMobileOpen(false)}
+            />
+            <motion.div
+              id="mobile-navigation"
+              role="dialog"
+              aria-label="Main navigation"
+              initial={{ opacity: 0, y: -10, scale: 0.985 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -8, scale: 0.985 }}
+              transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+              className="mobile-nav-panel absolute left-3 right-3 top-[76px] overflow-hidden"
+            >
+              <div className="grid grid-cols-2 gap-2 p-3">
+                {links.map((l) => {
+                  const active = location.pathname === l.to;
+                  return (
+                    <Link
+                      key={l.to}
+                      to={l.to}
+                      data-active={active}
+                      onClick={() => setMobileOpen(false)}
+                      className="mobile-nav-item group"
+                    >
+                      <span className="mobile-nav-icon">
+                        <l.icon className="h-[18px] w-[18px]" />
+                      </span>
+                      <span className="min-w-0 flex-1 leading-tight">{l.label}</span>
+                      <ChevronRight className="h-4 w-4 shrink-0 opacity-40 transition-transform group-hover:translate-x-0.5 group-data-[active=true]:text-primary" />
+                    </Link>
+                  );
+                })}
+              </div>
+
+              <div className="border-t border-border/60 p-3">
+                {!loading && user ? (
+                  <Link to="/dashboard" onClick={() => setMobileOpen(false)}>
+                    <Button className="cyber-button cyber-cta h-11 w-full justify-between px-4" size="sm">
+                      Dashboard
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </Link>
+                ) : (
+                  <Link to="/auth" onClick={() => setMobileOpen(false)}>
+                    <Button variant="ghost" className="mobile-nav-signin h-11 w-full justify-between px-4" size="sm">
+                      <span className="flex items-center gap-2.5"><LogIn className="h-4 w-4" />Sign In</span>
+                      <ChevronRight className="h-4 w-4 opacity-50" />
+                    </Button>
+                  </Link>
+                )}
+              </div>
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
     </>
