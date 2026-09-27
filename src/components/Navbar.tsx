@@ -119,16 +119,17 @@ export function Navbar() {
       <AnimatePresence>
         {mobileOpen && (
           <div className="fixed inset-0 z-40 lg:hidden">
-            <motion.button
-              type="button"
-              aria-label="Close navigation"
-              className="absolute inset-0 top-[65px] bg-background/60 backdrop-blur-[2px]"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.18 }}
-              onClick={() => setMobileOpen(false)}
-            />
+            <Button asChild variant="ghost" className="absolute inset-x-0 bottom-0 top-[65px] h-auto w-auto rounded-none bg-background/60 p-0 backdrop-blur-[2px] hover:bg-background/60">
+              <motion.button
+                type="button"
+                aria-label="Close navigation"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.18 }}
+                onClick={() => setMobileOpen(false)}
+              />
+            </Button>
             <motion.div
               id="mobile-navigation"
               role="dialog"
