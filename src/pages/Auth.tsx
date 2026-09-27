@@ -140,10 +140,10 @@ const Auth = () => {
             <EvoLogo size="sm" animate={false} showText />
           </Link>
           <h1 className="text-xl font-display font-semibold">
-            {isSignUp ? "Create your account" : "Welcome back"}
+            {isSignUp ? "Create Your Workspace" : "Access Your Workspace"}
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {isSignUp ? "Start accessing expert legal insights" : "Sign in to continue"}
+            {isSignUp ? "Run structured analyses and retain review history" : "Resume analyses, documents, and expert reviews"}
           </p>
         </div>
 

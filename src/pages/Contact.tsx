@@ -26,7 +26,7 @@ const Contact = () => {
     setSending(true);
     setTimeout(() => {
       setSending(false);
-      toast.success("Message sent! We'll get back to you soon.");
+      toast.success("Message logged. Our team will respond shortly.");
     }, 1500);
   };
 
@@ -39,10 +39,10 @@ const Contact = () => {
         <div className="container mx-auto max-w-2xl">
           <motion.div className="text-center mb-12" initial="hidden" animate="visible" variants={fadeUp} custom={0}>
             <h1 className="text-4xl md:text-5xl font-display font-bold mb-4">
-              Get in <span className="text-gradient">Touch</span>
+               Contact <span className="text-gradient">EvoLegal</span>
             </h1>
             <p className="text-lg text-muted-foreground">
-              Questions about our services? We'd love to hear from you.
+               Submit a platform, account, or service inquiry for review.
             </p>
           </motion.div>
 
@@ -57,7 +57,7 @@ const Contact = () => {
               </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <MessageSquare className="h-4 w-4 text-accent" />
-                <span>Live chat available</span>
+                 <span>Hugo Co-Pilot available</span>
               </div>
             </div>
 
@@ -78,15 +78,15 @@ const Contact = () => {
               </div>
               <div className="space-y-2">
                 <Label className="text-sm">Subject</Label>
-                <Input placeholder="How can we help?" className="bg-muted/30 border-border/50" required maxLength={200} />
+                 <Input placeholder="Define the inquiry" className="bg-muted/30 border-border/50" required maxLength={200} />
               </div>
               <div className="space-y-2">
                 <Label className="text-sm">Message</Label>
-                <Textarea placeholder="Tell us more..." rows={5} className="bg-muted/30 border-border/50 resize-none" required maxLength={2000} />
+                 <Textarea placeholder="Provide the relevant context…" rows={5} className="bg-muted/30 border-border/50 resize-none" required maxLength={2000} />
               </div>
 
               <Button type="submit" variant="hero" size="lg" className="w-full" disabled={sending}>
-                {sending ? "Sending..." : <>Send Message <Send className="ml-2 h-4 w-4" /></>}
+                 {sending ? "Submitting…" : <>Submit Inquiry <Send className="ml-2 h-4 w-4" /></>}
               </Button>
             </form>
 

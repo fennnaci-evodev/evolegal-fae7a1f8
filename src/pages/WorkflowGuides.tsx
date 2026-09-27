@@ -27,31 +27,31 @@ const WORKFLOWS: Workflow[] = [
   {
     id: "crypto-token",
     title: "Crypto Token Classification",
-    description: "Understand how tokens are classified under US and UK law — security vs. utility vs. payment token.",
+    description: "Classify tokens under US and UK frameworks: security, utility, or payment token.",
     systemContext: "Guide the user step-by-step through crypto token classification. Start by asking what kind of token they're interested in (utility, payment, security, governance, NFT). Then walk through the Howey Test (US) and UK FCA classification framework, comparing both. Ask clarifying questions at each step. Keep it conversational, no markdown formatting.",
   },
   {
     id: "defi-compliance",
     title: "DeFi Compliance Steps",
-    description: "Walk through the general compliance considerations for DeFi protocols in the US and UK.",
+    description: "Audit general compliance considerations for DeFi protocols in the US and UK.",
     systemContext: "Guide the user through DeFi compliance considerations step by step. Cover AML/KYC obligations, SEC/CFTC considerations in the US, FCA guidance in the UK, smart contract audit expectations, and governance token implications. Ask what type of DeFi activity they're exploring before diving in. Conversational prose only.",
   },
   {
     id: "nft-ownership",
     title: "NFT Ownership & IP Process",
-    description: "Learn about NFT ownership rights, IP licensing, and what buying an NFT actually gives you legally.",
+    description: "Extract NFT ownership rights, IP licensing terms, and legal limitations.",
     systemContext: "Walk the user through NFT ownership and intellectual property step by step. Cover what ownership of an NFT means legally, difference between owning the token and owning the underlying IP, common licensing models (CC0, commercial rights, restricted), and dispute resolution. Ask the user about their specific situation. Conversational prose only.",
   },
   {
     id: "tenant-eviction",
     title: "Tenant Eviction Process Overview",
-    description: "Understand the general eviction process for tenants in the US and UK, step by step.",
+    description: "Map the general eviction process and key procedural stages in the US and UK.",
     systemContext: "Guide the user through the general eviction process. Start by asking whether they're a tenant or landlord, and whether this is a US or UK situation. Then walk through notice requirements, grounds for eviction, court process, tenant rights and defenses, and timeline expectations. Compare US state-level variations with UK Housing Act provisions. Conversational prose only.",
   },
   {
     id: "personal-injury",
     title: "Personal Injury Claim Workflow",
-    description: "Walk through the typical stages of filing and pursuing a personal injury claim.",
+    description: "Map the typical stages, evidence requirements, and decision points in a personal injury claim.",
     systemContext: "Guide the user through the personal injury claim process step by step. Ask about the type of injury and jurisdiction first. Cover duty of care, establishing negligence, limitation periods (US statutes vs UK Limitation Act), gathering evidence, insurance interactions, settlement vs trial, and compensation types. Conversational prose only.",
   },
 ];
@@ -169,7 +169,7 @@ const WorkflowGuides = () => {
               <BookOpen className="h-6 w-6 text-primary" />
               <h1 className="text-2xl font-display font-bold">Workflow Guides</h1>
             </div>
-            <p className="text-sm text-muted-foreground">Hugo will guide you step-by-step through common legal processes. Choose a workflow to begin.</p>
+            <p className="text-sm text-muted-foreground">Run a structured review of common legal processes and decision points.</p>
           </motion.div>
 
           <div className="grid gap-4 sm:grid-cols-2">
@@ -205,7 +205,7 @@ const WorkflowGuides = () => {
           <HugoAvatar size={56} />
           <div className="flex-1">
             <h2 className="font-display font-semibold text-sm">{activeWorkflow.title}</h2>
-            <p className="text-xs text-muted-foreground">Guided by Hugo · step-by-step</p>
+            <p className="text-xs text-muted-foreground">Hugo Co-Pilot · structured workflow</p>
           </div>
           <Button variant="ghost" size="sm" onClick={() => { setActiveWorkflow(null); setMessages([]); }} className="text-xs text-muted-foreground">
             ← All Guides
@@ -251,7 +251,7 @@ const WorkflowGuides = () => {
           <Input
             value={input}
             onChange={e => setInput(e.target.value)}
-            placeholder="Answer Hugo's question or ask for more detail..."
+             placeholder="Add facts or request further analysis…"
             className="bg-transparent border-0 focus-visible:ring-0"
             disabled={loading}
             aria-label="Workflow chat input"
