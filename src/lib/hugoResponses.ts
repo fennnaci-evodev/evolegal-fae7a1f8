@@ -23,7 +23,7 @@ const FUN_PATTERNS = [
 
 const FUN_RESPONSES = [
   `Ha — you know, if I weren't so busy reading case law, I'd probably have a great stand-up career. But between you and me, my real talent is making complex legal concepts feel approachable. Got a legal topic on your mind? I'd love to dig into it with you.`,
-  `I appreciate the lighter side of conversation — honestly, it keeps me sharp. That said, I'm at my absolute best when we're working through something that actually matters to you. Tenant questions, crypto regulations, family law — throw anything at me and I'll give you the clearest picture I can.`,
+  `I appreciate the lighter side of conversation — honestly, it keeps me sharp. That said, I'm most effective when we're working through something that actually matters to you. Tenant questions, crypto regulations, family law — throw anything at me and I'll give you the clearest picture I can.`,
   `You know, I could probably tell you a decent joke, but I think you'd get a lot more value if I helped you untangle something that's been on your mind legally. What do you say — anything you've been curious about?`,
   `I like the energy! But I'll be honest, my comedy material is mostly contract clauses and statutory interpretation — niche audience, let's say. What I'm genuinely good at is making legal topics feel clear and manageable. Want to try me?`,
   `That made me smile. I'm happy to chat, but I'm really in my element when we're exploring legal questions together. Got something on your mind? Big or small, I'm here for it.`,
@@ -35,7 +35,7 @@ const GREETING_PATTERNS = [
 ];
 
 const GREETING_RESPONSES = [
-  `Hey there! Great to see you. I'm Hugo, your Expert Manager here at EvoLegal. I'm ready whenever you are — feel free to ask me about any legal topic, from tenant rights to crypto regulations, family law, personal injury, or anything else. What's on your mind?`,
+  `Hey there! Great to see you. I'm Hugo, your Legal Analysis Co-Pilot here at EvoLegal. I'm ready whenever you are — feel free to ask me about any legal topic, from tenant rights to crypto regulations, family law, personal injury, or anything else. What's on your mind?`,
   `Hello! Welcome — I'm Hugo. Whether you've got a quick question or something more involved, I'm here to walk you through it clearly and thoroughly. What would you like to explore today?`,
   `Hi! I'm Hugo — glad you're here. I cover everything from UK tenancy law to US personal injury to crypto regulation, and I genuinely enjoy untangling these things. What can I help with?`,
 ];

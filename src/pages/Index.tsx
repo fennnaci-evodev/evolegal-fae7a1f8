@@ -10,6 +10,7 @@ import { HugoDemoBubble } from "@/components/HugoDemoBubble";
 import { ArrowRight, PlayCircle, BookOpen, MessageCircle, Shield, Zap, Globe, Check, ChevronRight } from "lucide-react";
 
 import { fadeUp } from "@/lib/animations";
+import { PRODUCT_PLANS } from "@/lib/pricing";
 const offerings = [
   { icon: PlayCircle, title: "Contract Audit", desc: "Isolate material exposure and non-standard terms with structured analysis." },
   { icon: BookOpen, title: "Audit Resources", desc: "Apply concise frameworks, checklists, and controlled templates." },
@@ -34,37 +35,6 @@ const sampleContent = [
   { title: "5 Key Differences: NY vs UK Tenant Rights", type: "Article", duration: "5 min read", free: true, to: "/blog" },
   { title: "What Happens in a NY Family Court Hearing?", type: "Video", duration: "12 min", free: true, to: "/blog" },
   { title: "Understanding Your UK Tenancy Agreement", type: "Guide", duration: "6 min read", free: true, to: "/blog" },
-];
-
-const plans = [
-  {
-    name: "Free",
-    price: "$0",
-    period: "",
-    desc: "Core access",
-    features: ["Unlimited articles", "3 videos/month", "1 short chat session/month", "Community resources"],
-    cta: "Activate Free",
-    highlight: false,
-  },
-  {
-    name: "Basic",
-    price: "$24",
-    period: "/mo",
-    desc: "Essential access",
-    features: ["Unlimited videos & articles", "3 request submissions/month", "Basic Client Portal", "Email support", "Generic templates"],
-    cta: "Select Basic",
-    highlight: true,
-  },
-  {
-    name: "Pro",
-    price: "$59",
-    period: "/mo",
-    desc: "Advanced analysis",
-    features: ["Everything in Basic", "Unlimited submissions", "Priority ~4h turnaround", "Deep-dive exclusive content", "Full Case File portal", "Human Expert consultations"],
-    cta: "Select Pro",
-    highlight: false,
-    annual: "$499/year (save 20%)",
-  },
 ];
 
 const Index = () => {
@@ -248,26 +218,25 @@ const Index = () => {
             <p className="text-muted-foreground">Defined limits, transparent rates, and flexible plan control.</p>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-5">
-            {plans.map((plan, i) => (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {PRODUCT_PLANS.map((plan, i) => (
               <motion.div
                 key={plan.name}
-                className={`glass-card p-7 pt-8 flex flex-col relative overflow-visible ${plan.highlight ? "gradient-border glow-cyan" : ""}`}
+                className={`glass-card p-7 pt-8 flex flex-col relative overflow-visible ${plan.highlighted ? "gradient-border glow-cyan" : ""}`}
                 initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i + 1}
               >
-                {plan.highlight && (
+                {plan.highlighted && (
                   <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-primary text-primary-foreground text-[11px] font-semibold whitespace-nowrap z-10 shadow-lg">
                     Most Popular
                   </span>
                 )}
                 <h3 className="text-lg font-display font-bold mb-1">{plan.name}</h3>
-                <p className="text-xs text-muted-foreground mb-4">{plan.desc}</p>
+                <p className="text-xs text-muted-foreground mb-4">{plan.description}</p>
                 <div className="mb-1">
                   <span className="text-4xl font-display font-bold">{plan.price}</span>
                   <span className="text-muted-foreground text-sm">{plan.period}</span>
                 </div>
-                {plan.annual && <p className="text-xs text-primary mb-4">{plan.annual}</p>}
-                {!plan.annual && <div className="mb-4" />}
+                <div className="mb-4" />
                 <ul className="space-y-2.5 flex-1 mb-6">
                   {plan.features.map((f) => (
                     <li key={f} className="flex items-start gap-2 text-sm">
@@ -277,7 +246,7 @@ const Index = () => {
                   ))}
                 </ul>
                 <Link to="/auth">
-                  <Button className="w-full" variant={plan.highlight ? "hero" : "outline"} size="lg">
+                  <Button className="w-full" variant={plan.highlighted ? "hero" : "outline"} size="lg">
                     {plan.cta}
                   </Button>
                 </Link>
