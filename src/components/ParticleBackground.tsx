@@ -3,10 +3,10 @@ import { useTheme } from "@/contexts/ThemeContext";
 
 type NeuralNode = {
   x: number; y: number; vx: number; vy: number; radius: number;
-  depth: number; phase: number; accent: boolean;
+  depth: number; phase: number; driftRate: number; accent: boolean;
 };
 
-type NeuralLink = { from: number; to: number; strength: number };
+type NeuralLink = { from: number; to: number; strength: number; phase: number };
 type Signal = { linkIndex: number; progress: number; speed: number };
 
 export function ParticleBackground() {
@@ -23,6 +23,7 @@ export function ParticleBackground() {
 
     let animationId = 0;
     let lastFrame = 0;
+    let lastDrawTime = 0;
     let frame = 0;
     let width = window.innerWidth;
     let height = window.innerHeight;
@@ -48,11 +49,12 @@ export function ParticleBackground() {
         return {
           x,
           y: Math.random() * height,
-          vx: (Math.random() - 0.5) * (isMobile ? 0.09 : 0.16) * depth,
-          vy: (Math.random() - 0.5) * (isMobile ? 0.07 : 0.12) * depth,
+          vx: (Math.random() - 0.5) * (isMobile ? 10 : 16) * depth,
+          vy: (Math.random() - 0.5) * (isMobile ? 8 : 12) * depth,
           radius: 0.65 + depth * 1.15,
           depth,
           phase: Math.random() * Math.PI * 2,
+          driftRate: 0.00018 + Math.random() * 0.00022,
           accent: Math.random() > 0.76,
         };
       });
@@ -68,7 +70,12 @@ export function ParticleBackground() {
           .filter(({ to, distance }) => to > from && distance < reach)
           .sort((a, b) => a.distance - b.distance)
           .slice(0, isMobile ? 2 : 3)
-          .forEach(({ to, distance }) => nextLinks.push({ from, to, strength: 1 - distance / reach }));
+          .forEach(({ to, distance }) => nextLinks.push({
+            from,
+            to,
+            strength: 1 - distance / reach,
+            phase: ((from * 17 + to * 31) % 23) / 23 * Math.PI * 2,
+          }));
       });
       links = nextLinks;
       signals = signals.filter(({ linkIndex }) => linkIndex < links.length);
@@ -99,14 +106,16 @@ export function ParticleBackground() {
     window.addEventListener("pointermove", onPointerMove, { passive: true });
     document.documentElement.addEventListener("pointerleave", onPointerLeave);
 
-    const draw = (time: number, moving: boolean) => {
+    const draw = (time: number, moving: boolean, deltaSeconds = 0) => {
       ctx.clearRect(0, 0, width, height);
       const isLight = themeRef.current === "light";
       const isMobile = width < 768;
 
       if (moving) nodes.forEach((node) => {
-        node.x += node.vx;
-        node.y += node.vy;
+        const curveX = Math.sin(time * node.driftRate + node.phase) * 2.4 * node.depth;
+        const curveY = Math.cos(time * node.driftRate * 0.82 + node.phase) * 1.8 * node.depth;
+        node.x += (node.vx + curveX) * deltaSeconds;
+        node.y += (node.vy + curveY) * deltaSeconds;
         if (node.x < -8) node.x = width + 8;
         if (node.x > width + 8) node.x = -8;
         if (node.y < -8) node.y = height + 8;
@@ -129,13 +138,14 @@ export function ParticleBackground() {
         ctx.beginPath();
         ctx.moveTo(from.x, from.y);
         ctx.lineTo(to.x, to.y);
-        ctx.strokeStyle = color("--primary", link.strength * (isLight ? 0.11 : isMobile ? 0.16 : 0.13));
+        const breath = moving ? 0.72 + (Math.sin(time * 0.0011 + link.phase) + 1) * 0.14 : 0.85;
+        ctx.strokeStyle = color("--primary", link.strength * breath * (isLight ? 0.13 : isMobile ? 0.22 : 0.18));
         ctx.lineWidth = 0.55 + link.strength * 0.45;
         ctx.stroke();
       });
 
-      if (moving && links.length && signals.length < (isMobile ? 2 : 5) && Math.random() < 0.012) {
-        signals.push({ linkIndex: Math.floor(Math.random() * links.length), progress: 0, speed: 0.0035 + Math.random() * 0.0025 });
+      if (moving && links.length && signals.length < (isMobile ? 4 : 8) && Math.random() < 0.045) {
+        signals.push({ linkIndex: Math.floor(Math.random() * links.length), progress: 0, speed: 0.12 + Math.random() * 0.08 });
       }
 
       signals = signals.filter((signal) => {
@@ -143,7 +153,7 @@ export function ParticleBackground() {
         if (!link) return false;
         const from = nodes[link.from];
         const to = nodes[link.to];
-        signal.progress += signal.speed * (isMobile ? 0.7 : 1);
+        signal.progress += signal.speed * deltaSeconds * (isMobile ? 0.82 : 1);
         const x = from.x + (to.x - from.x) * signal.progress;
         const y = from.y + (to.y - from.y) * signal.progress;
         const glow = ctx.createRadialGradient(x, y, 0, x, y, isMobile ? 7 : 9);
@@ -180,10 +190,12 @@ export function ParticleBackground() {
     const animate = (time: number) => {
       const targetInterval = width < 768 ? 1000 / 30 : 1000 / 50;
       if (time - lastFrame >= targetInterval) {
+        const deltaSeconds = lastDrawTime ? Math.min((time - lastDrawTime) / 1000, 0.05) : targetInterval / 1000;
         lastFrame = time;
+        lastDrawTime = time;
         frame += 1;
-        if (frame % 18 === 0) buildLinks();
-        draw(time, true);
+        if (frame % 12 === 0) buildLinks();
+        draw(time, true, deltaSeconds);
       }
       animationId = requestAnimationFrame(animate);
     };
@@ -192,11 +204,24 @@ export function ParticleBackground() {
     if (prefersReduced) draw(0, false);
     else animationId = requestAnimationFrame(animate);
 
+    const onVisibilityChange = () => {
+      if (prefersReduced) return;
+      if (document.hidden) {
+        cancelAnimationFrame(animationId);
+      } else {
+        lastFrame = 0;
+        lastDrawTime = 0;
+        animationId = requestAnimationFrame(animate);
+      }
+    };
+    document.addEventListener("visibilitychange", onVisibilityChange);
+
     return () => {
       cancelAnimationFrame(animationId);
       window.removeEventListener("resize", resize);
       window.removeEventListener("pointermove", onPointerMove);
       document.documentElement.removeEventListener("pointerleave", onPointerLeave);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
     };
   }, []);
 
