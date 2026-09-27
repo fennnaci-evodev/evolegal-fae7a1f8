@@ -82,7 +82,7 @@ export function Navbar() {
                 </Link>
                 <Link to="/auth">
                   <Button size="sm" className="cyber-button cyber-cta px-5">
-                    Get Started
+                    Run Legal Audit
                   </Button>
                 </Link>
               </>

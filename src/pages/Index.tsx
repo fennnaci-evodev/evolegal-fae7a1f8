@@ -11,15 +11,15 @@ import { ArrowRight, PlayCircle, BookOpen, MessageCircle, Shield, Zap, Globe, Ch
 
 import { fadeUp } from "@/lib/animations";
 const offerings = [
-  { icon: PlayCircle, title: "Contract Audit", desc: "Spot hidden risks and imbalanced clauses in seconds." },
-  { icon: BookOpen, title: "Clear Guides", desc: "Concise walkthroughs and templates you can actually use." },
-  { icon: MessageCircle, title: "Ask Hugo", desc: "A calm, articulate co-pilot for everyday legal questions." },
+  { icon: PlayCircle, title: "Contract Audit", desc: "Isolate material exposure and non-standard terms with structured analysis." },
+  { icon: BookOpen, title: "Audit Resources", desc: "Apply concise frameworks, checklists, and controlled templates." },
+  { icon: MessageCircle, title: "Hugo Co-Pilot", desc: "Extract key terms and evaluate legal concepts with clear supporting context." },
 ];
 
 const whyUs = [
-  { icon: Zap, title: "Answers in Seconds", desc: "No waiting rooms. No bureaucracy." },
-  { icon: Shield, title: "Transparent", desc: "Flat pricing. Cancel anytime." },
-  { icon: Globe, title: "US & UK Coverage", desc: "Dual-jurisdiction clarity, built for Americans." },
+  { icon: Zap, title: "Accelerated Review", desc: "Move from document intake to structured findings without delay." },
+  { icon: Shield, title: "Auditable Outputs", desc: "Review defined findings, risk context, and supporting resources." },
+  { icon: Globe, title: "US & UK Coverage", desc: "Compare English and US legal concepts within a consistent framework." },
 ];
 
 const topics = [
@@ -41,9 +41,9 @@ const plans = [
     name: "Free",
     price: "$0",
     period: "",
-    desc: "Explore the basics",
+    desc: "Core access",
     features: ["Unlimited articles", "3 videos/month", "1 short chat session/month", "Community resources"],
-    cta: "Get Started",
+    cta: "Activate Free",
     highlight: false,
   },
   {
@@ -52,16 +52,16 @@ const plans = [
     period: "/mo",
     desc: "Essential access",
     features: ["Unlimited videos & articles", "3 request submissions/month", "Basic Client Portal", "Email support", "Generic templates"],
-    cta: "Choose Basic",
+    cta: "Select Basic",
     highlight: true,
   },
   {
     name: "Pro",
     price: "$59",
     period: "/mo",
-    desc: "Full power",
+    desc: "Advanced analysis",
     features: ["Everything in Basic", "Unlimited submissions", "Priority ~4h turnaround", "Deep-dive exclusive content", "Full Case File portal", "Human Expert consultations"],
-    cta: "Go Pro",
+    cta: "Select Pro",
     highlight: false,
     annual: "$499/year (save 20%)",
   },
@@ -90,7 +90,7 @@ const Index = () => {
             className="text-3xl md:text-5xl lg:text-6xl font-display font-bold leading-tight mb-6 hero-headline-glow"
             initial="hidden" animate="visible" variants={fadeUp} custom={1}
           >
-            <span className="hero-neon-cycle hero-neon-emphasis">EVOLEGAL — THE FUTURE OF LEGAL INTELLIGENCE</span>
+            <span className="hero-neon-cycle hero-neon-emphasis">Precision Contract Intelligence.</span>
           </motion.h1>
 
           <motion.div
@@ -98,10 +98,10 @@ const Index = () => {
             initial="hidden" animate="visible" variants={fadeUp} custom={2}
           >
             <p className="text-base md:text-lg font-display font-medium hero-sub-glow leading-relaxed">
-              Scan contracts, uncover hidden risks, and get actionable answers — without the bureaucracy.
+              Scan complex agreements, isolate critical exposure, and accelerate deal flow—with enterprise-grade accuracy.
             </p>
             <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
-              Hugo is your calm, articulate co-pilot for US & UK legal matters.
+              Structured contract analysis with clear findings, traceable context, and expert review pathways.
             </p>
           </motion.div>
 
@@ -111,12 +111,12 @@ const Index = () => {
           >
             <Link to="/auth">
               <Button variant="hero" size="xl">
-                Ask Hugo <ArrowRight className="ml-2 h-5 w-5" />
+                Run Legal Audit <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
             <Link to="/how-it-works">
               <Button variant="glass" size="xl">
-                See How It Works
+                Explore Sample Audit
               </Button>
             </Link>
           </motion.div>
@@ -137,8 +137,8 @@ const Index = () => {
       <section id="offerings" className="py-20 md:py-28 px-6 relative z-10">
         <div className="container mx-auto max-w-6xl">
           <motion.div className="text-center mb-14" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
-            <h2 className="text-3xl md:text-4xl font-display font-bold mb-3">What We Offer</h2>
-            <p className="text-muted-foreground max-w-md mx-auto">Everything you need to move forward with confidence.</p>
+            <h2 className="text-3xl md:text-4xl font-display font-bold mb-3">Contract Intelligence Stack</h2>
+            <p className="text-muted-foreground max-w-md mx-auto">Audit agreements, extract obligations, and validate key terms in one structured workflow.</p>
           </motion.div>
 
           <div className="grid md:grid-cols-3 gap-5">
@@ -164,7 +164,7 @@ const Index = () => {
         <div className="container mx-auto max-w-6xl">
           <motion.div className="text-center mb-14" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
             <h2 className="text-3xl md:text-4xl font-display font-bold mb-3">Why EvoLegal</h2>
-            <p className="text-muted-foreground max-w-md mx-auto">Precision engineering meets effortless simplicity.</p>
+            <p className="text-muted-foreground max-w-md mx-auto">Built for precise review, accountable outputs, and faster decisions.</p>
           </motion.div>
 
           <div className="grid md:grid-cols-3 gap-5">
@@ -189,8 +189,8 @@ const Index = () => {
       <section className="py-20 px-6 relative z-10">
         <div className="container mx-auto max-w-4xl">
           <motion.div className="text-center mb-10" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
-            <h2 className="text-3xl md:text-4xl font-display font-bold mb-3">Topics We Cover</h2>
-            <p className="text-muted-foreground">Tenant-Landlord, Family, Personal Injury, Insurance, Employment, Contracts, Crypto Law & more.</p>
+            <h2 className="text-3xl md:text-4xl font-display font-bold mb-3">Coverage Areas</h2>
+            <p className="text-muted-foreground">Structured information across contracts, employment, tenancy, insurance, disputes, and US–UK legal concepts.</p>
           </motion.div>
 
           <motion.div
@@ -210,8 +210,8 @@ const Index = () => {
       <section className="py-20 px-6 relative z-10">
         <div className="container mx-auto max-w-4xl">
           <motion.div className="text-center mb-10" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
-            <h2 className="text-3xl md:text-4xl font-display font-bold mb-3">Free Samples</h2>
-            <p className="text-muted-foreground">Try before you commit. Explore our free content.</p>
+            <h2 className="text-3xl md:text-4xl font-display font-bold mb-3">Sample Analysis</h2>
+            <p className="text-muted-foreground">Review the structure, depth, and source context before selecting a plan.</p>
           </motion.div>
 
           <div className="space-y-3">
@@ -245,7 +245,7 @@ const Index = () => {
         <div className="container mx-auto max-w-5xl">
           <motion.div className="text-center mb-14" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
             <h2 className="text-3xl md:text-4xl font-display font-bold mb-3">Transparent Pricing</h2>
-            <p className="text-muted-foreground">No hidden fees. Cancel anytime. Upgrade or downgrade freely.</p>
+            <p className="text-muted-foreground">Defined limits, transparent rates, and flexible plan control.</p>
           </motion.div>
 
           <div className="grid md:grid-cols-3 gap-5">
@@ -291,11 +291,11 @@ const Index = () => {
       <section className="py-20 px-6 relative z-10">
         <div className="container mx-auto max-w-2xl text-center">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
-            <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">Clarity Is One Question Away.</h2>
-            <p className="text-muted-foreground mb-8">Start your first analysis in seconds. No card required.</p>
+            <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">Move from Clause to Decision.</h2>
+            <p className="text-muted-foreground mb-8">Launch a structured review and isolate the terms that require attention.</p>
             <Link to="/auth">
               <Button variant="hero" size="xl">
-                Ask Hugo <ArrowRight className="ml-2 h-5 w-5" />
+                Run Legal Audit <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
           </motion.div>

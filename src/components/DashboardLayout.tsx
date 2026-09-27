@@ -15,8 +15,8 @@ const SIDEBAR_KEY = "evo_sidebar_collapsed";
 const navItems = [
   { title: "Home", url: "/dashboard", icon: Home },
   { title: "Videos & Lectures", url: "/dashboard/library", icon: PlayCircle },
-  { title: "Ask Hugo", url: "/dashboard/chat", icon: MessageCircle },
-  { title: "Submit Request", url: "/dashboard/submit", icon: FileText },
+  { title: "Launch Hugo Co-Pilot", url: "/dashboard/chat", icon: MessageCircle },
+  { title: "Submit for Review", url: "/dashboard/submit", icon: FileText },
   { title: "Workflow Guides", url: "/dashboard/workflows", icon: RouteIcon },
   { title: "My Library", url: "/dashboard/saved", icon: BookOpen },
   { title: "Settings", url: "/dashboard/settings", icon: Settings },
@@ -122,7 +122,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
             </div>
             {!collapsed && (
               <p className="px-3 py-2 text-[10px] text-muted-foreground/40 leading-relaxed">
-                Hugo & our Experts are here to help.
+                Structured analysis with expert review pathways.
               </p>
             )}
             {collapsed ? (
