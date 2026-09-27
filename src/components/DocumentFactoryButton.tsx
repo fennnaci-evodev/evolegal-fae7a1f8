@@ -8,10 +8,10 @@ import { exportDocumentPdf, downloadPdfBlob } from "@/lib/exportDocumentPdf";
 import { DocumentTemplate, type DocumentPayload } from "@/components/DocumentTemplate";
 
 const DOCUMENT_TYPES = [
-  { id: "overview", label: "Information Overview", badge: "Self-Help Outline", desc: "Educational overview of relevant frameworks and considerations" },
-  { id: "checklist", label: "Preparation Checklist", badge: "Draft Framework", desc: "Organizational checklist of materials commonly gathered" },
-  { id: "template", label: "Template Outline", badge: "Draft Framework", desc: "Structural template with fillable placeholders you control" },
-  { id: "comparative", label: "Comparative Guide", badge: "Self-Help Outline", desc: "Neutral side-by-side comparison of alternative approaches" },
+  { id: "overview", label: "Extract Information Overview", badge: "Self-Help Outline", desc: "Structured summary of relevant frameworks and considerations" },
+  { id: "checklist", label: "Build Preparation Checklist", badge: "Draft Framework", desc: "Controlled checklist of materials commonly required for review" },
+  { id: "template", label: "Draft Template Outline", badge: "Draft Framework", desc: "Structured template with user-controlled placeholders" },
+  { id: "comparative", label: "Compare Legal Frameworks", badge: "Self-Help Outline", desc: "Neutral comparison of defined approaches and trade-offs" },
 ] as const;
 
 const COMPLIANCE_DISCLAIMER =
@@ -84,7 +84,7 @@ export function DocumentFactoryButton({ topic, chatId, requestId, conversationCo
       }
 
       setPayload(data.payload as DocumentPayload);
-      toast.success("Here is a general informational template that many people find useful as a starting point.");
+      toast.success("Draft validated and ready for review.");
     } catch (err: any) {
       toast.error(err.message || "Something went wrong.");
     } finally {
@@ -147,7 +147,7 @@ export function DocumentFactoryButton({ topic, chatId, requestId, conversationCo
           className="gap-2 text-xs border-primary/30 text-primary hover:bg-primary/10"
         >
           <FileText className="h-3.5 w-3.5" />
-          Generate General Document
+           Extract Document
         </Button>
       )}
 
@@ -176,13 +176,13 @@ export function DocumentFactoryButton({ topic, chatId, requestId, conversationCo
 
               <div className="mb-5">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h3 className="text-lg font-display font-semibold">Generate Document</h3>
+                   <h3 className="text-lg font-display font-semibold">Extract Structured Document</h3>
                   <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full border border-primary/30 text-primary/90 bg-primary/5">
                     Self-Help Framework
                   </span>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Select a document type for: <span className="text-foreground font-medium">{topic}</span>
+                   Select an output framework for: <span className="text-foreground font-medium">{topic}</span>
                 </p>
               </div>
 
@@ -197,7 +197,7 @@ export function DocumentFactoryButton({ topic, chatId, requestId, conversationCo
                           Draft Framework
                         </span>
                       </div>
-                      <p className="text-xs text-muted-foreground">Ready for export</p>
+                       <p className="text-xs text-muted-foreground">Validated for export</p>
                     </div>
                   </div>
 
@@ -229,7 +229,7 @@ export function DocumentFactoryButton({ topic, chatId, requestId, conversationCo
                       size="sm"
                       onClick={() => setPayload(null)}
                     >
-                      Generate Another
+                       Extract Another
                     </Button>
                   </div>
                 </div>

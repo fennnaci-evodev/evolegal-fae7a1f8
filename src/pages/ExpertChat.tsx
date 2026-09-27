@@ -338,9 +338,9 @@ const ExpertChat = () => {
                 <HugoRecallBanner onResume={handleSelectChat} hidden={!!currentChatId} />
                 <ScalesOfJustice />
                 <div>
-                  <h3 className="text-lg font-display font-semibold mb-1">Ask Hugo</h3>
+                  <h3 className="text-lg font-display font-semibold mb-1">Launch Hugo Co-Pilot</h3>
                   <p className="text-xs text-muted-foreground max-w-sm">
-                    Legal clarity in seconds — calm, precise, actionable.
+                    Audit terms, isolate exposure, and produce structured findings.
                   </p>
                 </div>
                 <HugoChatTopicChips onSelect={(q) => setInput(q)} />
@@ -476,7 +476,7 @@ const ExpertChat = () => {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
-              placeholder="Ask Hugo anything…"
+              placeholder="Enter a contract question or audit objective…"
               className="chat-input-plain flex-1 bg-transparent border-0 resize-none text-sm placeholder:text-muted-foreground focus:outline-none leading-relaxed"
               disabled={streaming}
               rows={1}
@@ -493,7 +493,7 @@ const ExpertChat = () => {
                     <FileText className="h-4 w-4" />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent side="top">Generate Document</TooltipContent>
+                <TooltipContent side="top">Extract Document</TooltipContent>
               </Tooltip>
             )}
             <Button type="submit" size="icon" disabled={!input.trim() || streaming} className="shrink-0 h-8 w-8">
