@@ -11,10 +11,11 @@ type NeuralNode = {
   radius: number;
   depth: number;
   phase: number;
+  cluster: number;
   accent: boolean;
 };
 
-type NeuralLink = { from: number; to: number; strength: number; phase: number };
+type NeuralLink = { from: number; to: number; strength: number; phase: number; bend: number };
 type Signal = { linkIndex: number; progress: number; speed: number; delay: number };
 
 export function ParticleBackground() {
@@ -48,18 +49,23 @@ export function ParticleBackground() {
       const targetCount = isMobile
         ? Math.max(24, Math.min(32, Math.floor(width / 13)))
         : Math.min(72, Math.floor(width / 21));
-      const columns = Math.max(4, Math.round(Math.sqrt(targetCount * (width / height))));
-      const rows = Math.ceil(targetCount / columns);
-      const cellWidth = width / columns;
-      const cellHeight = height / rows;
+      const clusterCount = isMobile ? 5 : 8;
+      const centers = Array.from({ length: clusterCount }, (_, index) => ({
+        x: width * (0.12 + (((index * 47) % 89) / 89) * 0.76),
+        y: height * (0.08 + (((index * 67 + 13) % 97) / 97) * 0.84),
+      }));
 
       nodes = Array.from({ length: targetCount }, (_, index) => {
-        const column = index % columns;
-        const row = Math.floor(index / columns);
+        const cluster = index % clusterCount;
+        const center = centers[cluster];
         const seed = ((index * 47) % 101) / 101;
         const depth = 0.5 + (((index * 29) % 53) / 53) * 0.5;
-        const anchorX = (column + 0.5 + (seed - 0.5) * 0.42) * cellWidth;
-        const anchorY = (row + 0.5 + ((((index * 71) % 97) / 97) - 0.5) * 0.42) * cellHeight;
+        const ring = Math.floor(index / clusterCount) + 1;
+        const angle = index * 2.399963 + cluster * 0.57;
+        const radiusX = Math.min(width * 0.2, 24 + ring * (isMobile ? 28 : 38));
+        const radiusY = Math.min(height * 0.14, 28 + ring * (isMobile ? 36 : 45));
+        const anchorX = Math.max(12, Math.min(width - 12, center.x + Math.cos(angle) * radiusX * (0.55 + seed * 0.45)));
+        const anchorY = Math.max(12, Math.min(height - 12, center.y + Math.sin(angle) * radiusY * (0.55 + seed * 0.45)));
         return {
           anchorX,
           anchorY,
@@ -70,6 +76,7 @@ export function ParticleBackground() {
           radius: 0.7 + depth * 1.05,
           depth,
           phase: seed * Math.PI * 2,
+          cluster,
           accent: index % 5 === 1,
         };
       });
@@ -97,12 +104,13 @@ export function ParticleBackground() {
           const key = `${low}:${high}`;
           if (edgeKeys.has(key)) return;
           edgeKeys.add(key);
-          const expectedSpacing = Math.hypot(width / Math.max(4, Math.round(Math.sqrt(nodes.length * (width / height)))), height / Math.ceil(nodes.length / Math.max(4, Math.round(Math.sqrt(nodes.length * (width / height))))));
+          const expectedSpacing = Math.sqrt((width * height) / nodes.length);
           nextLinks.push({
             from: low,
             to: high,
             strength: Math.max(0.28, 1 - distance / (expectedSpacing * 1.8)),
             phase: ((low * 17 + high * 31) % 23) / 23 * Math.PI * 2,
+            bend: ((((low * 43 + high * 19) % 17) / 16) - 0.5) * (isMobile ? 32 : 48),
           });
         });
       });
@@ -148,14 +156,17 @@ export function ParticleBackground() {
         const localPhase = node.phase + index * 0.11;
         const sharedX = Math.sin(seconds * 0.115) * 5.5;
         const sharedY = Math.cos(seconds * 0.09) * 4;
-        const localX = moving ? Math.sin(seconds * (0.16 + node.depth * 0.035) + localPhase) * (5 + node.depth * 4) : 0;
-        const localY = moving ? Math.cos(seconds * (0.13 + node.depth * 0.03) + localPhase * 0.83) * (4 + node.depth * 3) : 0;
+        const clusterPhase = node.cluster * 1.37;
+        const clusterX = moving ? Math.sin(seconds * 0.105 + clusterPhase) * 7 : 0;
+        const clusterY = moving ? Math.cos(seconds * 0.085 + clusterPhase) * 6 : 0;
+        const localX = moving ? Math.sin(seconds * (0.16 + node.depth * 0.035) + localPhase) * (3 + node.depth * 3) : 0;
+        const localY = moving ? Math.cos(seconds * (0.13 + node.depth * 0.03) + localPhase * 0.83) * (3 + node.depth * 2) : 0;
         let targetOffsetX = 0;
         let targetOffsetY = 0;
 
         if (moving && pointer.active) {
-          const naturalX = node.anchorX + sharedX + localX;
-          const naturalY = node.anchorY + sharedY + localY;
+          const naturalX = node.anchorX + sharedX + clusterX + localX;
+          const naturalY = node.anchorY + sharedY + clusterY + localY;
           const dx = naturalX - pointer.x;
           const dy = naturalY - pointer.y;
           const distance = Math.hypot(dx, dy);
@@ -168,8 +179,8 @@ export function ParticleBackground() {
 
         node.offsetX += (targetOffsetX - node.offsetX) * 0.075;
         node.offsetY += (targetOffsetY - node.offsetY) * 0.075;
-        node.x = node.anchorX + (moving ? sharedX + localX : 0) + node.offsetX;
-        node.y = node.anchorY + (moving ? sharedY + localY : 0) + node.offsetY;
+        node.x = node.anchorX + (moving ? sharedX + clusterX + localX : 0) + node.offsetX;
+        node.y = node.anchorY + (moving ? sharedY + clusterY + localY : 0) + node.offsetY;
       });
     };
 
@@ -186,9 +197,14 @@ export function ParticleBackground() {
         const currentDistance = Math.hypot(from.x - to.x, from.y - to.y);
         const distanceFade = Math.max(0.55, 1 - currentDistance / (isMobile ? 230 : 320));
         const breath = moving ? 0.82 + Math.sin(time * 0.00055 + link.phase) * 0.08 : 0.82;
+        const dx = to.x - from.x;
+        const dy = to.y - from.y;
+        const length = Math.max(1, Math.hypot(dx, dy));
+        const curveX = (from.x + to.x) / 2 - (dy / length) * link.bend;
+        const curveY = (from.y + to.y) / 2 + (dx / length) * link.bend;
         ctx.beginPath();
         ctx.moveTo(from.x, from.y);
-        ctx.lineTo(to.x, to.y);
+        ctx.quadraticCurveTo(curveX, curveY, to.x, to.y);
         ctx.strokeStyle = color("--primary", link.strength * distanceFade * breath * (isLight ? 0.15 : isMobile ? 0.24 : 0.2));
         ctx.lineWidth = 0.55 + link.strength * 0.45;
         ctx.stroke();
@@ -209,8 +225,14 @@ export function ParticleBackground() {
           signal.linkIndex = (signal.linkIndex + 7) % links.length;
           return;
         }
-        const x = from.x + (to.x - from.x) * signal.progress;
-        const y = from.y + (to.y - from.y) * signal.progress;
+        const dx = to.x - from.x;
+        const dy = to.y - from.y;
+        const length = Math.max(1, Math.hypot(dx, dy));
+        const controlX = (from.x + to.x) / 2 - (dy / length) * link.bend;
+        const controlY = (from.y + to.y) / 2 + (dx / length) * link.bend;
+        const inverse = 1 - signal.progress;
+        const x = inverse * inverse * from.x + 2 * inverse * signal.progress * controlX + signal.progress * signal.progress * to.x;
+        const y = inverse * inverse * from.y + 2 * inverse * signal.progress * controlY + signal.progress * signal.progress * to.y;
         const glow = ctx.createRadialGradient(x, y, 0, x, y, isMobile ? 7 : 9);
         glow.addColorStop(0, color("--primary", isLight ? 0.7 : 0.95));
         glow.addColorStop(0.35, color("--accent", isLight ? 0.24 : 0.42));
