@@ -28,7 +28,7 @@ export function Footer() {
           <div className="md:col-span-2">
             <EvoLogo size="sm" animate={false} showText />
             <p className="text-sm text-muted-foreground mt-4 max-w-sm leading-relaxed">
-              Clear insights on English (UK) law & US legal concepts. General education, preparation resources, and informational support nationwide.
+              Structured insights on English and US legal concepts, with traceable frameworks for review and preparation.
             </p>
           </div>
           {footerLinks.map((group) => (
@@ -52,7 +52,7 @@ export function Footer() {
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-xs text-muted-foreground/60">© 2026 EvoLegal. All rights reserved.</p>
           <p className="text-xs text-muted-foreground/50 text-center max-w-xl">
-            At EvoLegal, our Experts — led by Hugo — work hard on every request. We draw from a vast base of cases and legislation to deliver objective, relevant, and accurate insights. We deeply care about your legal security. For complex personal matters, professional representation may be recommended.
+            EvoLegal provides general informational analysis using structured legal frameworks and expert review pathways. Complex or jurisdiction-specific matters may require licensed professional representation.
           </p>
         </div>
       </div>

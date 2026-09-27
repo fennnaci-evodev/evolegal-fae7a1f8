@@ -35,10 +35,10 @@ export const HugoClarificationModal = ({
         <DialogHeader>
           <DialogTitle className="font-display text-lg flex items-center gap-2">
             <HugoAvatar size={39} />
-            Hugo needs a bit more info…
+            Validate the Input
           </DialogTitle>
           <DialogDescription className="text-muted-foreground text-xs">
-            Answer below or skip to submit as-is — either way, we'll get to work.
+            Add the requested context or continue with the current record.
           </DialogDescription>
         </DialogHeader>
 
@@ -59,7 +59,7 @@ export const HugoClarificationModal = ({
           <Textarea
             value={answer}
             onChange={(e) => setAnswer(e.target.value)}
-            placeholder="Type your answer here…"
+               placeholder="Add precise context…"
             rows={3}
             className="bg-muted/30 border-border/50 resize-none text-sm"
             disabled={loading}
@@ -73,7 +73,7 @@ export const HugoClarificationModal = ({
               onClick={handleSend}
               disabled={loading || !answer.trim()}
             >
-              {loading ? "Sending…" : <>Send <Send className="ml-1.5 h-3.5 w-3.5" /></>}
+               {loading ? "Validating…" : <>Validate <Send className="ml-1.5 h-3.5 w-3.5" /></>}
             </Button>
             <Button
               variant="ghost"
@@ -82,7 +82,7 @@ export const HugoClarificationModal = ({
               disabled={loading}
               className="text-muted-foreground"
             >
-              Skip <SkipForward className="ml-1 h-3.5 w-3.5" />
+               Continue As-Is <SkipForward className="ml-1 h-3.5 w-3.5" />
             </Button>
           </div>
         </div>

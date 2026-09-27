@@ -1,13 +1,11 @@
 import { motion } from "framer-motion";
-import { ShieldAlert, FileSignature, Scale, Home, Briefcase, Gavel, type LucideIcon } from "lucide-react";
+import { ShieldAlert, FileSignature, ListChecks, GitCompareArrows, type LucideIcon } from "lucide-react";
 
 const topics: { label: string; prompt: string; icon: LucideIcon }[] = [
-  { label: "Highlight hidden risks in this contract", prompt: "Highlight the hidden risks in this contract.", icon: ShieldAlert },
-  { label: "Draft a balanced NDA", prompt: "Draft a balanced NDA between two parties.", icon: FileSignature },
-  { label: "Summarize key termination clauses", prompt: "Summarize the key termination clauses I should look for.", icon: Scale },
-  { label: "Review a rental agreement", prompt: "Review a rental agreement and flag anything unusual.", icon: Home },
-  { label: "Explain an employment offer", prompt: "Explain the key terms in an employment offer.", icon: Briefcase },
-  { label: "Compare US vs UK tenant rights", prompt: "Compare tenant rights in the US and the UK.", icon: Gavel },
+  { label: "Audit liability caps, indemnity triggers, and non-standard terms.", prompt: "Audit liability caps, indemnity triggers, and non-standard terms.", icon: ShieldAlert },
+  { label: "Draft a balanced NDA aligned with standard commercial terms.", prompt: "Draft a balanced NDA aligned with standard commercial terms.", icon: FileSignature },
+  { label: "Extract termination rights, cure periods, and renewal triggers.", prompt: "Extract termination rights, cure periods, and renewal triggers.", icon: ListChecks },
+  { label: "Compare draft against playbook and highlight risk deviations.", prompt: "Compare draft against playbook and highlight risk deviations.", icon: GitCompareArrows },
 ];
 
 interface Props {

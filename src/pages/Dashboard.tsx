@@ -14,9 +14,9 @@ import { toast } from "sonner";
 import { WavingHand } from "@/components/WavingHand";
 
 const quickActions = [
-  { icon: PlayCircle, title: "Video Lectures", desc: "Watch expert explanations", to: "/dashboard/library" },
-  { icon: MessageCircle, title: "Ask Hugo", desc: "Get detailed insights", to: "/dashboard/chat" },
-  { icon: FileText, title: "Submit Request", desc: "Get a detailed response", to: "/dashboard/submit" },
+  { icon: PlayCircle, title: "Analysis Library", desc: "Review expert-led frameworks", to: "/dashboard/library" },
+  { icon: MessageCircle, title: "Launch Hugo Co-Pilot", desc: "Audit, extract, and compare", to: "/dashboard/chat" },
+  { icon: FileText, title: "Submit for Review", desc: "Request a structured assessment", to: "/dashboard/submit" },
 ];
 
 const featuredContent = [
@@ -156,7 +156,7 @@ const Dashboard = () => {
             <span>Welcome back</span>
             <WavingHand />
           </h1>
-          <p className="text-muted-foreground">Continue your legal education journey.</p>
+          <p className="text-muted-foreground">Continue your active analyses and expert reviews.</p>
         </motion.div>
 
         {/* Quick Actions */}
@@ -182,7 +182,7 @@ const Dashboard = () => {
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <MessageCircle className="h-4 w-4 text-primary" />
-                <h2 className="text-lg font-display font-semibold">Chats with Hugo</h2>
+                <h2 className="text-lg font-display font-semibold">Hugo Co-Pilot Sessions</h2>
               </div>
               <Link to="/dashboard/chat">
                 <Button variant="ghost" size="sm" className="text-primary">

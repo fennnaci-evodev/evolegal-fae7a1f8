@@ -40,7 +40,7 @@ export function HugoConsiliumSuggestion({ onAccept, onDismiss, loading }: HugoCo
       <div className="flex-1 min-w-0">
         <p className="text-[12px] sm:text-[13px] leading-snug text-foreground/90">
           <Sparkles className="inline h-3 w-3 mr-1 -mt-0.5" style={{ color: "hsl(186 100% 65%)" }} aria-hidden="true" />
-          Hugo suggests switching to <span className="font-semibold" style={{ color: "hsl(270 95% 78%)" }}>Consilium Mode</span> for a deep multi-perspective risk analysis on this case.
+          Hugo recommends <span className="font-semibold" style={{ color: "hsl(270 95% 78%)" }}>Consilium Mode</span> for multi-perspective risk analysis and structured challenge.
         </p>
         <div className="mt-2 flex items-center gap-2 flex-wrap">
           <button
@@ -55,7 +55,7 @@ export function HugoConsiliumSuggestion({ onAccept, onDismiss, loading }: HugoCo
             }}
           >
             <Brain className="h-3 w-3" />
-            {loading ? "Switching…" : "Switch to Consilium"}
+            {loading ? "Validating…" : "Run Consilium Review"}
           </button>
           <button
             type="button"

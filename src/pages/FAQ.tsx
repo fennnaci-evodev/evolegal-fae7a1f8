@@ -9,35 +9,35 @@ import { fadeUp } from "@/lib/animations";
 const faqs = [
   {
     q: "What is EvoLegal?",
-    a: "EvoLegal is a platform where our Experts — led by Hugo, your Expert Manager — provide structured, well-researched insights on US and English (UK) legal topics. We draw from a vast base of cases and legislation to help you understand your options clearly.",
+    a: "EvoLegal provides structured analysis of English and US legal concepts. Hugo organizes findings through consistent frameworks, with expert review available for complex matters.",
   },
   {
     q: "Who is Hugo?",
-    a: "Hugo is your Expert Manager — the first point of contact when you have a question. Hugo works hard to deliver detailed, objective, and helpful responses on legal topics. For more complex needs, one of our Legal Experts is always ready to assist.",
+    a: "Hugo is EvoLegal’s analysis co-pilot for extracting terms, comparing frameworks, and identifying risk. Expert validation is available when a matter requires human review.",
   },
   {
     q: "What kind of help can I get?",
-    a: "We provide structured insights on legal processes, video lectures, guides, templates, and expert Q&A. Hugo and our team cover tenant-landlord, family, personal injury, insurance, employment, and contract topics across both US and UK law.",
+    a: "EvoLegal provides structured analysis, expert briefings, controlled templates, and review workflows. Coverage includes contracts, employment, tenancy, insurance, disputes, and English–US comparisons.",
   },
   {
     q: "Does this cover all US states?",
-    a: "Yes — our insights cover general legal frameworks applicable nationwide. Since laws vary by state, we always note where variations exist. For jurisdiction-specific matters, our team can point you in the right direction.",
+    a: "EvoLegal covers general US legal frameworks nationwide and identifies where state-level variation matters. Jurisdiction-specific questions may require licensed local counsel.",
   },
   {
     q: "How fast will I get a response?",
-    a: "You will get your answer as soon as possible. It always depends on the complexity of your case. Typical turnaround: 4 hours for Pro, 8 hours for Basic. Hugo handles many questions instantly, and our Experts review complex submissions promptly.",
+    a: "Hugo provides rapid initial analysis. Typical expert-review turnaround is 4 hours for Pro and 8 hours for Basic, subject to matter complexity.",
   },
   {
     q: "Can I cancel my subscription?",
-    a: "Absolutely. Cancel at any time from your account settings — no hidden fees, no lock-in contracts. We believe in earning your trust every month.",
+    a: "Yes. Cancel at any time from account settings; pricing and plan limits remain visible before selection.",
   },
   {
     q: "Do you cover UK law?",
-    a: "Yes! We uniquely cover both US and English (UK) law — particularly helpful for Americans dealing with UK tenancy or family matters, or anyone wanting comparative insights.",
+    a: "Yes. EvoLegal covers English law and US legal concepts, including structured comparative analysis where frameworks diverge.",
   },
   {
     q: "How is my data protected?",
-    a: "All data is encrypted in transit and at rest. Documents are stored securely. We follow strict data protection practices and never share your information with third parties.",
+    a: "Data is encrypted in transit and at rest, and documents are stored securely. Access controls and retention practices protect analysis records.",
   },
 ];
 
@@ -85,7 +85,7 @@ const FAQ = () => {
             <h1 className="text-4xl md:text-5xl font-display font-bold mb-4">
               Frequently Asked <span className="text-gradient">Questions</span>
             </h1>
-            <p className="text-lg text-muted-foreground">Everything you need to know about EvoLegal.</p>
+            <p className="text-lg text-muted-foreground">Platform scope, review standards, coverage, and account controls.</p>
           </motion.div>
 
           <div className="space-y-3">

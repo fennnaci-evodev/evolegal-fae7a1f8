@@ -11,20 +11,20 @@ const steps = [
   {
     icon: FileText,
     number: "01",
-    title: "Share Your Question",
-    desc: "Describe the topic you'd like to understand — share key facts, upload documents, and optionally select your state for context. Available for US residents anywhere.",
+    title: "Define the Review",
+    desc: "Provide the agreement, objective, and relevant commercial context. Add jurisdiction details where they affect the analysis.",
   },
   {
     icon: Search,
     number: "02",
-    title: "Hugo Researches & Drafts",
-    desc: "Hugo and our team research from a vast base of cases, legislation, and public legal frameworks to prepare a comprehensive, structured overview covering processes, terminology, risks, and options.",
+    title: "Hugo Audits the Terms",
+    desc: "Hugo isolates obligations, exposure, non-standard provisions, and decision points within a structured review framework.",
   },
   {
     icon: UserCheck,
     number: "03",
-    title: "Expert Review & Delivery",
-    desc: "Every response is reviewed by an EvoLegal Expert for accuracy and completeness, then delivered to your portal. You will get your answer as soon as possible — it always depends on the complexity of your case. Typical turnaround: 4 hours for Pro, 8 hours for Basic.",
+    title: "Validate and Deliver",
+    desc: "Expert review is available for accuracy and completeness. Typical turnaround is 4 hours for Pro and 8 hours for Basic, subject to matter complexity.",
   },
 ];
 
@@ -41,7 +41,7 @@ const HowItWorks = () => {
               How <span className="text-gradient">EvoLegal</span> Works
             </h1>
             <p className="text-lg text-muted-foreground max-w-lg mx-auto">
-              Three simple steps from question to clarity — Hugo and our Experts are here to help, for Americans nationwide.
+              A controlled workflow from document intake to structured, review-ready findings.
             </p>
           </motion.div>
 
@@ -76,14 +76,14 @@ const HowItWorks = () => {
             className="glass-card p-8 text-center"
             initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={4}
           >
-            <h3 className="text-xl font-display font-semibold mb-3">Quality You Can Trust</h3>
+            <h3 className="text-xl font-display font-semibold mb-3">Review Standards</h3>
             <p className="text-muted-foreground max-w-lg mx-auto mb-6">
-              Every response is carefully reviewed by our Experts — structured with Options → Risks → Resources.<br />
-              You will get your answer as soon as possible. It always depends on the complexity of your case.
+              Outputs follow a consistent Options → Risks → Resources structure.<br />
+              Expert review validates accuracy and completeness where included in your plan.
             </p>
             <Link to="/auth">
               <Button variant="hero" size="lg">
-                Ask Hugo <ArrowRight className="ml-2 h-4 w-4" />
+                Run Legal Audit <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
           </motion.div>

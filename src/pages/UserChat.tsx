@@ -227,7 +227,7 @@ const UserChat = () => {
                   <FileText className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent side="top">Generate Document</TooltipContent>
+              <TooltipContent side="top">Extract Document</TooltipContent>
             </Tooltip>
           )}
           <Button type="submit" size="icon" disabled={!input.trim() || sending} className="shrink-0 h-8 w-8">

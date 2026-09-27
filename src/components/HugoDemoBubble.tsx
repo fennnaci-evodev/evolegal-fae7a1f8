@@ -198,7 +198,7 @@ export function HugoDemoBubble() {
         <button
           onClick={() => setOpen(true)}
           className="hugo-prism"
-          aria-label="Chat with Hugo"
+          aria-label="Launch Hugo Co-Pilot"
         >
           <span className="hugo-prism__glint" aria-hidden="true" />
           <svg
@@ -229,13 +229,13 @@ export function HugoDemoBubble() {
             className="fixed bottom-6 right-6 z-50 w-[calc(100vw-3rem)] sm:w-96 glass-strong overflow-hidden flex flex-col"
             style={{ borderRadius: "1.25rem", maxHeight: "min(520px, 80vh)", maxWidth: "24rem" }}
             role="dialog"
-            aria-label="Hugo demo chat"
+            aria-label="Hugo Co-Pilot"
           >
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-border/20 shrink-0">
               <div className="flex items-center gap-2">
                 <HugoAvatar size={39} animate={false} talking={streaming} />
-                <span className="font-display font-semibold text-sm">Hugo</span>
+                 <span className="font-display font-semibold text-sm">Hugo Co-Pilot</span>
                 {preciseMode ? (
                   <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full" style={{ background: "hsla(270,95%,75%,0.15)", color: "hsl(270,95%,75%)", border: "1px solid hsla(270,95%,75%,0.35)" }}>
                     <Sparkles className="h-2.5 w-2.5" /> Precise mode
@@ -317,7 +317,7 @@ export function HugoDemoBubble() {
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-4 space-y-3 min-h-0">
               <div className="glass rounded-xl px-4 py-3 text-sm text-foreground leading-relaxed">
-                Hello — I'm Hugo, your Expert Manager. Ask me anything about US or UK legal topics. You will get your answer as soon as possible.
+                 I’m Hugo, your legal analysis co-pilot. Submit an agreement or define the terms you want to audit.
               </div>
 
               {messages.map((msg) => (
@@ -403,7 +403,7 @@ export function HugoDemoBubble() {
                   style={{ borderRadius: "0 0 1.25rem 1.25rem", background: "hsla(222, 47%, 6%, 0.92)", backdropFilter: "blur(16px)" }}
                 >
                   <p className="text-xs text-muted-foreground text-center mb-4 leading-relaxed">
-                    For more precise and refined analysis, connect with an EvoLegal Expert for human review.
+                     Submit the analysis for expert validation when the matter requires human review.
                   </p>
                   <div className="flex flex-col gap-2.5">
                     <button
@@ -412,7 +412,7 @@ export function HugoDemoBubble() {
                       style={{ border: "1px solid hsla(186, 100%, 50%, 0.3)", boxShadow: "0 0 16px hsla(186, 100%, 50%, 0.12)", background: "hsla(186, 100%, 50%, 0.06)" }}
                     >
                       <MessageCircle className="h-4 w-4 text-primary" />
-                      Continue with Hugo
+                       Continue Analysis
                     </button>
                     <button
                       onClick={handleConnectExpert}
@@ -420,7 +420,7 @@ export function HugoDemoBubble() {
                       style={{ border: "1px solid hsla(270, 95%, 75%, 0.35)", boxShadow: "0 0 16px hsla(270, 95%, 75%, 0.15)", background: "linear-gradient(135deg, hsla(270, 95%, 75%, 0.1), hsla(186, 100%, 50%, 0.08))" }}
                     >
                       <Users className="h-4 w-4" style={{ color: "hsl(270, 95%, 75%)" }} />
-                      Get Precise Help from EvoLegal Expert
+                       Request Expert Validation
                       <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
                     </button>
                   </div>
@@ -465,7 +465,7 @@ export function HugoDemoBubble() {
                     <LogIn className="h-6 w-6 text-primary mx-auto" />
                     <p className="text-sm font-display font-semibold">Sign in to keep chatting</p>
                     <p className="text-[11px] text-muted-foreground leading-relaxed">
-                      Create a free account to unlock Hugo's full insights and all EvoLegal features.
+                       Create a free account to retain analyses and access the full EvoLegal workspace.
                     </p>
                     <Button variant="hero" size="sm" className="w-full text-xs" onClick={handleGoogleSignIn}>
                       Continue with Google
@@ -486,7 +486,7 @@ export function HugoDemoBubble() {
               <Input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder={authLoading ? "Loading…" : "Ask Hugo anything…"}
+                placeholder={authLoading ? "Loading…" : "Enter an audit objective…"}
                 className="bg-transparent border-0 focus-visible:ring-0 text-sm"
                 disabled={streaming || authLoading}
               />

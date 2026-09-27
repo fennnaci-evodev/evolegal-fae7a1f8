@@ -62,12 +62,12 @@ const MyRequests = () => {
       <div className="max-w-4xl mx-auto space-y-6">
         <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0} className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-display font-bold mb-1">My Requests</h1>
-            <p className="text-sm text-muted-foreground">Track all your submitted requests and their status.</p>
+            <h1 className="text-2xl font-display font-bold mb-1">Review Register</h1>
+            <p className="text-sm text-muted-foreground">Track submitted matters, status, and validated outputs.</p>
           </div>
           <Link to="/dashboard/submit">
             <Button variant="hero" size="sm">
-              New Request <ArrowRight className="ml-1 h-3 w-3" />
+              Submit for Review <ArrowRight className="ml-1 h-3 w-3" />
             </Button>
           </Link>
         </motion.div>
@@ -75,14 +75,14 @@ const MyRequests = () => {
         {loading ? (
           <div className="glass-card p-12 text-center">
             <Clock className="h-6 w-6 text-muted-foreground mx-auto mb-2 animate-pulse" />
-            <p className="text-sm text-muted-foreground">Loading requests...</p>
+             <p className="text-sm text-muted-foreground">Loading review register…</p>
           </div>
         ) : requests.length === 0 ? (
           <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={1} className="glass-card p-12 text-center">
             <FileText className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
-            <p className="text-muted-foreground mb-4">No requests yet. Submit your first one!</p>
+             <p className="text-muted-foreground mb-4">No matters have been submitted for review.</p>
             <Link to="/dashboard/submit">
-              <Button variant="outline">Submit a Request</Button>
+               <Button variant="outline">Submit for Review</Button>
             </Link>
           </motion.div>
         ) : (

@@ -12,7 +12,7 @@ const plans = [
     name: "Free",
     price: "$0",
     period: "",
-    desc: "Get started with Hugo",
+    desc: "Core analysis access",
     icon: Sparkles,
     features: [
       "Unlimited general chat with Hugo",
@@ -20,14 +20,14 @@ const plans = [
       "Basic articles & guides",
       "Generic document templates",
     ],
-    cta: "Get Started",
+    cta: "Activate Free",
     highlight: false,
   },
   {
     name: "Basic",
     price: "$19",
     period: "/mo",
-    desc: "For everyday legal questions",
+    desc: "For recurring contract review",
     icon: Zap,
     features: [
       "Unlimited general chat",
@@ -35,14 +35,14 @@ const plans = [
       "More documents per month",
       "Full article & video library",
     ],
-    cta: "Choose Basic",
+    cta: "Select Basic",
     highlight: false,
   },
   {
     name: "Pro",
     price: "$49",
     period: "/mo",
-    desc: "Power users & frequent matters",
+    desc: "For high-volume analysis",
     icon: Crown,
     features: [
       "Unlimited general chat",
@@ -50,14 +50,14 @@ const plans = [
       "Unlimited documents",
       "Priority Expert connection",
     ],
-    cta: "Go Pro",
+    cta: "Select Pro",
     highlight: true,
   },
   {
     name: "Premium",
     price: "$99",
     period: "/mo",
-    desc: "Highest tier, no limits",
+    desc: "Unlimited analysis capacity",
     icon: InfinityIcon,
     features: [
       "Unlimited general chat",
@@ -65,7 +65,7 @@ const plans = [
       "Dedicated Expert support",
       "Fastest response times",
     ],
-    cta: "Go Premium",
+    cta: "Select Premium",
     highlight: false,
   },
 ];
@@ -90,7 +90,7 @@ const Pricing = () => {
               Transparent <span className="text-gradient">Pricing</span>
             </h1>
             <p className="text-lg text-muted-foreground max-w-xl mx-auto">
-              Hugo's general chat is always free and unlimited. Credits apply only to deeper Legal Analysis of Your Life Circumstances.
+               General Hugo access remains unlimited. Credits apply only to advanced legal analysis workflows.
             </p>
           </motion.div>
 
@@ -145,7 +145,7 @@ const Pricing = () => {
                 One-time <span className="text-gradient">Credit Packs</span>
               </h2>
               <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                Top up precise-analysis credits anytime. Credits never expire.
+                 Add analysis capacity at any time. Purchased credits do not expire.
               </p>
             </div>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">

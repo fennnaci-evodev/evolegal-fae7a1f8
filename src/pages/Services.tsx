@@ -10,27 +10,27 @@ import { fadeUp } from "@/lib/animations";
 const services = [
   {
     icon: MessageCircle,
-    title: "General Q&A Chat",
-    desc: "Unlimited questions answered by Hugo and our Expert team. Get clarity on processes, terms, and concepts — for US residents anywhere.",
-    features: ["Instant responses", "General information only", "Chat history saved", "Escalate to human Expert"],
+    title: "Hugo Co-Pilot",
+    desc: "Extract terms, test assumptions, and review legal concepts through a persistent analysis workspace.",
+    features: ["Rapid responses", "General information only", "Traceable chat history", "Expert escalation"],
   },
   {
     icon: PlayCircle,
-    title: "Video Lectures & Explainers",
-    desc: "Pre-recorded deep-dive video lectures covering key US and UK legal topics. From tenant rights to personal injury processes.",
-    features: ["Expert-led content", "US & UK coverage", "Free teasers available", "New content monthly"],
+    title: "Expert Briefings",
+    desc: "Structured briefings cover key English and US legal frameworks, processes, and terminology.",
+    features: ["Expert-led content", "US & UK coverage", "Sample briefings", "Monthly updates"],
   },
   {
     icon: FileText,
-    title: "Guides & Templates",
-    desc: "Generic templates, checklists, and step-by-step guides. Public-domain forms with clear disclaimers and context.",
-    features: ["Downloadable PDFs", "Preparation checklists", "Jargon glossaries", "Question lists for attorneys"],
+    title: "Frameworks & Templates",
+    desc: "Controlled templates, audit checklists, and structured self-help resources with clear usage boundaries.",
+    features: ["Downloadable PDFs", "Audit checklists", "Term glossaries", "Counsel review questions"],
   },
   {
     icon: Briefcase,
-    title: "Meeting Prep Toolkits",
-    desc: "Prepare for consultations with licensed attorneys. Understand terminology, organize your facts, and know what to ask.",
-    features: ["Topic-specific prep", "Key questions to ask", "Document checklists", "Timeline templates"],
+    title: "Counsel Preparation",
+    desc: "Organize facts, documents, timelines, and review questions before consulting licensed counsel.",
+    features: ["Matter-specific preparation", "Priority questions", "Document checklists", "Timeline templates"],
   },
 ];
 
@@ -47,7 +47,7 @@ const Services = () => {
               Our <span className="text-gradient">Services</span>
             </h1>
             <p className="text-lg text-muted-foreground max-w-lg mx-auto">
-              General informational resources for US residents anywhere — understand legal processes and prepare with confidence.
+              Structured legal information designed for precise review, efficient preparation, and accountable decisions.
             </p>
           </motion.div>
 
@@ -80,13 +80,13 @@ const Services = () => {
             className="glass-card p-8 mt-8 text-center"
             initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={5}
           >
-            <h3 className="text-xl font-display font-semibold mb-3">For US Residents Anywhere</h3>
+            <h3 className="text-xl font-display font-semibold mb-3">Cross-Jurisdiction Coverage</h3>
             <p className="text-muted-foreground max-w-lg mx-auto mb-6">
-              Whether you're in New York, California, Texas, or anywhere in between — get general insights on US legal topics and comparative overviews with UK processes. Perfect for Americans dealing with UK matters or seeking broader legal education.
+              Review general US legal concepts and comparative English-law frameworks through one consistent analysis standard. Jurisdiction-specific matters may require licensed local counsel.
             </p>
             <Link to="/auth">
               <Button variant="hero" size="lg">
-                Explore Resources <ArrowRight className="ml-2 h-4 w-4" />
+                Launch Hugo Co-Pilot <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
           </motion.div>

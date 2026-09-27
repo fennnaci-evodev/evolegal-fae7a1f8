@@ -100,8 +100,8 @@ const SubmitRequest = () => {
 
       const ticketNum = (insertedData as any)?.ticket_number;
       toast.success(ticketNum
-        ? `Request ${ticketNum} submitted! Hugo will prepare insights soon.`
-        : "Your request has been received. Hugo will prepare insights soon.");
+         ? `Request ${ticketNum} logged. Hugo will prepare a structured analysis.`
+         : "Request logged. Hugo will prepare a structured analysis.");
       setTopic("");
       setState("");
       setTitle("");
@@ -226,8 +226,8 @@ const SubmitRequest = () => {
     <DashboardLayout>
       <div className="max-w-2xl mx-auto space-y-6">
         <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
-          <h1 className="text-2xl font-display font-bold mb-2">Submit a Request</h1>
-          <p className="text-muted-foreground">Describe your topic and we'll prepare a detailed, general informational response.</p>
+           <h1 className="text-2xl font-display font-bold mb-2">Submit for Review</h1>
+           <p className="text-muted-foreground">Define the matter and receive a structured informational analysis.</p>
           {/* Progress indicator */}
           <div className="flex items-center gap-2 mt-4">
             {["Topic", "Details", "Files", "Review"].map((step, i) => {
@@ -245,7 +245,7 @@ const SubmitRequest = () => {
         <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0.5} className="glass rounded-xl px-5 py-3 flex items-start gap-3">
           <Info className="h-4 w-4 text-primary mt-0.5 shrink-0" />
           <p className="text-xs text-muted-foreground leading-relaxed">
-            Hugo and our Experts research your topic thoroughly and deliver detailed, structured insights. You will get your answer as soon as possible. It always depends on the complexity of your case. Typical turnaround: 4 hours for Pro, 8 hours for Basic.
+             Hugo structures the initial analysis, with expert validation available by plan. Typical turnaround is 4 hours for Pro and 8 hours for Basic, subject to matter complexity.
           </p>
         </motion.div>
 
@@ -289,21 +289,21 @@ const SubmitRequest = () => {
           </div>
 
           <div className="space-y-2">
-            <Label className="text-sm font-display">Request Title</Label>
+             <Label className="text-sm font-display">Review Title</Label>
             <Input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Brief summary of your question (e.g., 'Security deposit return timeline')"
+               placeholder="Define the review objective"
               className="bg-muted/30 border-border/50"
             />
           </div>
 
           <div className="space-y-2">
-            <Label className="text-sm font-display">Describe Your Topic <span className="text-destructive">*</span></Label>
+             <Label className="text-sm font-display">Define the Matter <span className="text-destructive">*</span></Label>
             <Textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Describe what you'd like general information about..."
+               placeholder="Describe the agreement, issue, or legal concept to analyze…"
               rows={5}
               className="bg-muted/30 border-border/50 resize-none"
               required
@@ -315,7 +315,7 @@ const SubmitRequest = () => {
             <Textarea
               value={keyFacts}
               onChange={(e) => setKeyFacts(e.target.value)}
-              placeholder="List any relevant facts, such as dates, specific terminology, or details..."
+               placeholder="Add relevant dates, terms, obligations, or commercial context…"
               rows={3}
               className="bg-muted/30 border-border/50 resize-none"
             />
@@ -362,11 +362,11 @@ const SubmitRequest = () => {
           </div>
 
           <p className="text-[10px] text-muted-foreground/50">
-            By submitting, you agree we store this request securely for processing and record-keeping.
+             Submission authorizes secure storage for analysis, audit history, and record-keeping.
           </p>
 
           <Button type="submit" variant="hero" size="lg" className="w-full" disabled={submitting}>
-            {submitting ? "Submitting..." : <>Submit Request <Send className="ml-2 h-4 w-4" /></>}
+             {submitting ? "Submitting…" : <>Submit for Review <Send className="ml-2 h-4 w-4" /></>}
           </Button>
 
           <p className="text-xs text-muted-foreground/50 text-center">
