@@ -6,76 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Check, ArrowRight, Sparkles, Zap, Crown, Infinity as InfinityIcon } from "lucide-react";
 import { fadeUp } from "@/lib/animations";
+import { CREDIT_PACKS, PRODUCT_PLANS } from "@/lib/pricing";
 
-const plans = [
-  {
-    name: "Free",
-    price: "$0",
-    period: "",
-    desc: "Core analysis access",
-    icon: Sparkles,
-    features: [
-      "Unlimited general chat with Hugo",
-      "2 precise analyses / day",
-      "Basic articles & guides",
-      "Generic document templates",
-    ],
-    cta: "Activate Free",
-    highlight: false,
-  },
-  {
-    name: "Basic",
-    price: "$19",
-    period: "/mo",
-    desc: "For recurring contract review",
-    icon: Zap,
-    features: [
-      "Unlimited general chat",
-      "15 precise analyses / day",
-      "More documents per month",
-      "Full article & video library",
-    ],
-    cta: "Select Basic",
-    highlight: false,
-  },
-  {
-    name: "Pro",
-    price: "$49",
-    period: "/mo",
-    desc: "For high-volume analysis",
-    icon: Crown,
-    features: [
-      "Unlimited general chat",
-      "60 precise analyses / day",
-      "Unlimited documents",
-      "Priority Expert connection",
-    ],
-    cta: "Select Pro",
-    highlight: true,
-  },
-  {
-    name: "Premium",
-    price: "$99",
-    period: "/mo",
-    desc: "Unlimited analysis capacity",
-    icon: InfinityIcon,
-    features: [
-      "Unlimited general chat",
-      "Unlimited precise analyses",
-      "Dedicated Expert support",
-      "Fastest response times",
-    ],
-    cta: "Select Premium",
-    highlight: false,
-  },
-];
-
-const creditPacks = [
-  { credits: 20, price: "$9" },
-  { credits: 50, price: "$19" },
-  { credits: 100, price: "$35", best: true },
-  { credits: 250, price: "$79" },
-];
+const planIcons = {
+  free: Sparkles,
+  basic: Zap,
+  pro: Crown,
+  premium: InfinityIcon,
+};
 
 const Pricing = () => {
   return (
@@ -99,14 +37,14 @@ const Pricing = () => {
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-16"
             initial="hidden" animate="visible" variants={fadeUp} custom={1}
           >
-            {plans.map((plan) => {
-              const Icon = plan.icon;
+            {PRODUCT_PLANS.map((plan) => {
+              const Icon = planIcons[plan.id];
               return (
                 <div
                   key={plan.name}
-                  className={`relative rounded-2xl p-6 flex flex-col ${plan.highlight ? "glass-card glow-cyan" : "glass-card"}`}
+                  className={`relative rounded-2xl p-6 flex flex-col ${plan.highlighted ? "glass-card glow-cyan" : "glass-card"}`}
                 >
-                  {plan.highlight && (
+                  {plan.highlighted && (
                     <span className="absolute -top-3 inset-x-0 mx-auto w-fit px-3 py-0.5 rounded-full bg-primary text-primary-foreground text-[10px] font-semibold z-10 whitespace-nowrap">
                       Recommended
                     </span>
@@ -115,7 +53,7 @@ const Pricing = () => {
                     <Icon className="h-4 w-4 text-primary" />
                     <h3 className="text-lg font-display font-bold">{plan.name}</h3>
                   </div>
-                  <p className="text-xs text-muted-foreground mb-4">{plan.desc}</p>
+                  <p className="text-xs text-muted-foreground mb-4">{plan.description}</p>
                   <div className="mb-5">
                     <span className="text-3xl font-display font-bold">{plan.price}</span>
                     <span className="text-muted-foreground text-sm">{plan.period}</span>
@@ -129,8 +67,8 @@ const Pricing = () => {
                     ))}
                   </ul>
                   <Link to="/auth">
-                    <Button variant={plan.highlight ? "hero" : "outline"} size="sm" className="w-full">
-                      {plan.cta} {plan.highlight && <ArrowRight className="ml-1 h-3.5 w-3.5" />}
+                    <Button variant={plan.highlighted ? "hero" : "outline"} size="sm" className="w-full">
+                      {plan.cta} {plan.highlighted && <ArrowRight className="ml-1 h-3.5 w-3.5" />}
                     </Button>
                   </Link>
                 </div>
@@ -149,12 +87,12 @@ const Pricing = () => {
               </p>
             </div>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-              {creditPacks.map((pack) => (
+              {CREDIT_PACKS.map((pack) => (
                 <div
                   key={pack.credits}
-                  className={`relative rounded-xl p-5 text-center glass-card ${pack.best ? "glow-cyan" : ""}`}
+                  className={`relative rounded-xl p-5 text-center glass-card ${pack.bestValue ? "glow-cyan" : ""}`}
                 >
-                  {pack.best && (
+                  {pack.bestValue && (
                     <span className="absolute -top-2 inset-x-0 mx-auto w-fit px-2 py-0.5 rounded-full bg-primary text-primary-foreground text-[9px] font-semibold whitespace-nowrap">
                       Best value
                     </span>

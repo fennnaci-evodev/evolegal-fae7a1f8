@@ -13,6 +13,7 @@ import { useLoading } from "@/contexts/LoadingContext";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { HugoClarificationModal } from "@/components/HugoClarificationModal";
+import { EXPERT_REVIEW_EXPECTATION } from "@/lib/pricing";
 
 const US_STATES = [
   "Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut","Delaware",
@@ -245,7 +246,7 @@ const SubmitRequest = () => {
         <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0.5} className="glass rounded-xl px-5 py-3 flex items-start gap-3">
           <Info className="h-4 w-4 text-primary mt-0.5 shrink-0" />
           <p className="text-xs text-muted-foreground leading-relaxed">
-             Hugo structures the initial analysis, with expert validation available by plan. Typical turnaround is 4 hours for Pro and 8 hours for Basic, subject to matter complexity.
+             Hugo structures the initial analysis, with expert review available by plan. {EXPERT_REVIEW_EXPECTATION}
           </p>
         </motion.div>
 

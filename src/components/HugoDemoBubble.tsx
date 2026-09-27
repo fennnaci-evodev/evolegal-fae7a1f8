@@ -241,7 +241,7 @@ export function HugoDemoBubble() {
                     <Sparkles className="h-2.5 w-2.5" /> Precise mode
                   </span>
                 ) : (
-                  <span className="text-[10px] text-muted-foreground">· Expert Manager</span>
+                  <span className="text-[10px] text-muted-foreground">· Analysis Co-Pilot</span>
                 )}
               </div>
               <div className="flex items-center gap-1">

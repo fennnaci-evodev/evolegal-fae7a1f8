@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 import { FileText, Search, UserCheck, ArrowRight } from "lucide-react";
 
 import { fadeUp } from "@/lib/animations";
+import { EXPERT_REVIEW_EXPECTATION } from "@/lib/pricing";
 const steps = [
   {
     icon: FileText,
@@ -24,7 +25,7 @@ const steps = [
     icon: UserCheck,
     number: "03",
     title: "Validate and Deliver",
-    desc: "Expert review is available for accuracy and completeness. Typical turnaround is 4 hours for Pro and 8 hours for Basic, subject to matter complexity.",
+    desc: `Expert review provides quality assurance and oversight. ${EXPERT_REVIEW_EXPECTATION}`,
   },
 ];
 
@@ -79,11 +80,11 @@ const HowItWorks = () => {
             <h3 className="text-xl font-display font-semibold mb-3">Review Standards</h3>
             <p className="text-muted-foreground max-w-lg mx-auto mb-6">
               Outputs follow a consistent Options → Risks → Resources structure.<br />
-              Expert review validates accuracy and completeness where included in your plan.
+              Expert review provides quality assurance and oversight where included in your plan.
             </p>
             <Link to="/auth">
               <Button variant="hero" size="lg">
-                Run Legal Audit <ArrowRight className="ml-2 h-4 w-4" />
+                Launch Hugo Co-Pilot <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
           </motion.div>

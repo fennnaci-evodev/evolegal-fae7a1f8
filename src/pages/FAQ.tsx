@@ -6,6 +6,7 @@ import { ParticleBackground } from "@/components/ParticleBackground";
 import { ChevronDown } from "lucide-react";
 
 import { fadeUp } from "@/lib/animations";
+import { EXPERT_REVIEW_EXPECTATION } from "@/lib/pricing";
 const faqs = [
   {
     q: "What is EvoLegal?",
@@ -25,7 +26,7 @@ const faqs = [
   },
   {
     q: "How fast will I get a response?",
-    a: "Hugo provides rapid initial analysis. Typical expert-review turnaround is 4 hours for Pro and 8 hours for Basic, subject to matter complexity.",
+    a: `Hugo provides rapid initial analysis. ${EXPERT_REVIEW_EXPECTATION}`,
   },
   {
     q: "Can I cancel my subscription?",

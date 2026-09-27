@@ -7,7 +7,7 @@ interface HugoAvatarProps {
 }
 
 /**
- * Hugo — Expert Manager avatar.
+ * Hugo — Analysis Co-Pilot avatar.
  * Sharp photo with an animated rotating neon gradient ring.
  */
 export function HugoAvatar({ size = 40 }: HugoAvatarProps) {
@@ -62,7 +62,7 @@ export function HugoAvatar({ size = 40 }: HugoAvatarProps) {
       >
         <img
           src={hugoPhoto}
-          alt="Hugo · Expert Manager"
+          alt="Hugo · Analysis Co-Pilot"
           className="block h-full w-full rounded-full object-cover select-none"
           style={{
             objectPosition: "center 20%",
