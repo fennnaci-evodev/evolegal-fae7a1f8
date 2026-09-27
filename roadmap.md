@@ -1,3 +1,4 @@
 # Roadmap
 
 - [x] Preserve the existing home UI and refine only the randomized neural-point background, with phone-specific density and motion.
+- [x] Replace the oversized mobile dropdown with a compact, polished navigation panel while preserving routes and page content.
