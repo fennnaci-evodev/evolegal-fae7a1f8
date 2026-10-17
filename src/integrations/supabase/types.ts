@@ -303,8 +303,10 @@ export type Database = {
           id: string
           impact_analysis: string | null
           new_hash: string | null
+          new_text: string | null
           new_unapplied: number | null
           previous_hash: string | null
+          previous_text: string | null
           previous_unapplied: number | null
           reviewed_at: string | null
           reviewed_by: string | null
@@ -317,8 +319,10 @@ export type Database = {
           id?: string
           impact_analysis?: string | null
           new_hash?: string | null
+          new_text?: string | null
           new_unapplied?: number | null
           previous_hash?: string | null
+          previous_text?: string | null
           previous_unapplied?: number | null
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -331,8 +335,10 @@ export type Database = {
           id?: string
           impact_analysis?: string | null
           new_hash?: string | null
+          new_text?: string | null
           new_unapplied?: number | null
           previous_hash?: string | null
+          previous_text?: string | null
           previous_unapplied?: number | null
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -341,6 +347,47 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "hugo_source_changes_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "hugo_knowledge_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hugo_source_reviews: {
+        Row: {
+          checks: Json
+          decision: string
+          id: string
+          notes: string
+          reviewed_at: string
+          reviewer_id: string
+          source_id: string
+          source_snapshot: Json
+        }
+        Insert: {
+          checks: Json
+          decision: string
+          id?: string
+          notes: string
+          reviewed_at?: string
+          reviewer_id: string
+          source_id: string
+          source_snapshot: Json
+        }
+        Update: {
+          checks?: Json
+          decision?: string
+          id?: string
+          notes?: string
+          reviewed_at?: string
+          reviewer_id?: string
+          source_id?: string
+          source_snapshot?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hugo_source_reviews_source_id_fkey"
             columns: ["source_id"]
             isOneToOne: false
             referencedRelation: "hugo_knowledge_sources"
@@ -506,6 +553,23 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      review_hugo_source: {
+        Args: {
+          p_checks: Json
+          p_decision: string
+          p_effective_from: string
+          p_effective_until: string
+          p_excerpt: string
+          p_expected_hash: string
+          p_expected_updated_at: string
+          p_jurisdiction: string
+          p_notes: string
+          p_review_due_at: string
+          p_source_id: string
+          p_topic: string
+        }
+        Returns: string
       }
     }
     Enums: {
