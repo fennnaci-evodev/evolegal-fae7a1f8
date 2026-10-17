@@ -35,6 +35,7 @@ async function analyseImpact(title: string, before: string, after: string, effec
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  if (req.method !== "POST") return json({ error: "POST required" }, 405);
   const url = Deno.env.get("SUPABASE_URL")!;
   const token = req.headers.get("Authorization")?.replace(/^Bearer\s+/i, "");
   if (!token) return json({ error: "Sign-in required" }, 401);
@@ -44,6 +45,7 @@ Deno.serve(async (req) => {
   const { data: role } = await admin.from("user_roles").select("id").eq("user_id", userData.user.id).eq("role", "admin").maybeSingle();
   if (!role) return json({ error: "Administrator access required" }, 403);
   const options = await req.json().catch(() => ({}));
+  if (!options || typeof options !== "object" || (options.analyse_impact !== undefined && typeof options.analyse_impact !== "boolean")) return json({ error: "Invalid check options" }, 400);
 
   const { data: sources, error } = await admin.from("hugo_knowledge_sources")
     .select("id,title,source_url,status,content_hash,monitored_text,unapplied_effects,updated_at")
@@ -83,7 +85,7 @@ Deno.serve(async (req) => {
     }
     // Withdraw changed evidence before analysis; never keep stale approved law live.
     const { data: withdrawn, error: withdrawError } = await admin.from("hugo_knowledge_sources").update({
-      status: "draft", check_status: "changed_needs_review",
+      status: "draft", check_status: "monitoring",
     }).eq("id", s.id).eq("updated_at", s.updated_at).select("id");
     if (withdrawError || !withdrawn?.length) {
       report.push({ title: s.title, result: "conflict_retry" });
@@ -91,7 +93,7 @@ Deno.serve(async (req) => {
     }
     let analysis: string | null = null;
     let analysisStatus = "skipped";
-    if (options.analyse_impact === false) analysisStatus = "skipped";
+    if (options.analyse_impact !== true) analysisStatus = "skipped";
     else if (!aiStopped) {
       const ai = await analyseImpact(s.title, s.monitored_text ?? "", text, effects);
       if (ai.stop) { aiStopped = ai.stop; analysisStatus = "paused"; }
