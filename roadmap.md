@@ -18,3 +18,5 @@
 - [ ] Run the monitor daily. Blocked: automatic daily scheduling is not available for this project yet; run manually as administrator.
 - [ ] Add New York via the free NY Senate Open Legislation key. Waits on the user obtaining the key.
 - [x] Administrator verification workflow at /dashboard/admin/sources: saved text diff, five legal attestations, atomic version-checked approval/rejection, immutable review history. Signed-in admin approved and rejected a test-only source, then it was retired; no real law approved. Fixed auth-resolution redirect race and official XML extraction. Manual checks from this panel do not use paid analysis. Hugo retrieval remains disabled pending actual expert approval.
+- [ ] Discover new related English provisions/judgments daily and add them as drafts (needs a daily schedule, not available yet; run manually meanwhile).
+- [ ] First English sources approved by the administrator in the panel (waiting on the administrator's own review).
