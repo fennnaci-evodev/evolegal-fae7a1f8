@@ -7,8 +7,7 @@ import { Input } from "@/components/ui/input";
 import { InlineELoader } from "@/components/InlineELoader";
 import { Send, ArrowRight, BookOpen } from "lucide-react";
 import { toast } from "sonner";
-
-const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/hugo-chat`;
+import { fetchHugo } from "@/lib/hugoTransport";
 
 interface Message {
   id: string;
@@ -91,14 +90,7 @@ const WorkflowGuides = () => {
       apiMessages.unshift({ role: "user", content: `[Workflow context: ${extraSystemContext}]` });
     }
 
-    const resp = await fetch(CHAT_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-      },
-      body: JSON.stringify({ messages: apiMessages }),
-    });
+    const resp = await fetchHugo({ messages: apiMessages });
 
     if (!resp.ok || !resp.body) throw new Error("Stream failed");
 

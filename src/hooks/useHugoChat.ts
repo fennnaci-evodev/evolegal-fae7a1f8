@@ -3,8 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { rememberLastChat, getOrCreateSessionId } from "@/lib/hugoMemory";
-
-const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/hugo-chat`;
+import { fetchHugo } from "@/lib/hugoTransport";
 
 // Establish a recovery session id as soon as the hook module loads.
 try { getOrCreateSessionId(); } catch { /* SSR safe */ }
@@ -28,14 +27,7 @@ export interface HugoChat {
 /** Generate a structured title via the AI Title Engine */
 async function generateSmartTitle(messages: { role: string; content: string }[]): Promise<string> {
   try {
-    const resp = await fetch(CHAT_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-      },
-      body: JSON.stringify({ action: "generate_title", messages }),
-    });
+    const resp = await fetchHugo({ action: "generate_title", messages });
     if (resp.ok) {
       const data = await resp.json();
       return data.title || "New Chat";
@@ -169,7 +161,12 @@ export function useHugoChat(chatId?: string | null) {
 
     // Save user message
     const savedId = await saveMessage(cId, "user", text);
-    if (savedId) userMsg.id = savedId;
+    if (!savedId) {
+      setStreaming(false);
+      toast.error("Unable to save this message. Please try again.");
+      return;
+    }
+    userMsg.id = savedId;
 
     // Stream Hugo's response
     const allMsgs = [...messagesRef.current, userMsg];
@@ -179,15 +176,7 @@ export function useHugoChat(chatId?: string | null) {
       const controller = new AbortController();
       abortRef.current = controller;
 
-      const resp = await fetch(CHAT_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-        },
-        body: JSON.stringify({ messages: apiMessages, chat_id: cId, user_id: user.id, precise_mode: !!opts?.precise, mode: opts?.mode ?? "auto" }),
-        signal: controller.signal,
-      });
+      const resp = await fetchHugo({ messages: apiMessages, chat_id: cId, precise_mode: !!opts?.precise, mode: opts?.mode ?? "auto" }, controller.signal);
 
       if (!resp.ok) {
         if (resp.status === 429) throw new Error("Too many requests — please wait a moment.");
@@ -281,7 +270,7 @@ export function useHugoChat(chatId?: string | null) {
         ];
         generateSmartTitle(titleMessages).then(title => {
           setCurrentTitle(title);
-          updateTitle(cId!, title);
+          if (cId) updateTitle(cId, title);
         });
       }
 
@@ -297,7 +286,7 @@ export function useHugoChat(chatId?: string | null) {
           content: "I'm sorry, I wasn't able to process that right now. Please try again in a moment.",
         };
         setMessages(prev => [...prev, errMsg]);
-        await saveMessage(cId!, "assistant", errMsg.content);
+        if (cId) await saveMessage(cId, "assistant", errMsg.content);
       }
       return { escalated: false, suggestPrecise: false, suggestConsilium: false, chatId: cId };
     } finally {
