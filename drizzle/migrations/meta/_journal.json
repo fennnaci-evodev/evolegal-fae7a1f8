@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1792255005053,
+      "tag": "0000_hugo_reviewed_sources",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792255050694,
+      "tag": "0001_hugo_sources_least_privilege",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792255359880,
+      "tag": "0002_restore_role_predicate_for_hugo_policies",
+      "breakpoints": true
+    }
+  ]
+}
