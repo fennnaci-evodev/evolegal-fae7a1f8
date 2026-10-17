@@ -9,7 +9,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
 import { useAuth } from "@/hooks/useAuth";
@@ -55,6 +54,8 @@ export default function AdminSources() {
     const { data, error: err } = await supabase.from("hugo_knowledge_sources").select("*").order("title").limit(1000);
     if (err) setError("Sources could not be loaded. Please retry.");
     else { setSources(data ?? []); setSelectedId(id => id || data?.[0]?.id || ""); }
+    const { data: past } = await supabase.from("hugo_source_reviews").select("*").order("reviewed_at", { ascending: false }).limit(5);
+    setLessons(past ?? []);
     setLoading(false);
   }, []);
   useEffect(() => { if (!authLoading && !roleLoading && isAdmin) void load(); }, [authLoading, roleLoading, isAdmin, load]);
