@@ -5,7 +5,7 @@
 - [x] Prepare server-verified identity, chat-ownership and administrative-role gates; update every chat caller to use the user's session. Local authorization and transport tests pass; not live-verified.
 - [x] Prepare shared Hugo personality and reviewed-source eligibility without fine-tuning; unreviewed memory is never legal authority. Reviewed-source retrieval is disabled until setup is complete.
 - [x] Test authorization, source eligibility, session transport and request validation locally (25 tests passed); Deno server check and preview build pass.
-- [ ] Apply the reviewed-source schema and deploy/test Hugo end-to-end. Blocked: Lovable Cloud is paused; no migration, deployment, authenticated live request or provider call has been performed.
+- [ ] Apply the reviewed-source schema and deploy/test Hugo end-to-end. Lovable Cloud is enabled and healthy again; no migration, deployment, authenticated live request or provider call has been performed yet.
 - [ ] Populate and legally review the knowledge base, establish jurisdiction/topic scope and an expert-verified evaluation set. Blocked: no reviewed legal materials or authorized review process supplied; source approval is not itself legal validation.
 
 - [x] Preserve the existing home UI and refine only the randomized neural-point background, with phone-specific density and motion.
