@@ -1,8 +1,10 @@
 # Roadmap
 
-- [ ] Switch Hugo's chat backend to Claude through built-in Lovable AI without changing the chat UI. Blocked: authenticated model discovery confirms Claude models on the Messages surface, but the required Anthropic Messages implementation contract is unavailable in this session and the loaded endpoint policy excludes unsupported providers. No provider switch or deployment has been made.
+- [ ] Switch Hugo to the direct official Anthropic Messages API using a securely stored ANTHROPIC_API_KEY; preserve the chat UI and verify provider access.
 - [x] Assess Hugo's logical maturity and readiness for system-prompt personality plus grounded legal knowledge, without model fine-tuning; completed a source-level audit, not a live legal-accuracy evaluation.
-- [ ] Configure Hugo's shared character and reviewed legal knowledge without fine-tuning. Blocked: Claude Messages integration remains unsupported by the available gateway contract; reviewed legal sources and jurisdiction scope are not established. Authentication and chat-ownership verification must precede attaching private context to the new integration.
+- [ ] Verify sessions, chat ownership, and administrative actions on Hugo's protected entry point; update every chat caller to use the user's session.
+- [ ] Configure shared Hugo personality and a reviewed-source knowledge foundation without fine-tuning; never mark unreviewed sources as validated.
+- [ ] Test authorization, source eligibility, conversation history, and Anthropic stream translation; deploy and verify supported flows.
 
 - [x] Preserve the existing home UI and refine only the randomized neural-point background, with phone-specific density and motion.
 - [x] Replace the oversized mobile dropdown with a compact, polished navigation panel while preserving routes and page content.
