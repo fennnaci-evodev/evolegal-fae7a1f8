@@ -43,6 +43,7 @@ Deno.serve(async (req) => {
   if (userErr || !userData.user) return json({ error: "Invalid session" }, 401);
   const { data: role } = await admin.from("user_roles").select("id").eq("user_id", userData.user.id).eq("role", "admin").maybeSingle();
   if (!role) return json({ error: "Administrator access required" }, 403);
+  const options = await req.json().catch(() => ({}));
 
   const { data: sources, error } = await admin.from("hugo_knowledge_sources")
     .select("id,title,source_url,status,content_hash,monitored_text,unapplied_effects,updated_at")
@@ -85,7 +86,8 @@ Deno.serve(async (req) => {
     }
     let analysis: string | null = null;
     let analysisStatus = "skipped";
-    if (!aiStopped) {
+    if (options.analyse_impact === false) analysisStatus = "skipped";
+    else if (!aiStopped) {
       const ai = await analyseImpact(s.title, s.monitored_text ?? "", text, effects);
       if (ai.stop) { aiStopped = ai.stop; analysisStatus = "paused"; }
       else { analysis = ai.text; analysisStatus = ai.text ? "draft" : "empty"; }

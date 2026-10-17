@@ -39,6 +39,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
     ? [
         { title: "Expert Dashboard", url: "/dashboard/admin/workdesk", icon: LayoutDashboard },
         { title: "Request Register", url: "/dashboard/admin/requests", icon: ShieldCheck },
+        { title: "Source Verification", url: "/dashboard/admin/sources", icon: BookOpen },
         { title: "Settings", url: "/dashboard/settings", icon: Settings },
       ]
     : navItems;

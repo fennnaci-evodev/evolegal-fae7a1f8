@@ -28,6 +28,7 @@ import ResetPassword from "./pages/ResetPassword";
 import MyRequests from "./pages/MyRequests";
 import AdminRequests from "./pages/AdminRequests";
 import ExpertDashboard from "./pages/ExpertDashboard";
+import AdminSources from "./pages/AdminSources";
 import WorkflowGuides from "./pages/WorkflowGuides";
 import SettingsPage from "./pages/Settings";
 import NotFound from "./pages/NotFound";
@@ -71,6 +72,7 @@ const App = () => {
                 <Route path="/dashboard/requests" element={<MyRequests />} />
                 <Route path="/dashboard/admin/requests" element={<AdminRequests />} />
                 <Route path="/dashboard/admin/workdesk" element={<ExpertDashboard />} />
+                <Route path="/dashboard/admin/sources" element={<AdminSources />} />
                 <Route path="/dashboard/workflows" element={<WorkflowGuides />} />
                 <Route path="/dashboard/saved" element={<Library />} />
                 <Route path="/dashboard/settings" element={<SettingsPage />} />
