@@ -1,6 +1,6 @@
 # Roadmap
 
-- [ ] Switch Hugo to the direct official Anthropic Messages API using a securely stored ANTHROPIC_API_KEY; preserve the chat UI and verify provider access.
+- [ ] Switch Hugo to Claude through Lovable AI, preserving the chat UI. Blocked: user declined the direct Anthropic key and chose Lovable AI again; the available gateway implementation contract still excludes Anthropic Messages. Preserve the existing model until supported.
 - [x] Assess Hugo's logical maturity and readiness for system-prompt personality plus grounded legal knowledge, without model fine-tuning; completed a source-level audit, not a live legal-accuracy evaluation.
 - [ ] Verify sessions, chat ownership, and administrative actions on Hugo's protected entry point; update every chat caller to use the user's session.
 - [ ] Configure shared Hugo personality and a reviewed-source knowledge foundation without fine-tuning; never mark unreviewed sources as validated.
