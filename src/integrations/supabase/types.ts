@@ -115,12 +115,16 @@ export type Database = {
       }
       hugo_knowledge_sources: {
         Row: {
+          check_status: string
+          content_hash: string | null
           created_at: string
           effective_from: string
           effective_until: string | null
           excerpt: string
           id: string
           jurisdiction: string
+          last_checked_at: string | null
+          monitored_text: string | null
           review_due_at: string | null
           reviewed_at: string | null
           reviewed_by: string | null
@@ -128,15 +132,20 @@ export type Database = {
           status: string
           title: string
           topic: string
+          unapplied_effects: number | null
           updated_at: string
         }
         Insert: {
+          check_status?: string
+          content_hash?: string | null
           created_at?: string
           effective_from: string
           effective_until?: string | null
           excerpt: string
           id?: string
           jurisdiction: string
+          last_checked_at?: string | null
+          monitored_text?: string | null
           review_due_at?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -144,15 +153,20 @@ export type Database = {
           status?: string
           title: string
           topic: string
+          unapplied_effects?: number | null
           updated_at?: string
         }
         Update: {
+          check_status?: string
+          content_hash?: string | null
           created_at?: string
           effective_from?: string
           effective_until?: string | null
           excerpt?: string
           id?: string
           jurisdiction?: string
+          last_checked_at?: string | null
+          monitored_text?: string | null
           review_due_at?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -160,6 +174,7 @@ export type Database = {
           status?: string
           title?: string
           topic?: string
+          unapplied_effects?: number | null
           updated_at?: string
         }
         Relationships: []
@@ -276,6 +291,59 @@ export type Database = {
             columns: ["document_id"]
             isOneToOne: false
             referencedRelation: "generated_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hugo_source_changes: {
+        Row: {
+          analysis_status: string
+          change_kind: string
+          detected_at: string
+          id: string
+          impact_analysis: string | null
+          new_hash: string | null
+          new_unapplied: number | null
+          previous_hash: string | null
+          previous_unapplied: number | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          source_id: string
+        }
+        Insert: {
+          analysis_status?: string
+          change_kind: string
+          detected_at?: string
+          id?: string
+          impact_analysis?: string | null
+          new_hash?: string | null
+          new_unapplied?: number | null
+          previous_hash?: string | null
+          previous_unapplied?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          source_id: string
+        }
+        Update: {
+          analysis_status?: string
+          change_kind?: string
+          detected_at?: string
+          id?: string
+          impact_analysis?: string | null
+          new_hash?: string | null
+          new_unapplied?: number | null
+          previous_hash?: string | null
+          previous_unapplied?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          source_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hugo_source_changes_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "hugo_knowledge_sources"
             referencedColumns: ["id"]
           },
         ]
