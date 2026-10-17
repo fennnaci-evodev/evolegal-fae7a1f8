@@ -9,4 +9,6 @@ describe("Official source monitoring", () => {
   });
   it("detects body changes", () => expect(extractMonitoredText("<Body>A</Body>")).not.toBe(extractMonitoredText("<Body>B</Body>")));
   it("counts unapplied amendments", () => expect(countUnappliedEffects("<ukm:UnappliedEffect a='1'/><ukm:UnappliedEffect a='2'/>")).toBe(2));
+  it("retains legal text after a self-closing commentary reference", () => expect(extractMonitoredText('<Body><CommentaryRef Ref="x"/><Text>Negligence liability</Text></Body><Commentaries><Commentary>Editorial note</Commentary></Commentaries>')).toBe("Negligence liability"));
+  it("rejects pages without an official legal body", () => expect(extractMonitoredText("<html>Access denied</html>")).toBe(""));
 });

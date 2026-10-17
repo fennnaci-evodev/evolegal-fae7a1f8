@@ -62,6 +62,11 @@ Deno.serve(async (req) => {
     }
     const xml = await res.text();
     const text = extractMonitoredText(xml);
+    if (!text) {
+      await admin.from("hugo_knowledge_sources").update({ last_checked_at: now, check_status: "invalid_text", ...(s.status === "approved" ? { status: "draft" } : {}) }).eq("id", s.id);
+      report.push({ title: s.title, result: "invalid_text" });
+      continue;
+    }
     const effects = countUnappliedEffects(xml);
     const hash = await sha256(text);
     if (!s.content_hash) {
