@@ -45,7 +45,7 @@ Deno.serve(async (req) => {
   if (!role) return json({ error: "Administrator access required" }, 403);
 
   const { data: sources, error } = await admin.from("hugo_knowledge_sources")
-    .select("id,title,source_url,status,content_hash,monitored_text,unapplied_effects")
+    .select("id,title,source_url,status,content_hash,monitored_text,unapplied_effects,updated_at")
     .neq("status", "retired").order("last_checked_at", { ascending: true, nullsFirst: true }).limit(BATCH);
   if (error) return json({ error: "Could not load sources" }, 500);
 
@@ -75,6 +75,14 @@ Deno.serve(async (req) => {
       report.push({ title: s.title, result: "current" });
       continue;
     }
+    // Withdraw changed evidence before analysis; never keep stale approved law live.
+    const { data: withdrawn, error: withdrawError } = await admin.from("hugo_knowledge_sources").update({
+      status: "draft", check_status: "changed_needs_review",
+    }).eq("id", s.id).eq("updated_at", s.updated_at).select("id");
+    if (withdrawError || !withdrawn?.length) {
+      report.push({ title: s.title, result: "conflict_retry" });
+      continue;
+    }
     let analysis: string | null = null;
     let analysisStatus = "skipped";
     if (!aiStopped) {
@@ -82,15 +90,17 @@ Deno.serve(async (req) => {
       if (ai.stop) { aiStopped = ai.stop; analysisStatus = "paused"; }
       else { analysis = ai.text; analysisStatus = ai.text ? "draft" : "empty"; }
     } else analysisStatus = "paused";
-    await admin.from("hugo_source_changes").insert({
+    const { error: changeError } = await admin.from("hugo_source_changes").insert({
       source_id: s.id, change_kind: textChanged ? "text_changed" : "pending_effects_changed",
       previous_hash: s.content_hash, new_hash: hash, previous_unapplied: s.unapplied_effects, new_unapplied: effects,
       impact_analysis: analysis, analysis_status: analysisStatus,
+      previous_text: s.monitored_text, new_text: text,
     });
+    if (changeError) { report.push({ title: s.title, result: "history_save_failed" }); continue; }
     // A changed source is withdrawn from Hugo until a reviewer re-approves it.
     await admin.from("hugo_knowledge_sources").update({
       content_hash: hash, monitored_text: text, unapplied_effects: effects, last_checked_at: now,
-      check_status: "changed_needs_review", ...(s.status === "approved" ? { status: "draft" } : {}),
+      check_status: "changed_needs_review", status: "draft",
     }).eq("id", s.id);
     report.push({ title: s.title, result: "changed", analysis: analysisStatus });
   }
