@@ -2,7 +2,7 @@
 
 ## Current state
 
-The user declined the Anthropic API key form and chose Lovable AI. No direct Anthropic request, Claude model switch, provider test, deployment or database migration was made. The existing Hugo model remains unchanged. Lovable Cloud was confirmed paused, so authenticated end-to-end checks are unavailable until it is resumed.
+As of 2026-10-17, Lovable Cloud is healthy. The prepared reviewed-source schema has been applied and session-protected `hugo-chat` deployed. Hugo still uses its existing Lovable AI model; no Claude switch or direct Anthropic connection was made. The knowledge table is empty and reviewed-source retrieval remains disabled.
 
 ## Prepared changes
 
@@ -16,10 +16,16 @@ The user declined the Anthropic API key form and chose Lovable AI. No direct Ant
 
 ## Required next steps
 
-1. Resume Lovable Cloud with owner authorization, then inspect the live schema and grants.
-2. Apply `docs/hugo-reviewed-sources.sql` through the migration tool (not a direct SQL write), regenerate types and test reviewer permissions, content-change reapproval and date rules against the live database.
+1. Completed: apply `docs/hugo-reviewed-sources.sql` verbatim through the migration tool and regenerate types. Remove inherited anonymous table privileges in a follow-up migration.
+2. Completed: restore signed-in execution of the read-only `has_role` RLS predicate (anonymous execution remains revoked); its earlier blanket revocation prevented chat creation. Live review-trigger rejection, content-change reapproval and date-rule tests remain outstanding; local eligibility tests pass.
 3. Establish jurisdiction/topic scope and an accountable legal review process. Populate sources with verified excerpts and provenance; do not approve materials automatically.
 4. Connect request jurisdiction/topic to the reviewed-source flow. Set the server configuration `HUGO_REVIEWED_KNOWLEDGE_ENABLED=true` only after the schema and approved sources are ready. Do not infer jurisdiction from user language or silently use another jurisdiction's sources.
-5. Deploy Hugo, test the signed-in chat through the interface with real input, then test invalid sessions, identity substitution, foreign chat IDs and metrics permissions against the deployed endpoint.
+5. Completed: deploy Hugo and test a signed-in liability-cap question through the interface. One user message and one assistant reply persist and reload through the chat URL. The deployed endpoint rejects missing/invalid sessions (401), identity substitution/foreign chats/non-admin metrics (403), and injected system messages (400). A non-admin source read returns no rows.
 6. Evaluate citations, abstention, prompt injection and jurisdiction/date accuracy against an expert-verified task set. Model self-ratings are not a readiness score.
 7. Resolve Claude's supported Lovable AI Messages implementation contract before changing the existing model; do not silently substitute another provider or request an Anthropic key again.
+
+## Live-test limitations
+
+- The reply explicitly disclosed that reviewed sources were unavailable, but still included specific legal propositions and directive wording; this is not evidence of legal accuracy or complete personality compliance.
+- Existing optional `hugo_session_recovery` calls return 404; the saved chat URL still reloads both messages correctly. Long-term memory tables and background learning were not verified.
+- No legal sources were seeded or approved and no reviewer account was impersonated.

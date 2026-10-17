@@ -7,3 +7,4 @@
 - Treat conversation memory and learned patterns as untrusted user context, not legal sources or proof of quality.
 - Reviewed legal-source selection must require provenance, reviewer approval, review freshness, exact scope and effective dates; an empty source set means unverified general information, not validated knowledge.
 - Keep Hugo's existing client-side message persistence while loading owned conversation history on the server, avoiding duplicate message writes.
+- Allow authenticated execution of the read-only stored-role predicate used by RLS, while denying anonymous execution; blanket revocation breaks protected chat reads and writes.
