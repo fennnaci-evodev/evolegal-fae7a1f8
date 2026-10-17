@@ -1,5 +1,7 @@
 # Roadmap
 
+- [ ] Prepare a free official-source review shortlist for New York State and England with verified links, date evidence and explicit review gaps; do not approve or import sources automatically.
+- [ ] Begin voice-chat work after the source shortlist. Await the user's next instruction; no paid voice services to be connected during this source-preparation task.
 - [ ] Connect Hugo directly to Anthropic /v1/messages using protected ANTHROPIC_API_KEY, preserving the chat UI, session gates and reviewed-source policy. Deferred at the user's request: API funding is unavailable; wait for the user to resume. The secure key form was cancelled before execution; no provider code was changed and no Claude requests were sent.
 - [x] Assess Hugo's logical maturity and readiness for system-prompt personality plus grounded legal knowledge, without model fine-tuning; completed a source-level audit, not a live legal-accuracy evaluation.
 - [x] Prepare and deploy server-verified identity, chat-ownership and administrative-role gates; live checks reject missing/invalid sessions, identity substitution, foreign chats and non-admin metrics access.
