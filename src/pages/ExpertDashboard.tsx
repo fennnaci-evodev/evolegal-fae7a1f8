@@ -2,6 +2,7 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchHugoReply } from "@/lib/hugoTransport";
 import { useAuth } from "@/hooks/useAuth";
 import { useAdminRole } from "@/hooks/useAdminRole";
 import { EvoLogo } from "@/components/EvoLogo";
@@ -317,20 +318,16 @@ const ExpertDashboard = () => {
 
     if (mentionsHugo && selected) {
       try {
-        const { data: fnData, error: fnError } = await supabase.functions.invoke("hugo-chat", {
-          body: {
-            message: `Context: This is a legal request about "${selected.topic}". The user's original request: "${selected.description}". The admin asked: "${sentMsg.replace(/@hugo/i, "").trim()}"`,
-          },
-        });
+        const reply = await fetchHugoReply(`Context: This is a legal request about "${selected.topic}". The user's original request: "${selected.description}". The admin asked: "${sentMsg.replace(/@hugo/i, "").trim()}"`);
 
-        if (!fnError && fnData?.reply) {
+        if (reply) {
           await supabase
             .from("request_messages")
             .insert({
               request_id: selectedId,
               sender_id: "00000000-0000-0000-0000-000000000000",
               sender_role: "hugo",
-              content: fnData.reply,
+              content: reply,
             } as any);
         }
       } catch {
@@ -388,25 +385,16 @@ const ExpertDashboard = () => {
         return `${role}: ${m.content}`;
       }).join("\n");
 
-      const { data } = await supabase.functions.invoke("hugo-chat", {
-        body: {
-          message: `You are summarizing a legal case for an expert review. Provide a clear, concise summary with these sections:
-
-**Key Points Discussed:**
-**Main User Concerns:**
-**Important Context:**
-**Expert Insights:**
+      const reply = await fetchHugoReply(`Summarize this legal case for expert review in clear, concise natural paragraphs covering key points, user concerns, important context and expert insights.
 
 Topic: ${selected.topic}
 Original Request: ${selected.description}
 ${selected.state ? `Jurisdiction: ${selected.state}` : ""}
 
 Conversation:
-${chatContext || "(No messages yet)"}`,
-        },
-      });
+${chatContext || "(No messages yet)"}`);
 
-      setSummaryText(data?.reply || "Unable to generate summary.");
+      setSummaryText(reply || "Unable to generate summary.");
     } catch {
       setSummaryText("Failed to generate summary. Please try again.");
     }
