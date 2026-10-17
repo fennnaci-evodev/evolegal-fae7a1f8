@@ -17,4 +17,4 @@
 - [x] Replace the neural field's simple grid character with organic clusters, curved paths, and coordinated depth.- [x] England official-source monitor: 10 draft England sources loaded; admin-only checker fetches official XML, detects text and pending-amendment changes, withdraws changed approved sources from Hugo, and stores a draft impact note for reviewer approval.
 - [ ] Run the monitor daily. Blocked: automatic daily scheduling is not available for this project yet; run manually as administrator.
 - [ ] Add New York via the free NY Senate Open Legislation key. Waits on the user obtaining the key.
-- [ ] Admin screen to view changes and approve sources/impact notes.
+- [ ] Build the administrator verification workflow: source queue, saved text diff, legal-detail checks, atomic approval and immutable review history; verify signed-in use.
