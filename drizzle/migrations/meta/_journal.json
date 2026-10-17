@@ -43,6 +43,13 @@
       "when": 1792275736738,
       "tag": "0005_source_review_write_gate",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792279478747,
+      "tag": "0006_verbatim_excerpt_rule",
+      "breakpoints": true
     }
   ]
 }
