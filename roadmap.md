@@ -1,6 +1,6 @@
 # Roadmap
 
-- [ ] Repair Hugo sending when an administrator opens another account's conversation; preserve ownership restrictions and verify a saved reply in an owned chat.
+- [x] Repair Hugo sending when an administrator opens another account's conversation: owner-scoped lists/loads, safe return to a new chat, unsaved-message rollback and draft restoration. Live verification: foreign chat blocked, owned chat returns 200, user and assistant persist (201) and both reload; 14 regression tests pass. Ownership restrictions unchanged.
 
 - [x] Prepare a free official-source review shortlist for New York State and England: 16 draft cards in the dated Files document, with official URLs, date evidence and reviewer checks. Eight England primary links returned 200; eight NY Senate links returned 403 and require manual text/date verification. No sources imported or approved; no paid services connected.
 - [ ] Begin voice-chat work after the source shortlist. Await the user's next instruction; no paid voice services to be connected during this source-preparation task.
