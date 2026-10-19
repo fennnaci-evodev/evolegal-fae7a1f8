@@ -52,6 +52,8 @@ export function useHugoChat(chatId?: string | null) {
   const [currentChatId, setCurrentChatId] = useState<string | null>(chatId ?? null);
   const [currentTitle, setCurrentTitle] = useState<string>("New Chat");
   const [historyLoading, setHistoryLoading] = useState(false);
+  const [conversationUnavailable, setConversationUnavailable] = useState(false);
+  const loadVersionRef = useRef(0);
   const abortRef = useRef<AbortController | null>(null);
   const messagesRef = useRef<HugoMessage[]>(messages);
   messagesRef.current = messages;
@@ -60,13 +62,27 @@ export function useHugoChat(chatId?: string | null) {
 
   // Load messages for an existing chat
   const loadMessages = useCallback(async (cId: string) => {
+    if (!user) return;
+    const version = ++loadVersionRef.current;
     setHistoryLoading(true);
+    setConversationUnavailable(false);
+    setMessages([]);
     // Load chat title
-    const { data: chatData } = await supabase
+    const { data: chatData, error: chatError } = await supabase
       .from("hugo_chats" as any)
       .select("title")
       .eq("id", cId)
-      .single();
+      .eq("user_id", user.id)
+      .maybeSingle();
+    if (version !== loadVersionRef.current) return;
+    if (chatError || !chatData) {
+      setCurrentChatId(null);
+      setCurrentTitle("New Chat");
+      setConversationUnavailable(true);
+      setHistoryLoading(false);
+      toast.error("This conversation belongs to another account or is unavailable. Start a new chat to continue.");
+      return;
+    }
     if (chatData) setCurrentTitle((chatData as any).title || "New Chat");
 
     const { data, error } = await supabase
@@ -75,6 +91,7 @@ export function useHugoChat(chatId?: string | null) {
       .eq("chat_id", cId)
       .order("created_at", { ascending: true });
 
+    if (version !== loadVersionRef.current) return;
     if (error) {
       console.error("Failed to load messages:", error);
     } else if (data) {
@@ -86,15 +103,15 @@ export function useHugoChat(chatId?: string | null) {
       })));
     }
     setHistoryLoading(false);
-  }, []);
+  }, [user]);
 
   // Load on mount if chatId provided
   useEffect(() => {
-    if (chatId) {
+    if (chatId && user) {
       setCurrentChatId(chatId);
       loadMessages(chatId);
-      if (user) rememberLastChat(user.id, chatId);
     }
+    return () => { loadVersionRef.current += 1; };
   }, [chatId, loadMessages, user]);
 
   // Create a new chat session
@@ -143,7 +160,7 @@ export function useHugoChat(chatId?: string | null) {
 
   // Stream and persist
   const sendMessage = useCallback(async (text: string, opts?: { precise?: boolean; mode?: "auto" | "blitz" | "consilium" }) => {
-    if (!text.trim() || streaming || !user) return;
+    if (!text.trim() || streaming || historyLoading || !user) return;
 
     let cId = currentChatId;
     const isFirst = !cId;
@@ -162,9 +179,10 @@ export function useHugoChat(chatId?: string | null) {
     // Save user message
     const savedId = await saveMessage(cId, "user", text);
     if (!savedId) {
+      setMessages(prev => prev.filter(m => m.id !== userMsg.id));
       setStreaming(false);
       toast.error("Unable to save this message. Please try again.");
-      return;
+      return { failed: true, chatId: cId };
     }
     userMsg.id = savedId;
 
@@ -293,7 +311,7 @@ export function useHugoChat(chatId?: string | null) {
       setStreaming(false);
       abortRef.current = null;
     }
-  }, [streaming, user, currentChatId, createChat, saveMessage, updateTitle]);
+  }, [streaming, historyLoading, user, currentChatId, createChat, saveMessage, updateTitle]);
 
   // Edit the last user message: remove last user+assistant msgs, return the text
   const editLastMessage = useCallback(async (): Promise<string | null> => {
@@ -325,6 +343,9 @@ export function useHugoChat(chatId?: string | null) {
 
   // Start a new chat (reset state)
   const startNewChat = useCallback(() => {
+    loadVersionRef.current += 1;
+    setHistoryLoading(false);
+    setConversationUnavailable(false);
     setCurrentChatId(null);
     setCurrentTitle("New Chat");
     setMessages([]);
@@ -336,6 +357,7 @@ export function useHugoChat(chatId?: string | null) {
     streaming,
     loading,
     historyLoading,
+    conversationUnavailable,
     currentChatId,
     currentTitle,
     sendMessage,
@@ -349,9 +371,12 @@ export function useHugoChat(chatId?: string | null) {
 
 /** Fetch all Hugo chats for the current user */
 export async function fetchHugoChats(): Promise<HugoChat[]> {
+  const { data: sessionData } = await supabase.auth.getSession();
+  if (!sessionData.session?.user) return [];
   const { data, error } = await supabase
     .from("hugo_chats" as any)
     .select("id, title, status, created_at, updated_at")
+    .eq("user_id", sessionData.session.user.id)
     .order("updated_at", { ascending: false });
 
   if (error) {
