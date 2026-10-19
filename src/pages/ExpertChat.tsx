@@ -71,8 +71,11 @@ const ExpertChat = () => {
   const showConsiliumGate = consiliumActive && !consiliumConfirmed;
 
   useEffect(() => {
-    if (conversationUnavailable) navigate("/dashboard/chat", { replace: true });
-  }, [conversationUnavailable, navigate]);
+    if (conversationUnavailable) {
+      startNewChat();
+      navigate("/dashboard/chat", { replace: true });
+    }
+  }, [conversationUnavailable, navigate, startNewChat]);
 
   // Load/refresh chat list when chatId or title changes
   useEffect(() => {
