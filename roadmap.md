@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Repair Hugo sending when an administrator opens another account's conversation: owner-scoped lists/loads, safe return to a new chat, unsaved-message rollback and draft restoration. Live verification: foreign chat blocked, owned chat returns 200, user and assistant persist (201) and both reload; 14 regression tests pass. Ownership restrictions unchanged.
+
 - [x] Prepare a free official-source review shortlist for New York State and England: 16 draft cards in the dated Files document, with official URLs, date evidence and reviewer checks. Eight England primary links returned 200; eight NY Senate links returned 403 and require manual text/date verification. No sources imported or approved; no paid services connected.
 - [ ] Begin voice-chat work after the source shortlist. Await the user's next instruction; no paid voice services to be connected during this source-preparation task.
 - [ ] Connect Hugo directly to Anthropic /v1/messages using protected ANTHROPIC_API_KEY, preserving the chat UI, session gates and reviewed-source policy. Deferred at the user's request: API funding is unavailable; wait for the user to resume. The secure key form was cancelled before execution; no provider code was changed and no Claude requests were sent.

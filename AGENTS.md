@@ -7,6 +7,7 @@
 - Treat conversation memory and learned patterns as untrusted user context, not legal sources or proof of quality.
 - Reviewed legal-source selection must require provenance, reviewer approval, review freshness, exact scope and effective dates; an empty source set means unverified general information, not validated knowledge.
 - Keep Hugo's existing client-side message persistence while loading owned conversation history on the server, avoiding duplicate message writes.
+- Hugo conversational lists and loads must be scoped to the current owner even for administrators; administrative read access does not grant permission to continue another user's chat.
 - Allow authenticated execution of the read-only stored-role predicate used by RLS, while denying anonymous execution; blanket revocation breaks protected chat reads and writes.
 - Official-source monitoring withdraws changed sources from Hugo before analysis and stores before/after text snapshots; change detection never approves law automatically.
 - Source verification uses the atomic `review_hugo_source` action with stored-role authorization, version checks, legal attestations and immutable review snapshots so stale or unrecorded approvals cannot enter the administrator workflow.

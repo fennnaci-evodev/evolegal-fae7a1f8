@@ -38,6 +38,7 @@ const ExpertChat = () => {
     messages,
     streaming,
     historyLoading,
+    conversationUnavailable,
     currentChatId,
     currentTitle,
     sendMessage,
@@ -68,6 +69,13 @@ const ExpertChat = () => {
   const consiliumConfirmed = useConsiliumConfirmed();
   const consiliumActive = hugoMode === "consilium";
   const showConsiliumGate = consiliumActive && !consiliumConfirmed;
+
+  useEffect(() => {
+    if (conversationUnavailable) {
+      startNewChat();
+      navigate("/dashboard/chat", { replace: true });
+    }
+  }, [conversationUnavailable, navigate, startNewChat]);
 
   // Load/refresh chat list when chatId or title changes
   useEffect(() => {
@@ -100,7 +108,7 @@ const ExpertChat = () => {
   }, [input]);
 
   const handleSend = async () => {
-    if (!input.trim() || streaming) return;
+    if (!input.trim() || streaming || historyLoading) return;
     if (isRateLimited("hugo_chat", 15, 60_000)) {
       toast.error("Too many messages — please wait a moment.");
       return;
@@ -115,6 +123,7 @@ const ExpertChat = () => {
     setEditingMode(false);
     setSuggestConsilium(false);
     const result = await sendMessage(text, { mode: getHugoModePref() });
+    if (result?.failed) setInput(text);
 
     if (result?.suggestConsilium && getHugoModePref() !== "consilium") {
       setSuggestConsilium(true);
@@ -478,7 +487,7 @@ const ExpertChat = () => {
               onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
               placeholder="Enter a contract question or audit objective…"
               className="chat-input-plain flex-1 bg-transparent border-0 resize-none text-sm placeholder:text-muted-foreground focus:outline-none leading-relaxed"
-              disabled={streaming}
+              disabled={streaming || historyLoading}
               rows={1}
               style={{ maxHeight: 120, minHeight: 36 }}
             />
@@ -496,7 +505,7 @@ const ExpertChat = () => {
                 <TooltipContent side="top">Extract Document</TooltipContent>
               </Tooltip>
             )}
-            <Button type="submit" size="icon" disabled={!input.trim() || streaming} className="shrink-0 h-8 w-8">
+            <Button type="submit" size="icon" disabled={!input.trim() || streaming || historyLoading} className="shrink-0 h-8 w-8">
               <Send className="h-4 w-4" />
             </Button>
           </form>
