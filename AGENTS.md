@@ -1,5 +1,7 @@
 # Project Rules
 
+- Keep Contract Risk Analysis provider payloads separate from document text and illustrative baselines; uploaded documents remain unscored until an actual provider returns their analysis, so sample risks cannot be mistaken for findings about a user's contract.
+
 - Keep customer-facing plan prices, quotas, and review expectations in `src/lib/pricing.ts` so every pricing surface remains consistent.
 - Route browser Hugo requests through `src/lib/hugoTransport.ts` with a current user session; never authorize with the public application key.
 - Authorize Hugo in code before private reads or provider calls, deriving identity from a verified token and enforcing ownership and stored admin roles.

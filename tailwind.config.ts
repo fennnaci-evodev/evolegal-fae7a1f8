@@ -65,6 +65,11 @@ export default {
           cyan: "hsl(var(--neon-cyan))",
           purple: "hsl(var(--neon-purple))",
         },
+        risk: {
+          safe: "hsl(var(--risk-safe))",
+          caution: "hsl(var(--risk-caution))",
+          high: "hsl(var(--risk-high))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",

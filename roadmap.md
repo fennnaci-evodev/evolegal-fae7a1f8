@@ -1,5 +1,7 @@
 # Roadmap
 
+- [ ] Add Contract Risk Analysis to the Expert Dashboard, matching the supplied reference with isolated sample data, document upload, linked clause details, severity filters and report export; verify and publish.
+
 - [x] Repair Hugo sending when an administrator opens another account's conversation: owner-scoped lists/loads, safe return to a new chat, unsaved-message rollback and draft restoration. Live verification: foreign chat blocked, owned chat returns 200, user and assistant persist (201) and both reload; 14 regression tests pass. Ownership restrictions unchanged.
 
 - [x] Prepare a free official-source review shortlist for New York State and England: 16 draft cards in the dated Files document, with official URLs, date evidence and reviewer checks. Eight England primary links returned 200; eight NY Senate links returned 403 and require manual text/date verification. No sources imported or approved; no paid services connected.
