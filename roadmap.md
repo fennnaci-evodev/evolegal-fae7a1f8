@@ -1,6 +1,7 @@
 # Roadmap
 
-- [ ] Add Contract Risk Analysis to the Expert Dashboard, matching the supplied reference with isolated sample data, document upload, linked clause details, severity filters and report export; verify and publish.
+- [x] Add Contract Risk Analysis to the Expert Dashboard, matching the supplied reference with isolated sample data, document upload, linked clause details, severity filters and printable HTML report export. Three tests pass; signed-in admin flow, downloads, unscored uploads and desktop/tablet/mobile layouts verified without runtime errors.
+- [ ] Publish the verified Contract Risk Analysis section as requested.
 
 - [x] Repair Hugo sending when an administrator opens another account's conversation: owner-scoped lists/loads, safe return to a new chat, unsaved-message rollback and draft restoration. Live verification: foreign chat blocked, owned chat returns 200, user and assistant persist (201) and both reload; 14 regression tests pass. Ownership restrictions unchanged.
 
