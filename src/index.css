@@ -119,6 +119,16 @@
 
 }
 
+.risk-summary-band { background: var(--risk-summary); }
+.risk-spectrum { background: var(--risk-spectrum); }
+.contract-analysis .risk-clause-row,
+.contract-analysis .risk-document-clause { transform: none; filter: none; transition: background-color 160ms ease, border-color 160ms ease; }
+.contract-analysis .risk-clause-row:hover,
+.contract-analysis .risk-document-clause:hover { transform: none; filter: none; background-color: hsl(var(--muted) / 0.55); }
+@media (prefers-reduced-motion: reduce) {
+  .contract-analysis *, .contract-analysis *::before, .contract-analysis *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+}
+
 @layer base {
   * {
     @apply border-border;
