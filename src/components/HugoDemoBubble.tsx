@@ -408,7 +408,7 @@ export function HugoDemoBubble() {
                   <div className="flex flex-col gap-2.5">
                     <button
                       onClick={handleContinueHugo}
-                      className="w-full flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-display font-semibold text-foreground transition-all duration-200 hover:scale-[1.02]"
+                      className="w-full flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-display font-semibold text-foreground transition-colors"
                       style={{ border: "1px solid hsla(186, 100%, 50%, 0.3)", boxShadow: "0 0 16px hsla(186, 100%, 50%, 0.12)", background: "hsla(186, 100%, 50%, 0.06)" }}
                     >
                       <MessageCircle className="h-4 w-4 text-primary" />
@@ -416,7 +416,7 @@ export function HugoDemoBubble() {
                     </button>
                     <button
                       onClick={handleConnectExpert}
-                      className="w-full flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-display font-semibold text-foreground transition-all duration-200 hover:scale-[1.02]"
+                      className="w-full flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-display font-semibold text-foreground transition-colors"
                       style={{ border: "1px solid hsla(270, 95%, 75%, 0.35)", boxShadow: "0 0 16px hsla(270, 95%, 75%, 0.15)", background: "linear-gradient(135deg, hsla(270, 95%, 75%, 0.1), hsla(186, 100%, 50%, 0.08))" }}
                     >
                       <Users className="h-4 w-4" style={{ color: "hsl(270, 95%, 75%)" }} />

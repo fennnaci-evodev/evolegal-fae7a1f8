@@ -22,7 +22,7 @@ export function HugoChatTopicChips({ onSelect }: Props) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: i * 0.05, duration: 0.25 }}
           onClick={() => onSelect(t.prompt)}
-          className="glass rounded-full px-4 py-2 text-xs text-muted-foreground hover:text-foreground hover:border-primary/20 transition-all flex items-center gap-1.5"
+          className="glass rounded-full px-4 py-2 text-xs text-muted-foreground hover:text-foreground hover:border-primary/40 hover:bg-primary/5 flex items-center gap-1.5"
         >
           <t.icon className="h-3.5 w-3.5" />
           <span>{t.label}</span>
