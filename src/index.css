@@ -16,6 +16,12 @@
     --popover-foreground: 210 25% 88%;
 
     --primary: 186 100% 50%;
+    --neural-primary: 186 100% 55%;
+    --neural-accent: 270 90% 68%;
+    --neural-opacity: 0.85;
+    --ease-evo: cubic-bezier(0.16, 1, 0.3, 1);
+    --dur-evo: 600ms;
+    --stagger-evo: 60ms;
     --primary-foreground: 240 20% 4%;
 
     --secondary: 270 80% 75%;
@@ -66,6 +72,9 @@
     --popover-foreground: 222 47% 8%;
 
     --primary: 186 90% 32%;
+    --neural-primary: 192 80% 40%;
+    --neural-accent: 270 60% 55%;
+    --neural-opacity: 0.45;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 270 60% 45%;
