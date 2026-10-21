@@ -8,7 +8,7 @@ export const fadeUp = {
     transition: {
       delay: i * 0.12,
       duration: 0.6,
-      ease: [0.22, 1, 0.36, 1] as const,
+      ease: [0.16, 1, 0.3, 1] as const,
     },
   }),
 };
