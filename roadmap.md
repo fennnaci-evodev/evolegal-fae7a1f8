@@ -19,6 +19,7 @@
 - [x] Replace the oversized mobile dropdown with a compact, polished navigation panel while preserving routes and page content.
 - [x] Make the neural background visibly dynamic with organic drift, breathing links, and flowing signals while retaining mobile performance controls.
 - [x] Make neural node placement, motion, connections, and signal flow smooth, stable, and logically consistent.
+- [x] Replace the Hugo chat loading animation with the user's hexagonal-sphere animation (transparent WebP + static frame for reduced motion), scoped to chat surfaces only; full-page and main-page loading keep the slanted-E animation.
 - [x] Replace the neural field's simple grid character with organic clusters, curved paths, and coordinated depth.- [x] England official-source monitor: 10 draft England sources loaded; admin-only checker fetches official XML, detects text and pending-amendment changes, withdraws changed approved sources from Hugo, and stores a draft impact note for reviewer approval.
 - [ ] Run the monitor daily. Blocked: automatic daily scheduling is not available for this project yet; run manually as administrator.
 - [ ] Add New York via the free NY Senate Open Legislation key. Waits on the user obtaining the key.
