@@ -366,8 +366,9 @@ const ExpertChat = () => {
                 return (
                 <motion.div
                   key={msg.id}
-                  initial={{ opacity: 0, y: 10 }}
+                  initial={msg.role === "assistant" ? { opacity: 0 } : { opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
+                  transition={msg.role === "assistant" ? { duration: 0.45, ease: "easeOut" } : undefined}
                   className={`group/msg flex gap-2 sm:gap-3 ${msg.role === "user" ? "justify-end" : ""}`}
                 >
                   {msg.role === "assistant" && (
