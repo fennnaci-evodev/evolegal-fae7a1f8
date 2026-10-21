@@ -279,7 +279,8 @@ export function useHugoChat(chatId?: string | null) {
       if (finalContent) {
         const storedId = await saveMessage(cId, "assistant", finalContent);
         if (storedId) {
-          newAssistantIdsRef.current.add(storedId);
+          // Already displayed while streaming; the saved row must not replay on remount.
+          newAssistantIdsRef.current.delete(assistantId);
           setMessages(prev => prev.map(m => m.id === assistantId ? { ...m, id: storedId } : m));
         }
       }
@@ -311,7 +312,7 @@ export function useHugoChat(chatId?: string | null) {
         if (cId) {
           const storedErrId = await saveMessage(cId, "assistant", errMsg.content);
           if (storedErrId) {
-            newAssistantIdsRef.current.add(storedErrId);
+            newAssistantIdsRef.current.delete(errId);
             setMessages(prev => prev.map(m => m.id === errId ? { ...m, id: storedErrId } : m));
           }
         }
