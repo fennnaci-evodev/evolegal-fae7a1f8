@@ -275,9 +275,13 @@ export function useHugoChat(chatId?: string | null) {
         i === prev.length - 1 && m.role === "assistant" ? { ...m, content: finalContent, consilium: wasConsilium } : m
       ));
 
-      // Save assistant message
+      // Save assistant message and adopt the stored row id so edits/feedback target it
       if (finalContent) {
-        await saveMessage(cId, "assistant", finalContent);
+        const storedId = await saveMessage(cId, "assistant", finalContent);
+        if (storedId) {
+          newAssistantIdsRef.current.add(storedId);
+          setMessages(prev => prev.map(m => m.id === assistantId ? { ...m, id: storedId } : m));
+        }
       }
 
       // Generate smart title after first exchange (user + assistant both exist)
@@ -304,7 +308,13 @@ export function useHugoChat(chatId?: string | null) {
           content: "I'm sorry, I wasn't able to process that right now. Please try again in a moment.",
         };
         setMessages(prev => [...prev, errMsg]);
-        if (cId) await saveMessage(cId, "assistant", errMsg.content);
+        if (cId) {
+          const storedErrId = await saveMessage(cId, "assistant", errMsg.content);
+          if (storedErrId) {
+            newAssistantIdsRef.current.add(storedErrId);
+            setMessages(prev => prev.map(m => m.id === errId ? { ...m, id: storedErrId } : m));
+          }
+        }
       }
       return { escalated: false, suggestPrecise: false, suggestConsilium: false, chatId: cId };
     } finally {
