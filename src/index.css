@@ -230,7 +230,10 @@
     .glass-card,
     .glass-card:hover,
     .eco-hover,
-    .eco-hover:hover {
+    .eco-hover:hover,
+    .btn-snappy,
+    .btn-snappy:hover,
+    .btn-snappy:active {
       transition: none !important;
       transform: none !important;
       filter: none !important;
