@@ -15,3 +15,4 @@
 - Source verification uses the atomic `review_hugo_source` action with stored-role authorization, version checks, legal attestations and immutable review snapshots so stale or unrecorded approvals cannot enter the administrator workflow.
 - Keep source diff and verification rules in `src/lib/sourceReview.ts`, using the diff library for text comparisons rather than a custom parser.
 - Approved excerpts must be verbatim quotes of the stored official text, enforced both in `src/lib/sourceReview.ts` and in `review_hugo_source`, so paraphrased or invented law cannot be approved.
+- Ambient backgrounds are static SVG animated only with CSS transform/opacity (no per-frame JavaScript), so pages stay smooth on low-end phones.
