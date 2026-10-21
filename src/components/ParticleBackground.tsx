@@ -73,7 +73,7 @@ function Layer({ layer }: { layer: number }) {
         <path
           key={`l${i}`}
           d={l.d}
-          className="neural-link"
+          className="neural-link" fill="none" vectorEffect="non-scaling-stroke"
           stroke={l.accent ? "hsl(var(--neural-accent))" : "hsl(var(--neural-primary))"}
           style={{ animationDelay: `-${l.delay}s` }}
         />
@@ -85,7 +85,7 @@ function Layer({ layer }: { layer: number }) {
             key={`s${i}`}
             d={l.d}
             pathLength={100}
-            className="neural-signal"
+            className="neural-signal" fill="none" vectorEffect="non-scaling-stroke"
             stroke={l.accent ? "hsl(var(--neural-accent))" : "hsl(var(--neural-primary))"}
             style={{ animationDelay: `-${l.delay}s` }}
           />
