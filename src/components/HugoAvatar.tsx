@@ -1,4 +1,4 @@
-import hugoPhoto from "@/assets/hugo-avatar.png";
+import hugoPhoto from "@/assets/hugo-avatar.webp";
 
 interface HugoAvatarProps {
   size?: number;
