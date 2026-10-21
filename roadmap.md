@@ -1,6 +1,6 @@
 # Roadmap
 
-- [ ] Verify and fix Hugo replies replaying after persistence, preserving stored message IDs for edits and feedback.
+- [x] Fix Hugo replies replaying after persistence while preserving stored IDs for edits and feedback. Normal/error regression cases pass; signed-in live reply stays visible after saving and reloads unchanged.
 
 - [x] Add Contract Risk Analysis to the Expert Dashboard, matching the supplied reference with isolated sample data, document upload, linked clause details, severity filters and printable HTML report export. Three tests pass; signed-in admin flow, downloads, unscored uploads and desktop/tablet/mobile layouts verified without runtime errors.
 - [ ] Publish the verified Contract Risk Analysis section. Blocked: the user declined publishing; changes remain in preview.
