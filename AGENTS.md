@@ -16,3 +16,4 @@
 - Keep source diff and verification rules in `src/lib/sourceReview.ts`, using the diff library for text comparisons rather than a custom parser.
 - Approved excerpts must be verbatim quotes of the stored official text, enforced both in `src/lib/sourceReview.ts` and in `review_hugo_source`, so paraphrased or invented law cannot be approved.
 - Ambient backgrounds are static SVG animated only with CSS transform/opacity (no per-frame JavaScript), so pages stay smooth on low-end phones.
+- Hugo's inline thinking indicator uses a shared vector signature animated with CSS transform/opacity, avoiding image downloads and per-frame JavaScript; full-page loaders remain independent.

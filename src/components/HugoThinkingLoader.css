@@ -1,0 +1,57 @@
+.hugo-thinking-loader {
+  --hugo-loader-ink: hsl(var(--primary));
+  --hugo-loader-companion: hsl(var(--secondary));
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+  vertical-align: middle;
+  contain: layout paint;
+}
+
+.hugo-thinking-loader__ribbon,
+.hugo-thinking-loader__signature {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.hugo-thinking-loader__ribbon {
+  stroke: var(--hugo-loader-ink);
+  stroke-width: 2;
+  transform-origin: center;
+  animation: hugo-ribbon-turn 8s linear infinite;
+}
+
+.hugo-thinking-loader__ribbon--echo {
+  stroke: var(--hugo-loader-companion);
+  stroke-width: 1.2;
+  opacity: 0.45;
+  animation-direction: reverse;
+  animation-delay: -2s;
+}
+
+.hugo-thinking-loader__signature {
+  stroke: var(--hugo-loader-ink);
+  stroke-width: 2.4;
+  animation: hugo-signature-breathe 4s ease-in-out infinite;
+}
+
+@keyframes hugo-ribbon-turn {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes hugo-signature-breathe {
+  0%, 100% { opacity: 0.65; }
+  50% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hugo-thinking-loader__ribbon,
+  .hugo-thinking-loader__signature { animation: none; }
+  .hugo-thinking-loader__ribbon--echo { transform: rotate(90deg); }
+}
