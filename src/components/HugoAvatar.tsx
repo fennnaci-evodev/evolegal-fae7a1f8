@@ -1,4 +1,6 @@
-import hugoPhoto from "@/assets/hugo-avatar.webp";
+import hugoPhotoAsset from "@/assets/hugo-avatar.webp.asset.json";
+
+const hugoPhoto = hugoPhotoAsset.url;
 
 interface HugoAvatarProps {
   size?: number;
