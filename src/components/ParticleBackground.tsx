@@ -1,118 +1,99 @@
 import { memo, useMemo } from "react";
 
 /**
- * Ambient neural field — rendered once as static SVG and animated purely with
- * compositor-friendly CSS (transform / opacity). No per-frame JavaScript.
- * Deterministic clusters with curved links keep it organic yet calm.
+ * Ambient neural field — static SVG layers rasterized once, animated only as
+ * whole layers via compositor-friendly CSS (transform / opacity). No per-element
+ * or per-frame animation, so weak PCs and phones stay smooth.
  */
 
-type Node = { x: number; y: number; r: number; accent: boolean; delay: number };
-type Link = { d: string; accent: boolean; delay: number; signal: boolean };
-
-const W = 1600;
-const H = 1000;
+type Node = { x: number; y: number; r: number; accent: boolean };
+type Link = { d: string; accent: boolean };
 
 function rand(seed: number) {
   const s = Math.sin(seed * 9301 + 49297) * 233280;
   return s - Math.floor(s);
 }
 
-function buildField(layer: number) {
+function buildField(layer: number, W: number, H: number, portrait: boolean) {
   const nodes: Node[] = [];
-  const clusters = layer === 0 ? 7 : 5;
+  const clusters = portrait ? (layer === 0 ? 5 : 4) : layer === 0 ? 7 : 5;
+  const count = layer === 0 ? 7 : 5;
+  const spread = portrait ? 0.75 : 1;
   for (let c = 0; c < clusters; c++) {
-    const cx = (W / clusters) * (c + 0.5) + (rand(c + layer * 31) - 0.5) * 160;
-    const cy = H * (0.18 + rand(c * 7 + layer * 13) * 0.64);
-    const count = layer === 0 ? 7 : 5;
+    // Portrait: distribute clusters down the screen in a zig-zag so they stay visible.
+    const cx = portrait
+      ? W * (c % 2 === 0 ? 0.3 : 0.7) + (rand(c + layer * 31) - 0.5) * 160
+      : (W / clusters) * (c + 0.5) + (rand(c + layer * 31) - 0.5) * 160;
+    const cy = portrait
+      ? (H / clusters) * (c + 0.5) + (rand(c * 7 + layer * 13) - 0.5) * 120
+      : H * (0.18 + rand(c * 7 + layer * 13) * 0.64);
     for (let i = 0; i < count; i++) {
       const angle = i * 2.399963 + rand(c * 17 + i) * 0.6;
-      const dist = 26 + Math.sqrt(i + 1) * (layer === 0 ? 62 : 80);
+      const dist = (26 + Math.sqrt(i + 1) * (layer === 0 ? 62 : 80)) * spread;
       nodes.push({
         x: cx + Math.cos(angle) * dist,
         y: cy + Math.sin(angle) * dist * 0.8,
-        r: layer === 0 ? 1.6 + rand(c * 3 + i) * 1.6 : 1 + rand(c + i) * 0.9,
+        r: layer === 0 ? 2 + rand(c * 3 + i) * 1.8 : 1.2 + rand(c + i) * 1,
         accent: rand(c * 11 + i * 5 + layer) > 0.72,
-        delay: rand(c * 23 + i * 3) * 8,
       });
     }
   }
   const links: Link[] = [];
   const seen = new Set<string>();
   nodes.forEach((a, i) => {
-    const near = nodes
+    nodes
       .map((b, j) => ({ j, d: (a.x - b.x) ** 2 + (a.y - b.y) ** 2 }))
       .filter((n) => n.j !== i)
       .sort((p, q) => p.d - q.d)
-      .slice(0, 2);
-    near.forEach(({ j }) => {
-      const key = i < j ? `${i}-${j}` : `${j}-${i}`;
-      if (seen.has(key)) return;
-      seen.add(key);
-      const b = nodes[j];
-      const mx = (a.x + b.x) / 2;
-      const my = (a.y + b.y) / 2;
-      const bend = (rand(i * 41 + j) - 0.5) * 0.45;
-      const qx = mx - (b.y - a.y) * bend;
-      const qy = my + (b.x - a.x) * bend;
-      links.push({
-        d: `M${a.x.toFixed(1)} ${a.y.toFixed(1)} Q${qx.toFixed(1)} ${qy.toFixed(1)} ${b.x.toFixed(1)} ${b.y.toFixed(1)}`,
-        accent: a.accent || b.accent,
-        delay: rand(i * 7 + j) * 10,
-        signal: layer === 0 && rand(i * 13 + j * 3) > 0.82,
+      .slice(0, 2)
+      .forEach(({ j }) => {
+        const key = i < j ? `${i}-${j}` : `${j}-${i}`;
+        if (seen.has(key)) return;
+        seen.add(key);
+        const b = nodes[j];
+        const bend = (rand(i * 41 + j) - 0.5) * 0.45;
+        const qx = (a.x + b.x) / 2 - (b.y - a.y) * bend;
+        const qy = (a.y + b.y) / 2 + (b.x - a.x) * bend;
+        links.push({
+          d: `M${a.x.toFixed(0)} ${a.y.toFixed(0)}Q${qx.toFixed(0)} ${qy.toFixed(0)} ${b.x.toFixed(0)} ${b.y.toFixed(0)}`,
+          accent: a.accent || b.accent,
+        });
       });
-    });
   });
   return { nodes, links };
 }
 
-function Layer({ layer }: { layer: number }) {
-  const { nodes, links } = useMemo(() => buildField(layer), [layer]);
+const P = "hsl(var(--neural-primary))";
+const A = "hsl(var(--neural-accent))";
+
+function LayerSvg({ layer, portrait }: { layer: number; portrait: boolean }) {
+  const W = portrait ? 900 : 1600;
+  const H = portrait ? 1600 : 1000;
+  const { nodes, links } = useMemo(() => buildField(layer, W, H, portrait), [layer, W, H, portrait]);
+  const primaryLinks = links.filter((l) => !l.accent).map((l) => l.d).join("");
+  const accentLinks = links.filter((l) => l.accent).map((l) => l.d).join("");
   return (
-    <g className={layer === 0 ? "neural-drift-a" : "neural-drift-b"} opacity={layer === 0 ? 1 : 0.45}>
-      {links.map((l, i) => (
-        <path
-          key={`l${i}`}
-          d={l.d}
-          className="neural-link" fill="none" vectorEffect="non-scaling-stroke"
-          stroke={l.accent ? "hsl(var(--neural-accent))" : "hsl(var(--neural-primary))"}
-          style={{ animationDelay: `-${l.delay}s` }}
-        />
-      ))}
-      {links
-        .filter((l) => l.signal)
-        .map((l, i) => (
-          <path
-            key={`s${i}`}
-            d={l.d}
-            pathLength={100}
-            className="neural-signal" fill="none" vectorEffect="non-scaling-stroke"
-            stroke={l.accent ? "hsl(var(--neural-accent))" : "hsl(var(--neural-primary))"}
-            style={{ animationDelay: `-${l.delay}s` }}
-          />
-        ))}
+    <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid slice" className="absolute inset-0 h-full w-full">
+      <path d={primaryLinks} fill="none" stroke={P} strokeWidth={1} strokeOpacity={0.22} vectorEffect="non-scaling-stroke" />
+      <path d={accentLinks} fill="none" stroke={A} strokeWidth={1} strokeOpacity={0.24} vectorEffect="non-scaling-stroke" />
       {nodes.map((n, i) => (
-        <circle
-          key={`n${i}`}
-          cx={n.x}
-          cy={n.y}
-          r={n.r}
-          className="neural-node"
-          fill={n.accent ? "hsl(var(--neural-accent))" : "hsl(var(--neural-primary))"}
-          style={{ animationDelay: `-${n.delay}s` }}
-        />
+        <circle key={i} cx={n.x} cy={n.y} r={n.r} fill={n.accent ? A : P} fillOpacity={0.8} />
       ))}
-    </g>
+    </svg>
   );
 }
 
 export const ParticleBackground = memo(function ParticleBackground() {
+  const portrait = typeof window !== "undefined" && window.innerHeight > window.innerWidth;
   return (
     <div aria-hidden="true" className="neural-field fixed inset-0 pointer-events-none z-0">
       <div className="neural-glow" />
-      <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid slice" className="h-full w-full">
-        <Layer layer={1} />
-        <Layer layer={0} />
-      </svg>
+      <div className="neural-layer neural-drift-b" style={{ opacity: 0.5 }}>
+        <LayerSvg layer={1} portrait={portrait} />
+      </div>
+      <div className="neural-layer neural-drift-a">
+        <LayerSvg layer={0} portrait={portrait} />
+      </div>
     </div>
   );
 });
