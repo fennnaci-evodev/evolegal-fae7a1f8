@@ -202,6 +202,23 @@
     filter: drop-shadow(0 0 8px hsla(186, 100%, 50%, 0.1));
   }
 
+  /* Modern snappy button hover: fast transform-only micro-lift, no filter work */
+  .btn-snappy {
+    transition:
+      transform 140ms cubic-bezier(0.2, 0, 0, 1),
+      background-color 120ms ease,
+      border-color 120ms ease,
+      color 120ms ease,
+      box-shadow 140ms cubic-bezier(0.2, 0, 0, 1);
+  }
+  .btn-snappy:hover {
+    transform: translateY(-1px);
+  }
+  .btn-snappy:active {
+    transform: translateY(0) scale(0.98);
+    transition-duration: 70ms;
+  }
+
   /* GPU hints for animated elements */
   .will-animate {
     will-change: transform, opacity;
@@ -213,7 +230,10 @@
     .glass-card,
     .glass-card:hover,
     .eco-hover,
-    .eco-hover:hover {
+    .eco-hover:hover,
+    .btn-snappy,
+    .btn-snappy:hover,
+    .btn-snappy:active {
       transition: none !important;
       transform: none !important;
       filter: none !important;
