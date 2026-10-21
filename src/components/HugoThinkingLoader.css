@@ -1,57 +1,40 @@
-.hugo-thinking-loader {
-  --hugo-loader-ink: hsl(var(--primary));
-  --hugo-loader-companion: hsl(var(--secondary));
+.hugo-orbit {
   position: relative;
   display: inline-block;
   flex-shrink: 0;
-  vertical-align: middle;
-  contain: layout paint;
 }
-
-.hugo-thinking-loader__ribbon,
-.hugo-thinking-loader__signature {
+.hugo-orbit__ring {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
-  fill: none;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+  border-radius: 9999px;
+  border: 1.5px solid transparent;
+  will-change: transform;
 }
-
-.hugo-thinking-loader__ribbon {
-  stroke: var(--hugo-loader-ink);
-  stroke-width: 2;
-  transform-origin: center;
-  animation: hugo-ribbon-turn 8s linear infinite;
+.hugo-orbit__ring--cyan {
+  border-top-color: hsl(186 100% 55%);
+  border-right-color: hsl(186 100% 55% / 0.35);
+  animation: hugo-orbit-spin 1.6s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
 }
-
-.hugo-thinking-loader__ribbon--echo {
-  stroke: var(--hugo-loader-companion);
-  stroke-width: 1.2;
-  opacity: 0.45;
-  animation-direction: reverse;
-  animation-delay: -2s;
+.hugo-orbit__ring--violet {
+  inset: 22%;
+  border-bottom-color: hsl(270 90% 72%);
+  border-left-color: hsl(270 90% 72% / 0.35);
+  animation: hugo-orbit-spin 2.2s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite reverse;
 }
-
-.hugo-thinking-loader__signature {
-  stroke: var(--hugo-loader-ink);
-  stroke-width: 2.4;
-  animation: hugo-signature-breathe 4s ease-in-out infinite;
+.hugo-orbit__core {
+  position: absolute;
+  inset: 42%;
+  border-radius: 9999px;
+  background: hsl(186 100% 70%);
+  box-shadow: 0 0 6px hsl(186 100% 60% / 0.8);
+  animation: hugo-orbit-breathe 1.6s ease-in-out infinite;
+  will-change: transform, opacity;
 }
-
-@keyframes hugo-ribbon-turn {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+@keyframes hugo-orbit-spin { to { transform: rotate(360deg); } }
+@keyframes hugo-orbit-breathe {
+  0%, 100% { transform: scale(0.8); opacity: 0.6; }
+  50% { transform: scale(1.15); opacity: 1; }
 }
-
-@keyframes hugo-signature-breathe {
-  0%, 100% { opacity: 0.65; }
-  50% { opacity: 1; }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .hugo-thinking-loader__ribbon,
-  .hugo-thinking-loader__signature { animation: none; }
-  .hugo-thinking-loader__ribbon--echo { transform: rotate(90deg); }
+  .hugo-orbit__ring, .hugo-orbit__core { animation: none; }
 }
