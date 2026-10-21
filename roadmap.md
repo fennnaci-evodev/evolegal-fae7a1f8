@@ -1,5 +1,7 @@
 # Roadmap
 
+- [ ] Replace the heavy Hugo chat sphere with a custom lightweight continuous signature; preserve full-page loaders and verify phone/desktop and reduced motion.
+
 - [x] Fix Hugo replies replaying after persistence while preserving stored IDs for edits and feedback. Normal/error regression cases pass; signed-in live reply stays visible after saving and reloads unchanged.
 
 - [x] Add Contract Risk Analysis to the Expert Dashboard, matching the supplied reference with isolated sample data, document upload, linked clause details, severity filters and printable HTML report export. Three tests pass; signed-in admin flow, downloads, unscored uploads and desktop/tablet/mobile layouts verified without runtime errors.
