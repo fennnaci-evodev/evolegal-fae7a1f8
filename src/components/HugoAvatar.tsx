@@ -1,6 +1,4 @@
-import hugoPhotoAsset from "@/assets/hugo-avatar.webp.asset.json";
-
-const hugoPhoto = hugoPhotoAsset.url;
+import hugoPhoto from "@/assets/hugo-avatar.webp";
 
 interface HugoAvatarProps {
   size?: number;
@@ -10,7 +8,7 @@ interface HugoAvatarProps {
 
 /**
  * Hugo — Analysis Co-Pilot avatar.
- * Sharp photo with an animated rotating neon gradient ring.
+ * High-density bundled portrait (512px) with a rotating neon gradient ring.
  */
 export function HugoAvatar({ size = 40 }: HugoAvatarProps) {
   const ringSize = Math.max(2, Math.round(size * 0.06));
@@ -20,20 +18,14 @@ export function HugoAvatar({ size = 40 }: HugoAvatarProps) {
   return (
     <div
       className="relative flex shrink-0 items-center justify-center rounded-full"
-      style={{
-        width: size,
-        height: size,
-        transform: "translateZ(0)",
-        backfaceVisibility: "hidden",
-      }}
+      style={{ width: size, height: size }}
     >
-      {/* Rotating gradient ring */}
       <svg
         className="absolute inset-0 animate-[hugo-spin_6s_linear_infinite]"
         width={size}
         height={size}
         viewBox={`0 0 ${size} ${size}`}
-        style={{ transform: "translateZ(0)" }}
+        aria-hidden="true"
       >
         <defs>
           <linearGradient id={id} x1="0%" y1="0%" x2="100%" y2="100%">
@@ -52,31 +44,16 @@ export function HugoAvatar({ size = 40 }: HugoAvatarProps) {
         />
       </svg>
 
-      {/* Photo — sharp rendering for small sizes */}
-      <div
-        className="overflow-hidden rounded-full"
-        style={{
-          width: imgSize,
-          height: imgSize,
-          transform: "translateZ(0)",
-          backfaceVisibility: "hidden",
-        }}
-      >
-        <img
-          src={hugoPhoto}
-          alt="Hugo · Analysis Co-Pilot"
-          className="block h-full w-full rounded-full object-cover select-none"
-          style={{
-            objectPosition: "center 20%",
-            transform: "translateZ(0) scale(1.15)",
-            backfaceVisibility: "hidden",
-            imageRendering: "auto",
-            filter: "contrast(1.08) saturate(1.05) sharpen(0)",
-            WebkitBackfaceVisibility: "hidden",
-          }}
-          draggable={false}
-        />
-      </div>
+      <img
+        src={hugoPhoto}
+        alt="Hugo · Analysis Co-Pilot"
+        width={imgSize}
+        height={imgSize}
+        decoding="async"
+        className="relative block rounded-full object-cover select-none bg-muted"
+        style={{ width: imgSize, height: imgSize, objectPosition: "center 18%" }}
+        draggable={false}
+      />
     </div>
   );
 }

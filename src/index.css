@@ -202,21 +202,29 @@
     filter: drop-shadow(0 0 8px hsla(186, 100%, 50%, 0.1));
   }
 
-  /* Modern snappy button hover: fast transform-only micro-lift, no filter work */
-  .btn-snappy {
-    transition:
-      transform 140ms cubic-bezier(0.2, 0, 0, 1),
-      background-color 120ms ease,
-      border-color 120ms ease,
-      color 120ms ease,
-      box-shadow 140ms cubic-bezier(0.2, 0, 0, 1);
+  /* Unified compact button interaction for every active button, incl. chats */
+  .btn-snappy,
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    transition-property: transform, background-color, border-color, color, box-shadow, opacity !important;
+    transition-duration: 110ms !important;
+    transition-timing-function: cubic-bezier(0.2, 0, 0, 1) !important;
   }
-  .btn-snappy:hover {
-    transform: translateY(-1px);
+  .btn-snappy:hover:not(:disabled),
+  button:not(:disabled):hover {
+    transform: translateY(-1px) !important;
   }
-  .btn-snappy:active {
-    transform: translateY(0) scale(0.98);
-    transition-duration: 70ms;
+  .btn-snappy:active:not(:disabled),
+  button:not(:disabled):active {
+    transform: translateY(0) scale(0.97) !important;
+    transition-duration: 50ms !important;
+  }
+  /* Elements that must stay put (switches, sidebar triggers, tabs) */
+  [role="switch"]:hover, [role="switch"]:active,
+  [role="tab"]:hover, [role="tab"]:active,
+  [data-sidebar]:hover, [data-sidebar]:active,
+  .no-hover-scale:hover, .no-hover-scale:active {
+    transform: none !important;
   }
 
   /* GPU hints for animated elements */
