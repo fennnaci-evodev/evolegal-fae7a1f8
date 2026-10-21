@@ -873,7 +873,7 @@ html.light .hero-neon-emphasis {
 }
 
 /* ===== Ambient neural field (CSS-only, compositor animated) ===== */
-.neural-field { opacity: var(--neural-opacity); contain: strict; }
+.neural-field { opacity: var(--neural-opacity); contain: strict; overflow: hidden; }
 .neural-glow {
   position: absolute; inset: -20%;
   background:
@@ -882,27 +882,17 @@ html.light .hero-neon-emphasis {
   animation: neural-glow 24s ease-in-out infinite alternate;
   will-change: transform;
 }
-.neural-drift-a { animation: neural-drift-a 32s ease-in-out infinite alternate; will-change: transform; }
-.neural-drift-b { animation: neural-drift-b 44s ease-in-out infinite alternate; will-change: transform; }
-.neural-link { fill: none; stroke-width: 0.8; opacity: 0.16; animation: neural-breathe 9s ease-in-out infinite; }
-.neural-node { animation: neural-pulse 7s ease-in-out infinite; }
-.neural-signal {
-  fill: none; stroke-width: 1.4; stroke-linecap: round;
-  stroke-dasharray: 8 92; stroke-dashoffset: 100; opacity: 0.85;
-  animation: neural-signal 6s linear infinite;
-}
+.neural-layer { position: absolute; inset: -3%; will-change: transform, opacity; backface-visibility: hidden; }
+.neural-drift-a { animation: neural-drift-a 28s ease-in-out infinite alternate, neural-breathe 9s ease-in-out infinite; }
+.neural-drift-b { animation: neural-drift-b 40s ease-in-out infinite alternate; }
 @keyframes neural-glow { from { transform: translate3d(0,0,0) scale(1); } to { transform: translate3d(3%,-2%,0) scale(1.06); } }
-@keyframes neural-drift-a { from { transform: translate3d(0,0,0); } to { transform: translate3d(-18px,12px,0); } }
-@keyframes neural-drift-b { from { transform: translate3d(0,0,0); } to { transform: translate3d(24px,-14px,0); } }
-@keyframes neural-breathe { 0%,100% { opacity: 0.10; } 50% { opacity: 0.26; } }
-@keyframes neural-pulse { 0%,100% { opacity: 0.45; } 50% { opacity: 0.95; } }
-@keyframes neural-signal { to { stroke-dashoffset: 0; } }
+@keyframes neural-drift-a { from { transform: translate3d(0,0,0); } to { transform: translate3d(-18px,14px,0); } }
+@keyframes neural-drift-b { from { transform: translate3d(0,0,0); } to { transform: translate3d(22px,-16px,0); } }
+@keyframes neural-breathe { 0%,100% { opacity: 0.75; } 50% { opacity: 1; } }
 
 .evo-enter { animation: evo-enter 600ms cubic-bezier(0.16, 1, 0.3, 1) both; }
 @keyframes evo-enter { from { opacity: 0; transform: translate3d(0,12px,0); } to { opacity: 1; transform: none; } }
 
-@media (max-width: 640px) { .neural-signal, .neural-drift-b { animation: none; } .neural-signal { display: none; } }
 @media (prefers-reduced-motion: reduce) {
-  .neural-glow, .neural-drift-a, .neural-drift-b, .neural-link, .neural-node, .neural-signal, .evo-enter { animation: none !important; }
-  .neural-signal { display: none; }
+  .neural-glow, .neural-drift-a, .neural-drift-b, .evo-enter { animation: none !important; }
 }
