@@ -333,7 +333,7 @@ const ExpertChat = () => {
           </AnimatePresence>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto space-y-3 pr-2 mb-3" style={{ overflowAnchor: "none" }}>
+          <div className="flex-1 overflow-y-auto space-y-3 pr-2 mb-3 [contain:paint]" style={{ overflowAnchor: "none" }}>
             {historyLoading && (
               <div className="space-y-3 p-4">
                 <Skeleton className="h-12 w-3/4" />
