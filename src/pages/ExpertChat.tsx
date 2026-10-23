@@ -30,6 +30,7 @@ import { HugoRecallBanner } from "@/components/HugoRecallBanner";
 import { HugoCitationChips } from "@/components/HugoCitationChips";
 import { HugoContractCard } from "@/components/HugoContractCard";
 import { looksLikeContract } from "@/lib/contractRisk";
+import { CONTRACT_MESSAGE_LIMIT, prepareContractAttachment } from "@/lib/hugoContractInput";
 const ExpertChat = () => {
   const { chatId: paramChatId } = useParams<{ chatId?: string }>();
   const [searchParams] = useSearchParams();
@@ -69,10 +70,14 @@ const ExpertChat = () => {
   const fileRef = useRef<HTMLInputElement>(null);
   const handleContractFile = async (file?: File) => {
     if (!file) return;
-    if (file.size > 30_000) { toast.error("Contract too long — up to 30,000 characters per message."); return; }
-    const text = await file.text();
-    setInput(`Audit this contract for liability, indemnity, termination and non-standard terms:\n\n${text}`);
-    textareaRef.current?.focus();
+    try {
+      if (!/\.(txt|md)$/i.test(file.name)) throw new Error("Attach a .txt or .md contract.");
+      if (file.size > CONTRACT_MESSAGE_LIMIT * 4) throw new Error("Contract too long — up to 30,000 characters including the audit request.");
+      setInput(prepareContractAttachment(await file.text()));
+      textareaRef.current?.focus();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Unable to read this file. Try another text contract.");
+    }
   };
   const recognitionRef = useRef<any>(null);
   const isMobile = useIsMobile();
@@ -120,6 +125,10 @@ const ExpertChat = () => {
 
   const handleSend = async () => {
     if (!input.trim() || streaming || historyLoading) return;
+    if (input.length > CONTRACT_MESSAGE_LIMIT) {
+      toast.error("Message too long — up to 30,000 characters per message.");
+      return;
+    }
     if (isRateLimited("hugo_chat", 15, 60_000)) {
       toast.error("Too many messages — please wait a moment.");
       return;
@@ -344,7 +353,7 @@ const ExpertChat = () => {
           </AnimatePresence>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto space-y-3 pr-2 mb-3 [contain:paint]" style={{ overflowAnchor: "none" }}>
+          <div className="hugo-chat-surfaces flex-1 overflow-y-auto space-y-3 pr-2 mb-3 [contain:paint]" style={{ overflowAnchor: "none" }}>
             {historyLoading && (
               <div className="space-y-3 p-4">
                 <Skeleton className="h-12 w-3/4" />
@@ -490,7 +499,7 @@ const ExpertChat = () => {
               <button onClick={() => { setEditingMode(false); setInput(""); }} className="ml-auto hover:text-foreground">Cancel</button>
             </div>
           )}
-          <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="glass-strong shimmer-chat-form p-2.5 flex items-end gap-2 relative">
+          <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="hugo-chat-composer glass-strong shimmer-chat-form p-2.5 flex items-end gap-2 relative">
             <Button
               type="button" size="icon" variant="ghost"
               onClick={toggleVoice}

@@ -249,11 +249,6 @@
 
   /* Mobile: subtler eco-animations */
   @media (max-width: 768px) {
-    .glass-card:hover,
-    .eco-hover:hover {
-      transform: scale(1.015);
-      filter: drop-shadow(0 0 4px hsla(186, 100%, 50%, 0.08));
-    }
     .glass-card,
     .eco-hover {
       transition-duration: 0.2s;
@@ -614,6 +609,24 @@ img,
 
   .shimmer-chat-form:focus-within:hover {
     transform: scale(1.02);
+  }
+
+  /* Chat surfaces override the generic 16px bubble and 10px composer blur. */
+  .hugo-chat-surfaces .glass,
+  html.light .hugo-chat-surfaces .glass,
+  .hugo-chat-composer.glass-strong,
+  html.light .hugo-chat-composer.glass-strong {
+    backdrop-filter: blur(8px) saturate(1.1);
+    contain: paint;
+  }
+
+  .hugo-chat-composer.shimmer-chat-form:focus-within {
+    animation: none !important;
+    background-size: 100% 100%, 100% 100% !important;
+  }
+
+  .hugo-chat-composer.shimmer-chat-form:focus-within:hover {
+    transform: none;
   }
 
   @media (prefers-reduced-motion: reduce) {
