@@ -163,7 +163,8 @@
 
   .glass-strong {
     background: hsla(240, 12%, 100%, 0.1);
-    backdrop-filter: blur(24px) saturate(1.6);
+    backdrop-filter: blur(10px) saturate(1.4);
+    contain: paint;
     border: 1px solid hsla(0, 0%, 100%, 0.12);
     border-radius: 1.25rem;
     box-shadow: 0 8px 32px hsla(0, 0%, 0%, 0.25), inset 0 1px 0 hsla(0, 0%, 100%, 0.06);
