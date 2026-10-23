@@ -12,7 +12,7 @@ export interface VerifiedSource {
 }
 
 const PATTERNS: RegExp[] = [
-  /\b(?:Section|section)\s+(\d+[A-Z]?(?:\([\w]+\))*)\s+of\s+the\s+((?:[A-Z][A-Za-z.]*\s+){1,6}(?:Act\s+(?:19|20)\d{2}|(?:\(UCC\)|UCC)))/g,
+  /\b(?:Section|section)\s+(\d+(?:-\d+)?[A-Z]?(?:\([\w]+\))*)\s+of\s+the\s+((?:[A-Z][A-Za-z.]*\s+){1,6}(?:Act\s+(?:19|20)\d{2}|(?:\(UCC\)|UCC)))/g,
   // Companies Act 2006 s. 172 / section 172 / s172(1)
   /\b((?:[A-Z][a-z]+(?:\s+(?:and|of|the|for|\(?[A-Z][a-z]+\)?))*\s+)?Act\s+(?:19|20)\d{2})(?:,?\s*(?:s\.?|ss\.?|section|§)\s*\d+[A-Z]?(?:\(\d+\))*)?/g,
   // NY UCC § 2-207, N.Y. Gen. Oblig. Law § 5-1401, NY Real Property Law § 235-b
