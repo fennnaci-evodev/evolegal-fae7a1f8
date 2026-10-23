@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { extractCitations, matchSource } from "@/lib/citations";
 import { extractClauses, looksLikeContract } from "@/lib/contractRisk";
+import { CONTRACT_AUDIT_PREFIX, prepareContractAttachment } from "@/lib/hugoContractInput";
 
 describe("citations", () => {
   it("detects UK and NY statutory references", () => {
@@ -11,8 +12,18 @@ describe("citations", () => {
   it("marks a citation verified only when an approved source matches", () => {
     const [c] = extractCitations("Companies Act 2006 s. 172");
     expect(matchSource(c, [])).toBeNull();
-    const src = { id: "1", title: "Companies Act 2006", jurisdiction: "England", source_url: "https://x", excerpt: "e", reviewed_at: null, effective_from: "2006-01-01" };
+    const src = { id: "1", title: "Companies Act 2006 s. 172", jurisdiction: "England", source_url: "https://x", excerpt: "e", reviewed_at: "2026-10-01", effective_from: "2006-01-01" };
     expect(matchSource(c, [src])?.id).toBe("1");
+    expect(matchSource(c, [{ ...src, title: "Companies Act 2006" }])).toBeNull();
+    expect(matchSource(c, [{ ...src, title: "Companies Act 2006 s. 173" }])).toBeNull();
+    expect(matchSource(c, [{ ...src, jurisdiction: "New York" }])).toBeNull();
+    expect(matchSource(c, [{ ...src, reviewed_at: null }])).toBeNull();
+    expect(matchSource(c, [src, { ...src, id: "2" }])).toBeNull();
+  });
+  it("detects section-first references used in live replies", () => {
+    const labels = extractCitations("Section 172 of the Companies Act 2006 and Section 2-207 of the New York Uniform Commercial Code (UCC).").map(c => c.label);
+    expect(labels).toContain("Companies Act 2006 s. 172");
+    expect(labels).toContain("NY UCC § 2-207");
   });
 });
 
@@ -28,4 +39,16 @@ describe("in-chat contract detection", () => {
     expect(titles).toEqual(expect.arrayContaining(["Indemnification", "Limitation of Liability", "Governing Law"]));
     expect(extractClauses(contract)[0]).not.toHaveProperty("risk_score");
   });
+  it("excludes the attachment instruction from clause excerpts", () => {
+    const text = prepareContractAttachment("Either party may terminate this Agreement after thirty days' written notice.");
+    expect(extractClauses(text).find(c => c.title === "Term and Termination")?.excerpt).toBe("Either party may terminate this Agreement after thirty days' written notice.");
+  });
+  it("limits the complete attachment message to 30,000 characters", () => {
+    expect(prepareContractAttachment("x".repeat(30_000 - CONTRACT_AUDIT_PREFIX.length))).toHaveLength(30_000);
+    expect(() => prepareContractAttachment("x".repeat(30_001 - CONTRACT_AUDIT_PREFIX.length))).toThrow();
+  });
+  it("counts decoded characters rather than UTF-8 bytes", () => {
+    expect(prepareContractAttachment("界".repeat(15_000))).toHaveLength(15_000 + CONTRACT_AUDIT_PREFIX.length);
+  });
+  it("rejects empty attachments", () => expect(() => prepareContractAttachment(" \n")).toThrow());
 });

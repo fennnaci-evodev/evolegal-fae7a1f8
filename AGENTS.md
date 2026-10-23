@@ -18,5 +18,6 @@
 - Ambient backgrounds are static SVG animated only with CSS transform/opacity (no per-frame JavaScript), so pages stay smooth on low-end phones.
 - Hugo's inline thinking indicator uses a shared vector signature animated with CSS transform/opacity, avoiding image downloads and per-frame JavaScript; full-page loaders remain independent.
 - Hugo's model calls go only through `supabase/functions/hugo-chat/provider.ts`, which always emits OpenAI-style output; switching to Anthropic needs only `HUGO_PROVIDER=anthropic` plus `ANTHROPIC_API_KEY`, with no client changes.
-- Citation chips show "verified" only when matched to an approved, current source returned by `list_verified_hugo_citations`; unmatched references stay labelled unverified.
+- Citation chips show "verified" only for an unambiguous exact statute/section title and jurisdiction match to a reviewed source returned by `list_verified_hugo_citations`; matching an Act never verifies all its sections.
 - In-chat contract cards detect clauses only and stay unscored, consistent with the Contract Risk Analysis rule against invented scores.
+- Normalize attached contract input in `hugoContractInput.ts`, enforcing the complete message limit and stripping the audit instruction before clause detection to prevent invented excerpts.
