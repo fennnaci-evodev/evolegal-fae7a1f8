@@ -69,7 +69,7 @@ const ExpertChat = () => {
   const fileRef = useRef<HTMLInputElement>(null);
   const handleContractFile = async (file?: File) => {
     if (!file) return;
-    if (file.size > 200_000) { toast.error("File too large — paste up to 200 KB of text."); return; }
+    if (file.size > 30_000) { toast.error("Contract too long — up to 30,000 characters per message."); return; }
     const text = await file.text();
     setInput(`Audit this contract for liability, indemnity, termination and non-standard terms:\n\n${text}`);
     textareaRef.current?.focus();
