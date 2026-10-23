@@ -56,3 +56,42 @@ export function filterRiskClauses(clauses: RiskClause[], severity: ClauseSeverit
 export const riskLabels: Record<ClauseSeverity, string> = { Green: "Safe", Amber: "Caution", Red: "High Risk" };
 
 export const riskDisclaimer = "Illustrative sample scores, not a validated legal assessment. Baselines are examples, not market benchmarks. Informational only; not legal advice. Professional review may be appropriate.";
+// ---- In-chat clause extraction (detection only; never scores a user's contract) ----
+export interface ExtractedClause { title: string; excerpt: string }
+
+const CLAUSE_KEYWORDS: Record<string, RegExp> = {
+  "Limitation of Liability": /limitation of liability|in no event shall|liable for any (indirect|consequential)|aggregate liability/i,
+  "Indemnification": /indemnif|hold harmless/i,
+  "Confidentiality": /confidential/i,
+  "Payment Terms": /invoice|payable within|payment terms|fees? (are|shall be) due/i,
+  "Term and Termination": /terminat|renewal|cure period/i,
+  "Governing Law": /governing law|jurisdiction of the courts|governed by the laws/i,
+  "Insurance Requirements": /insurance/i,
+  "Force Majeure": /force majeure|beyond (its|their) reasonable control/i,
+  "Intellectual Property": /intellectual property|license grant|ownership of (work|deliverables)/i,
+  "Non-Compete / Non-Solicit": /non-?compet|non-?solicit/i,
+};
+
+const CONTRACT_SIGNALS = /\b(agreement|party|parties|hereby|shall|clause|section|whereas|effective date)\b/gi;
+
+/** Heuristic: long text with several contract signals reads as a pasted contract. */
+export function looksLikeContract(text: string): boolean {
+  if (text.length < 400) return false;
+  return (text.match(CONTRACT_SIGNALS)?.length ?? 0) >= 6;
+}
+
+export function extractClauses(text: string): ExtractedClause[] {
+  const sentences = text.replace(/\s+/g, " ").split(/(?<=[.;:])\s+/);
+  const out: ExtractedClause[] = [];
+  for (const [title, re] of Object.entries(CLAUSE_KEYWORDS)) {
+    const hit = sentences.find(s => re.test(s));
+    if (hit) out.push({ title, excerpt: hit.length > 240 ? `${hit.slice(0, 237)}…` : hit });
+  }
+  return out;
+}
+
+/** Standard categories the contract does not appear to address. */
+export function missingClauses(found: ExtractedClause[]): string[] {
+  const have = new Set(found.map(c => c.title));
+  return ["Limitation of Liability", "Indemnification", "Confidentiality", "Term and Termination", "Governing Law"].filter(t => !have.has(t));
+}
