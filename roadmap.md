@@ -1,5 +1,7 @@
 # Roadmap
 
+- [ ] Verify updated Hugo with the requesting user's authenticated session: contract attachments, pasted text, citation popovers, persistence and laptop rendering; fix reproduced problems and report verification limits.
+
 - [x] Replace the heavy Hugo chat sphere with a custom lightweight continuous signature; full-page loaders unchanged. Isolated browser rendering verified at phone/desktop sizes, light theme and reduced motion; no sphere download. Live chat waiting state not exercised.
 
 - [x] Fix Hugo replies replaying after persistence while preserving stored IDs for edits and feedback. Normal/error regression cases pass; signed-in live reply stays visible after saving and reloads unchanged.
