@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { BookOpen, ShieldCheck, ShieldAlert, ExternalLink } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { extractCitations, matchSource, type VerifiedSource } from "@/lib/citations";
 
@@ -29,16 +30,17 @@ export function HugoCitationChips({ content }: { content: string }) {
         return (
           <Popover key={c.label}>
             <PopoverTrigger asChild>
-              <button
+              <Button
                 type="button"
-                className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-medium ${
+                variant="ghost"
+                className={`inline-flex h-auto items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-medium ${
                   src ? "border-primary/40 bg-primary/10 text-primary" : "border-border/50 bg-muted/30 text-muted-foreground"
                 }`}
               >
                 <BookOpen className="h-3 w-3" aria-hidden="true" />
                 {c.label}
                 {src ? <ShieldCheck className="h-3 w-3" aria-label="Verified" /> : <ShieldAlert className="h-3 w-3" aria-label="Not verified" />}
-              </button>
+              </Button>
             </PopoverTrigger>
             <PopoverContent className="w-80 text-xs space-y-2">
               {src ? (

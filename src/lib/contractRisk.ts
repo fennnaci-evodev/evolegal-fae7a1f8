@@ -1,3 +1,5 @@
+import { contractDocumentText } from "./hugoContractInput";
+
 export type ClauseSeverity = "Green" | "Amber" | "Red";
 
 export interface RiskClause {
@@ -81,7 +83,7 @@ export function looksLikeContract(text: string): boolean {
 }
 
 export function extractClauses(text: string): ExtractedClause[] {
-  const sentences = text.replace(/\s+/g, " ").split(/(?<=[.;:])\s+/);
+  const sentences = contractDocumentText(text).replace(/\s+/g, " ").split(/(?<=[.;:])\s+/);
   const out: ExtractedClause[] = [];
   for (const [title, re] of Object.entries(CLAUSE_KEYWORDS)) {
     const hit = sentences.find(s => re.test(s));

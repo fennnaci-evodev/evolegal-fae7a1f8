@@ -554,6 +554,18 @@ export type Database = {
         }
         Returns: boolean
       }
+      list_verified_hugo_citations: {
+        Args: never
+        Returns: {
+          effective_from: string
+          excerpt: string
+          id: string
+          jurisdiction: string
+          reviewed_at: string
+          source_url: string
+          title: string
+        }[]
+      }
       review_hugo_source: {
         Args: {
           p_checks: Json
