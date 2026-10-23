@@ -47,19 +47,11 @@ export function HugoRecallBanner({ onResume, hidden }: Props) {
           .maybeSingle();
         if (!chat || cancelled) return;
 
-        const { data: artifact } = await supabase
-          .from("hugo_chat_artifacts" as any)
-          .select("summary, topics")
-          .eq("chat_id", chatId)
-          .maybeSingle();
-
         if (cancelled) return;
         setData({
           chatId,
           title: (chat as any).title,
           updated_at: (chat as any).updated_at,
-          summary: (artifact as any)?.summary,
-          topics: (artifact as any)?.topics,
         });
       } catch {
         /* memory tables may not exist yet — silent */

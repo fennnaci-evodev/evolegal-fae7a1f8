@@ -1,6 +1,6 @@
 # Roadmap
 
-- [ ] Verify updated Hugo with the requesting user's authenticated session: contract attachments, pasted text, citation popovers, persistence and laptop rendering; fix reproduced problems and report verification limits.
+- [x] Verify updated Hugo signed in: text attachments, pasted contracts, saved replies, and UK/NY unverified citation popovers work. Fixed instruction contamination in clause excerpts, decoded-character limits and empty attachments, unsafe citation matching, 16px/10px chat blurs, and missing recovery-table requests. 34 regression tests pass. Headless frames varied 16.7–33.3ms median, so real-laptop 60 FPS is not established; verified-source popovers and legal accuracy remain unverified.
 
 - [x] Replace the heavy Hugo chat sphere with a custom lightweight continuous signature; full-page loaders unchanged. Isolated browser rendering verified at phone/desktop sizes, light theme and reduced motion; no sphere download. Live chat waiting state not exercised.
 
@@ -19,7 +19,7 @@
 - [x] Prepare shared Hugo personality and reviewed-source eligibility without fine-tuning; unreviewed memory is never legal authority. Reviewed-source retrieval is disabled until setup is complete.
 - [x] Test authorization, source eligibility, session transport and request validation locally (25 tests passed); Deno server check and preview build pass.
 - [x] Apply the prepared reviewed-source schema, deploy session-protected Hugo, and verify a signed-in conversation plus denied access paths live. One user message and one reply persist and reload; 25 local tests pass. Restored authenticated execution of the read-only role predicate required by RLS; anonymous source privileges revoked.
-- [ ] Populate and legally review the knowledge base, establish jurisdiction/topic scope and an expert-verified evaluation set, including hosted approval/date/reapproval checks. Blocked: no reviewed legal materials or authorized reviewer process supplied. Retrieval remains disabled; the live reply disclosed the verification gap but still used specific legal propositions and directive wording, so accuracy/personality compliance is not established. Optional recovery-table calls return 404; saved chat URLs work.
+- [ ] Populate and legally review the knowledge base, establish jurisdiction/topic scope and an expert-verified evaluation set, including hosted approval/date/reapproval checks. Blocked: no reviewed legal materials or authorized reviewer process supplied. Retrieval remains disabled; the live reply disclosed the verification gap but still used specific legal propositions and directive wording, so accuracy/personality compliance is not established. Saved chat URLs and owner-scoped recovery now work without optional tables.
 
 - [x] Preserve the existing home UI and refine only the randomized neural-point background, with phone-specific density and motion.
 - [x] Replace the oversized mobile dropdown with a compact, polished navigation panel while preserving routes and page content.
