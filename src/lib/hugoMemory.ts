@@ -48,51 +48,31 @@ export function getOrCreateSessionId(): string {
   return sid;
 }
 
-/** Persist the user's last active chat for cross-device recovery. */
+/** Keep a non-sensitive, owner-specific pointer; chat contents stay in Cloud. */
 export async function rememberLastChat(userId: string, chatId: string) {
   try {
-    const sid = getOrCreateSessionId();
-    await supabase
-      .from("hugo_session_recovery" as any)
-      .upsert(
-        {
-          session_id: sid,
-          user_id: userId,
-          last_chat_id: chatId,
-          device_label:
-            typeof navigator !== "undefined" ? navigator.userAgent.slice(0, 120) : null,
-          updated_at: new Date().toISOString(),
-        } as any,
-        { onConflict: "session_id" } as any,
-      );
-  } catch (e) {
-    // Table may not exist yet (migration pending) — fail silently
-    console.debug("rememberLastChat skipped:", e);
-  }
+    localStorage.setItem(`evolegal_hugo_last_${userId}`, chatId);
+  } catch { /* Browser storage can be unavailable. */ }
 }
 
-/** Recover the most recent chat for this user (cookie first, then DB fallback). */
+/** Validate the local pointer, then use owned chat history across devices. */
 export async function recoverLastChat(userId: string): Promise<string | null> {
   try {
-    const sid = getOrCreateSessionId();
-    const { data: bySid } = await supabase
-      .from("hugo_session_recovery" as any)
-      .select("last_chat_id")
-      .eq("session_id", sid)
-      .eq("user_id", userId)
-      .maybeSingle();
-    const chatId = (bySid as any)?.last_chat_id;
-    if (chatId) return chatId as string;
-
-    // Fallback: latest recovery row for this user (any device)
+    let pointer: string | null = null;
+    try { pointer = localStorage.getItem(`evolegal_hugo_last_${userId}`); } catch { /* Use Cloud history. */ }
+    if (pointer) {
+      const { data: owned } = await supabase.from("hugo_chats" as any)
+        .select("id").eq("id", pointer).eq("user_id", userId).maybeSingle();
+      if (owned) return (owned as any).id as string;
+    }
     const { data: latest } = await supabase
-      .from("hugo_session_recovery" as any)
-      .select("last_chat_id")
+      .from("hugo_chats" as any)
+      .select("id")
       .eq("user_id", userId)
       .order("updated_at", { ascending: false })
       .limit(1)
       .maybeSingle();
-    return ((latest as any)?.last_chat_id as string) || null;
+    return ((latest as any)?.id as string) || null;
   } catch {
     return null;
   }

@@ -43,6 +43,7 @@ export function HugoRecallBanner({ onResume, hidden }: Props) {
           .from("hugo_chats" as any)
           .select("id, title, updated_at")
           .eq("id", chatId)
+          .eq("user_id", user.id)
           .maybeSingle();
         if (!chat || cancelled) return;
 

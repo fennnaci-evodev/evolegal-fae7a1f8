@@ -21,3 +21,4 @@
 - Citation chips show "verified" only for an unambiguous exact statute/section title and jurisdiction match to a reviewed source returned by `list_verified_hugo_citations`; matching an Act never verifies all its sections.
 - In-chat contract cards detect clauses only and stay unscored, consistent with the Contract Risk Analysis rule against invented scores.
 - Normalize attached contract input in `hugoContractInput.ts`, enforcing the complete message limit and stripping the audit instruction before clause detection to prevent invented excerpts.
+- Recover chats through owner-validated local pointers and existing owned chat history, never an optional missing recovery table; this preserves recovery without failing requests.
