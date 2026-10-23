@@ -171,18 +171,16 @@
 
   .glass-card {
     background: hsla(240, 12%, 100%, 0.05);
-    backdrop-filter: blur(20px) saturate(1.5);
+    backdrop-filter: blur(8px) saturate(1.4);
     border: 1px solid hsla(0, 0%, 100%, 0.07);
     border-radius: 1.5rem;
     box-shadow: 0 8px 32px hsla(0, 0%, 0%, 0.2);
-    transition: transform 0.3s ease-out, filter 0.3s ease-out, border-color 0.3s ease-out;
-    will-change: transform;
+    transition: border-color 0.15s ease-out;
+    contain: paint;
   }
 
   .glass-card:hover {
     border-color: hsla(186, 100%, 50%, 0.15);
-    transform: scale(1.03);
-    filter: drop-shadow(0 0 8px hsla(186, 100%, 50%, 0.1));
   }
 
   /* Prevent hover scale on dialog content — keep centering intact */
@@ -197,9 +195,7 @@
     will-change: transform;
   }
   .eco-hover:hover {
-    transform: scale(1.03);
     border-color: hsla(186, 100%, 50%, 0.15);
-    filter: drop-shadow(0 0 8px hsla(186, 100%, 50%, 0.1));
   }
 
   /* Unified compact button interaction for every active button, incl. chats */

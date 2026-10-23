@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { useSearchParams, useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { ScalesOfJustice } from "@/components/ScalesOfJustice";
+import { HugoThinkingLoader } from "@/components/HugoThinkingLoader";
 import { HugoAvatar } from "@/components/HugoAvatar";
 import { Button } from "@/components/ui/button";
 import { Send, User, Info, Mic, MicOff, Plus, Trash2, MessageCircle, FileText, ChevronDown, PanelLeftClose, PanelLeftOpen, Pencil } from "lucide-react";
@@ -345,7 +345,7 @@ const ExpertChat = () => {
             {!historyLoading && messages.length === 0 && !streaming && (
               <div className="flex flex-col items-center justify-center h-full text-center space-y-5">
                 <HugoRecallBanner onResume={handleSelectChat} hidden={!!currentChatId} />
-                <ScalesOfJustice />
+                <HugoThinkingLoader size={72} />
                 <div>
                   <h3 className="text-lg font-display font-semibold mb-1">Launch Hugo Co-Pilot</h3>
                   <p className="text-xs text-muted-foreground max-w-sm">
