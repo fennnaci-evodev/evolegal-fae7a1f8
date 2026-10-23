@@ -4,6 +4,7 @@ import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { authorizeHugo, HugoAccessError } from "./access.ts";
 import { HugoBodySchema } from "./request.ts";
 import { hugoPersonality } from "./personality.ts";
+import { complete, stream as providerStream, providerConfigured } from "./provider.ts";
 import { isEligibleSource, knowledgeContext, type LegalSource } from "./knowledge.ts";
 
 const TITLE_SYSTEM_PROMPT = `You are a title generator for legal conversations. Generate a short, structured title following this EXACT format:
@@ -142,25 +143,17 @@ async function learnAndRemember(opts: {
 }) {
   const { admin, apiKey, userId, chatId, userMessage, assistantReply, priorArtifact, turnCount } = opts;
   try {
-    const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash-lite",
-        messages: [
-          { role: "system", content: LEARN_SYSTEM_PROMPT },
-          {
-            role: "user",
-            content: `PRIOR ARTIFACT:\n${priorArtifact || "(none)"}\n\nLATEST USER MESSAGE:\n${userMessage}\n\nHUGO REPLY:\n${assistantReply}\n\nReturn the JSON now.`,
-          },
-        ],
-        temperature: 0.2,
-        response_format: { type: "json_object" },
-      }),
-    });
-    if (!resp.ok) return;
-    const data = await resp.json();
-    const raw = data.choices?.[0]?.message?.content || "{}";
+    const raw = (await complete({
+      tier: "fast",
+      system: LEARN_SYSTEM_PROMPT,
+      messages: [{
+        role: "user",
+        content: `PRIOR ARTIFACT:\n${priorArtifact || "(none)"}\n\nLATEST USER MESSAGE:\n${userMessage}\n\nHUGO REPLY:\n${assistantReply}\n\nReturn the JSON now.`,
+      }],
+      temperature: 0.2,
+      json: true,
+    })) ?? "{}";
+    void apiKey;
     let parsed: any = {};
     try {
       parsed = JSON.parse(raw);
@@ -291,8 +284,8 @@ serve(async (req) => {
         return Boolean(data);
       },
     });
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("Provider configuration unavailable");
+    if (!providerConfigured()) throw new Error("Provider configuration unavailable");
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY") ?? "";
 
     // ---- Title generation ----
     if (action === "generate_title") {
@@ -309,26 +302,13 @@ serve(async (req) => {
         });
       }
 
-      const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "google/gemini-2.5-flash-lite",
-          messages: [
-            { role: "system", content: TITLE_SYSTEM_PROMPT },
-            { role: "user", content: `Generate a title for this legal conversation:\n\n${content}` },
-          ],
-          temperature: 0.3,
-        }),
+      const rawTitle = await complete({
+        tier: "fast",
+        system: TITLE_SYSTEM_PROMPT,
+        messages: [{ role: "user", content: `Generate a title for this legal conversation:\n\n${content}` }],
+        temperature: 0.3,
       });
-
-      if (!response.ok) {
-        return new Response(JSON.stringify({ title: "New Chat" }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      const data = await response.json();
-      const title = (data.choices?.[0]?.message?.content || "New Chat").trim().replace(/^["']|["']$/g, "");
+      const title = (rawTitle || "New Chat").trim().replace(/^["']|["']$/g, "");
       return new Response(JSON.stringify({ title }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -425,16 +405,12 @@ serve(async (req) => {
       } catch { /* table missing */ }
     }
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+    const response = await providerStream({
+      tier: "main",
+      system: systemPrompt,
+      messages: chatMessages as any,
+      temperature: preciseMode ? 0.55 : 0.7,
       signal: req.signal,
-      body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [{ role: "system", content: systemPrompt }, ...chatMessages],
-        stream: true,
-        temperature: preciseMode ? 0.55 : 0.7,
-      }),
     });
 
     if (!response.ok) {
