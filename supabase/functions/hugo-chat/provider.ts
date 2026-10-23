@@ -15,7 +15,7 @@ export interface ProviderRequest {
   signal?: AbortSignal;
 }
 
-const GATEWAY_MODELS: Record<Tier, string> = { fast: "google/gemini-2.5-flash-lite", main: "google/gemini-3-flash-preview" };
+const GATEWAY_MODELS: Record<Tier, string> = { fast: "google/gemini-3.1-flash-lite", main: "google/gemini-3-flash-preview" };
 
 export function activeProvider(): "anthropic" | "gateway" {
   return Deno.env.get("HUGO_PROVIDER") === "anthropic" && Deno.env.get("ANTHROPIC_API_KEY") ? "anthropic" : "gateway";
