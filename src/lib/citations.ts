@@ -15,16 +15,19 @@ const PATTERNS: RegExp[] = [
   // Companies Act 2006 s. 172 / section 172 / s172(1)
   /\b((?:[A-Z][a-z]+(?:\s+(?:and|of|the|for|\(?[A-Z][a-z]+\)?))*\s+)?Act\s+(?:19|20)\d{2})(?:,?\s*(?:s\.?|ss\.?|section|§)\s*\d+[A-Z]?(?:\(\d+\))*)?/g,
   // NY UCC § 2-207, N.Y. Gen. Oblig. Law § 5-1401, NY Real Property Law § 235-b
-  /\b((?:N\.?Y\.?|New York)\s+(?:[A-Z][A-Za-z.]*\s+){1,4}(?:Law|UCC|Code))\s*§+\s*[\d-]+[a-z]?(?:\(\w+\))*/g,
+  /\b((?:N\.?Y\.?|New York)\s+(?:[A-Z][A-Za-z.]*\s+){0,4}(?:Law|UCC|Code))\s*§+\s*[\d-]+[a-z]?(?:\(\w+\))*/g,
   /\b(UCC)\s*§+\s*\d+-\d+/g,
 ];
+
+const LEAD = /^(?:(?:See|Under|Per|In|The|Also|And|Of|By|Section)\s+)+/;
 
 export function extractCitations(text: string): Citation[] {
   const seen = new Map<string, Citation>();
   for (const re of PATTERNS) {
     for (const m of text.matchAll(re)) {
-      const label = m[0].replace(/\s+/g, " ").trim();
-      const act = m[1].replace(/\s+/g, " ").trim();
+      const label = m[0].replace(/\s+/g, " ").trim().replace(LEAD, "");
+      const act = m[1].replace(/\s+/g, " ").trim().replace(LEAD, "");
+      if ([...seen.keys()].some(k => k.includes(label.toLowerCase()))) continue;
       if (label.length < 6 || seen.has(label.toLowerCase())) continue;
       seen.set(label.toLowerCase(), { label, act });
     }
