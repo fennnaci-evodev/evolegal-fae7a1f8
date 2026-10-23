@@ -34,7 +34,7 @@ export function HugoContractCard({ text }: { text: string }) {
           <span>Not found: {missing.join(", ")}.</span>
         </div>
       )}
-      <Link to="/dashboard/contract-analysis" className="mt-3 inline-block text-[11px] text-primary underline underline-offset-2">
+      <Link to="/dashboard/admin/contracts" className="mt-3 inline-block text-[11px] text-primary underline underline-offset-2">
         Open full Contract Risk Analysis
       </Link>
     </div>

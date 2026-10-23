@@ -5,7 +5,7 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { HugoThinkingLoader } from "@/components/HugoThinkingLoader";
 import { HugoAvatar } from "@/components/HugoAvatar";
 import { Button } from "@/components/ui/button";
-import { Send, User, Info, Mic, MicOff, Plus, Trash2, MessageCircle, FileText, ChevronDown, PanelLeftClose, PanelLeftOpen, Pencil } from "lucide-react";
+import { Send, User, Info, Paperclip, Mic, MicOff, Plus, Trash2, MessageCircle, FileText, ChevronDown, PanelLeftClose, PanelLeftOpen, Pencil } from "lucide-react";
 import { HugoFeedbackButtons } from "@/components/HugoFeedbackButtons";
 import { HugoCopyButton } from "@/components/HugoCopyButton";
 import { HugoModeBadge, getHugoModePref, setHugoModePref, useHugoMode, type HugoMode } from "@/components/HugoModeBadge";
@@ -27,6 +27,9 @@ import { HugoChatRecentTopics } from "@/components/HugoChatRecentTopics";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { HugoRecallBanner } from "@/components/HugoRecallBanner";
+import { HugoCitationChips } from "@/components/HugoCitationChips";
+import { HugoContractCard } from "@/components/HugoContractCard";
+import { looksLikeContract } from "@/lib/contractRisk";
 const ExpertChat = () => {
   const { chatId: paramChatId } = useParams<{ chatId?: string }>();
   const [searchParams] = useSearchParams();
@@ -63,6 +66,14 @@ const ExpertChat = () => {
   const [showDocFactory, setShowDocFactory] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const handleContractFile = async (file?: File) => {
+    if (!file) return;
+    if (file.size > 200_000) { toast.error("File too large — paste up to 200 KB of text."); return; }
+    const text = await file.text();
+    setInput(`Audit this contract for liability, indemnity, termination and non-standard terms:\n\n${text}`);
+    textareaRef.current?.focus();
+  };
   const recognitionRef = useRef<any>(null);
   const isMobile = useIsMobile();
   const hugoMode = useHugoMode();
@@ -389,10 +400,16 @@ const ExpertChat = () => {
                           isStreaming={streaming && idx === messages.length - 1}
                           isNew={newAssistantIds.has(msg.id)}
                         />
+                      ) : looksLikeContract(msg.content) ? (
+                        <span className="line-clamp-4">{msg.content}</span>
                       ) : (
                         msg.content
                       )}
+                      {msg.role === "assistant" && !(streaming && idx === messages.length - 1) && (
+                        <HugoCitationChips content={msg.content} />
+                      )}
                     </div>
+                    {msg.role === "user" && looksLikeContract(msg.content) && <HugoContractCard text={msg.content} />}
                     {msg.role === "user" && isLastUserMsg && !streaming && (
                       <button
                         onClick={handleEditLastMessage}
@@ -481,6 +498,18 @@ const ExpertChat = () => {
             >
               {listening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
             </Button>
+            <input ref={fileRef} type="file" accept=".txt,.md,text/plain" className="hidden"
+              onChange={(e) => { handleContractFile(e.target.files?.[0]); e.target.value = ""; }} />
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button type="button" size="icon" variant="ghost" aria-label="Attach contract text"
+                  onClick={() => fileRef.current?.click()} disabled={streaming || historyLoading}
+                  className="shrink-0 h-8 w-8 text-muted-foreground">
+                  <Paperclip className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="top">Attach contract (.txt)</TooltipContent>
+            </Tooltip>
             <textarea
               ref={textareaRef}
               value={input}
