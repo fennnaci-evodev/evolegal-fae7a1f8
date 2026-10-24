@@ -49,6 +49,14 @@ export function EvoLogo({ size = "md", animate = true, showText = true }: EvoLog
           </defs>
           <path d={E_PATH} fill={`url(#${uid}-main)`} />
           <path d={E_PATH} fill={`url(#${uid}-rim)`} />
+          <path
+            d={E_PATH}
+            fill="none"
+            stroke="hsla(186, 100%, 80%, 0.35)"
+            strokeWidth={1.5}
+            strokeLinejoin="round"
+            vectorEffect="non-scaling-stroke"
+          />
         </svg>
       </div>
 
