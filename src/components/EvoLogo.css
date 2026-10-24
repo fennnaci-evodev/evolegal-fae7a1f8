@@ -1,28 +1,27 @@
-/* Pure GPU-accelerated logo animation. No filters/containment: avoids WebKit
-   clipped glow boxes and extra raster tiles over the navbar backdrop blur. */
+/* Flat 2D logo: no will-change, no 3D transforms, no backface/filters/containment.
+   Any of these promote a separate WebKit layer, which renders as a dark box
+   over the navbar backdrop blur on iOS Safari. */
 
 .evo-logo-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  will-change: transform;
-  backface-visibility: hidden;
-  transform: translate3d(0, 0, 0) rotate(-33deg);
+  transform: rotate(-33deg);
   transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
   cursor: pointer;
 }
 
 .evo-logo-icon:hover {
-  transform: translate3d(0, 0, 0) rotate(-28deg) scale(1.08);
+  transform: rotate(-28deg) scale(1.08);
 }
 
 .evo-logo-icon:active {
-  transform: translate3d(0, 0, 0) rotate(-40deg) scale(1.05);
+  transform: rotate(-40deg) scale(1.05);
 }
 
 .evo-logo-static {
-  transform: translate3d(0, 0, 0) rotate(-33deg);
+  transform: rotate(-33deg);
 }
 
 .evo-logo-animate {
@@ -30,14 +29,8 @@
 }
 
 @keyframes evoLogoRotateIn {
-  0% {
-    transform: translate3d(0, 0, 0) rotate(0deg);
-    opacity: 0.8;
-  }
-  100% {
-    transform: translate3d(0, 0, 0) rotate(-33deg);
-    opacity: 1;
-  }
+  0% { transform: rotate(0deg); opacity: 0.8; }
+  100% { transform: rotate(-33deg); opacity: 1; }
 }
 
 .evo-logo-text-in {
@@ -45,8 +38,18 @@
 }
 
 @keyframes evoLogoTextIn {
-  0% { opacity: 0; transform: translate3d(0, 6px, 0); }
-  100% { opacity: 1; transform: translate3d(0, 0, 0); }
+  0% { opacity: 0; transform: translateY(6px); }
+  100% { opacity: 1; transform: none; }
+}
+
+/* The navbar logo never animates: keep it fully static so no transition
+   or hover state can promote a compositing layer over the blurred bar. */
+nav .evo-logo-icon {
+  transition: none;
+}
+nav .evo-logo-icon:hover,
+nav .evo-logo-icon:active {
+  transform: rotate(-33deg);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -55,7 +58,7 @@
     animation: none;
   }
   .evo-logo-animate {
-    transform: translate3d(0, 0, 0) rotate(-33deg);
+    transform: rotate(-33deg);
     opacity: 1;
   }
 }
