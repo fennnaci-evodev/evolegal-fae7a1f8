@@ -295,6 +295,48 @@ export type Database = {
           },
         ]
       }
+      hugo_provider_state: {
+        Row: {
+          blocked_at: string
+          message: string
+          provider: string
+          status: number
+        }
+        Insert: {
+          blocked_at?: string
+          message: string
+          provider: string
+          status: number
+        }
+        Update: {
+          blocked_at?: string
+          message?: string
+          provider?: string
+          status?: number
+        }
+        Relationships: []
+      }
+      hugo_request_windows: {
+        Row: {
+          attempts: number
+          bucket: string
+          user_id: string
+          window_start: string
+        }
+        Insert: {
+          attempts?: number
+          bucket: string
+          user_id: string
+          window_start?: string
+        }
+        Update: {
+          attempts?: number
+          bucket?: string
+          user_id?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
       hugo_source_changes: {
         Row: {
           analysis_status: string
@@ -546,6 +588,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      consume_hugo_request: {
+        Args: { p_bucket: string; p_user: string }
+        Returns: boolean
+      }
       generate_ticket_number: { Args: never; Returns: string }
       has_role: {
         Args: {
