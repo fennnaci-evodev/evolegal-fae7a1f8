@@ -1,3 +1,4 @@
+import { boundedText, safeProviderFetch, SafeError } from "../_shared/safety.ts";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { extractMonitoredText, countUnappliedEffects, dataXmlUrl } from "./monitor.ts";
@@ -15,7 +16,8 @@ type AiResult = { text: string | null; stop?: number };
 async function analyseImpact(title: string, before: string, after: string, effects: number | null): Promise<AiResult> {
   const key = Deno.env.get("LOVABLE_API_KEY");
   if (!key) return { text: null, stop: 401 };
-  const res = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
+  let res: Response;
+  try { res = await safeProviderFetch("gateway", "https://ai.gateway.lovable.dev/v1/responses", {
     method: "POST",
     headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -26,7 +28,7 @@ async function analyseImpact(title: string, before: string, after: string, effec
       input: `Source: ${title}\nOutstanding unapplied effects reported by the publisher: ${effects ?? "unknown"}\n\nPREVIOUS TEXT:\n${before.slice(0, 12000)}\n\nCURRENT TEXT:\n${after.slice(0, 12000)}`,
     }),
   });
-  if (!res.ok) return { text: null, stop: res.status };
+  } catch (err) { return { text: null, stop: err instanceof SafeError ? err.status : 503 }; }
   const data = await res.json();
   const text = data.output_text ?? (data.output ?? []).flatMap((o: any) => o.content ?? [])
     .filter((c: any) => c.type === "output_text").map((c: any) => c.text).join("\n");
@@ -56,13 +58,15 @@ Deno.serve(async (req) => {
   let aiStopped: number | null = null;
   for (const s of sources ?? []) {
     const now = new Date().toISOString();
-    const res = await fetch(dataXmlUrl(s.source_url), { headers: { Accept: "application/xml" } }).catch(() => null);
+    let res: Response | null = null;
+    try { res = await fetch(dataXmlUrl(s.source_url), { headers: { Accept: "application/xml" }, redirect: "error", signal: AbortSignal.timeout(15_000) }); } catch { /* fail closed for URLs, redirects and timeouts */ }
     if (!res || !res.ok) {
       await admin.from("hugo_knowledge_sources").update({ last_checked_at: now, check_status: "unreachable" }).eq("id", s.id);
       report.push({ title: s.title, result: "unreachable", http: res?.status ?? null });
       continue;
     }
-    const xml = await res.text();
+    let xml: string;
+    try { xml = await boundedText(res, 5_000_000); } catch { report.push({ title: s.title, result: "oversized_or_unreadable" }); continue; }
     const text = extractMonitoredText(xml);
     if (!text) {
       await admin.from("hugo_knowledge_sources").update({ last_checked_at: now, check_status: "invalid_text", ...(s.status === "approved" ? { status: "draft" } : {}) }).eq("id", s.id);

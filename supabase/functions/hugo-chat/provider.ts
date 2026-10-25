@@ -1,3 +1,4 @@
+import { safeProviderFetch, SafeError, blockProvider } from "../_shared/safety.ts";
 /**
  * Provider boundary for Hugo. Callers pass a provider-neutral request and always
  * receive OpenAI-style output (JSON `choices[0].message.content` or SSE
@@ -42,11 +43,11 @@ export function toAnthropicMessages(messages: ChatTurn[]): ChatTurn[] {
 
 function callAnthropic(req: ProviderRequest, stream: boolean) {
   const system = req.json ? `${req.system}\n\nRespond with a single valid JSON object only.` : req.system;
-  return fetch("https://api.anthropic.com/v1/messages", {
+  return safeProviderFetch("anthropic", "https://api.anthropic.com/v1/messages", {
     method: "POST",
     signal: req.signal,
     headers: {
-      "x-api-key": Deno.env.get("ANTHROPIC_API_KEY")!,
+      "x-api-key": Deno.env.get("ANTHROPIC_API_KEY") ?? "",
       "anthropic-version": "2023-06-01",
       "content-type": "application/json",
     },
@@ -62,7 +63,7 @@ function callAnthropic(req: ProviderRequest, stream: boolean) {
 }
 
 function callGateway(req: ProviderRequest, stream: boolean) {
-  return fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+  return safeProviderFetch("gateway", "https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
     signal: req.signal,
     headers: { Authorization: `Bearer ${Deno.env.get("LOVABLE_API_KEY")}`, "Content-Type": "application/json" },
@@ -86,12 +87,13 @@ export async function complete(req: ProviderRequest): Promise<string | null> {
     const r = await callAnthropic(req, false);
     if (!r.ok) { await r.body?.cancel(); return null; }
     const data = await r.json();
-    return (data.content ?? []).filter((b: any) => b.type === "text").map((b: any) => b.text).join("") || null;
+    return (data.content ?? []).filter((b: any) => b.type === "text").map((b: any) => b.text).join("") || (() => { throw new SafeError(422, "The provider returned no answer or declined the request."); })();
   }
   const r = await callGateway(req, false);
   if (!r.ok) { await r.body?.cancel(); return null; }
   const data = await r.json();
-  return data.choices?.[0]?.message?.content ?? null;
+  if (data.choices?.[0]?.message?.refusal || !data.choices?.[0]?.message?.content?.trim()) throw new SafeError(422, "The provider returned no answer or declined the request.");
+  return data.choices[0].message.content;
 }
 
 /** Converts Anthropic SSE events into OpenAI-style SSE lines. */
@@ -100,7 +102,7 @@ export function anthropicToOpenAiSse(body: ReadableStream<Uint8Array>): Readable
   const dec = new TextDecoder();
   let buf = "";
   return body.pipeThrough(new TransformStream<Uint8Array, Uint8Array>({
-    transform(chunk, controller) {
+    async transform(chunk, controller) {
       buf += dec.decode(chunk, { stream: true });
       const lines = buf.split("\n");
       buf = lines.pop() ?? "";
@@ -110,6 +112,11 @@ export function anthropicToOpenAiSse(body: ReadableStream<Uint8Array>): Readable
           const ev = JSON.parse(line.slice(5).trim());
           if (ev.type === "content_block_delta" && ev.delta?.type === "text_delta") {
             controller.enqueue(enc.encode(`data: ${JSON.stringify({ choices: [{ delta: { content: ev.delta.text } }] })}\n\n`));
+          } else if (ev.type === "error") {
+            if (ev.error?.type === "permission_error") await blockProvider("anthropic", 403, ev.error.message || "Provider access denied.");
+            controller.enqueue(enc.encode(`data: ${JSON.stringify({ error: { message: ev.error?.message || "The provider stream failed.", retryable: false } })}\n\n`));
+            controller.terminate();
+            return;
           } else if (ev.type === "message_stop") {
             controller.enqueue(enc.encode("data: [DONE]\n\n"));
           }

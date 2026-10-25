@@ -1,3 +1,4 @@
+import { SafeError, readJson, consumeRequest, blockProvider } from "../_shared/safety.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.97.0";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
@@ -265,7 +266,7 @@ serve(async (req) => {
     if (authError || !authData.user || authData.user.is_anonymous) throw new HugoAccessError(401, "Your session has expired. Please sign in again.");
     const verifiedUserId = authData.user.id;
     let rawBody: unknown;
-    try { rawBody = await req.json(); } catch { throw new HugoAccessError(400, "Invalid request body."); }
+    try { rawBody = await readJson(req, 600_000); } catch { throw new HugoAccessError(400, "Invalid request body."); }
     const parsed = HugoBodySchema.safeParse(rawBody);
     if (!parsed.success) throw new HugoAccessError(400, "Invalid Hugo request. Check the message and conversation details.");
     const body = parsed.data;
@@ -284,6 +285,7 @@ serve(async (req) => {
         return Boolean(data);
       },
     });
+    await consumeRequest(userId, "llm");
     if (!providerConfigured()) throw new Error("Provider configuration unavailable");
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY") ?? "";
 
@@ -413,25 +415,6 @@ serve(async (req) => {
       signal: req.signal,
     });
 
-    if (!response.ok) {
-      const status = response.status;
-      if (status === 429) {
-        return new Response(JSON.stringify({ error: "Rate limited, please try again shortly." }), {
-          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      if (status === 402) {
-        return new Response(JSON.stringify({ error: "AI credits exhausted. Please add credits in your workspace settings." }), {
-          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      await response.body?.cancel();
-      console.error("Hugo provider failure", { status });
-      return new Response(JSON.stringify({ error: "AI service temporarily unavailable." }), {
-        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
     const reader = response.body?.getReader();
     if (!reader) throw new Error("No response body");
 
@@ -440,18 +423,41 @@ serve(async (req) => {
     const lastUserMessage = [...chatMessages].reverse().find((m) => m.role === "user")?.content || "";
 
     let cancelled = false;
+    let terminalFailure = false;
+    let completed = false;
+    let eventBuffer = "";
     const stream = new ReadableStream({
       async start(controller) {
         try {
           while (true) {
-            const { done, value } = await reader.read();
+            let timer: ReturnType<typeof setTimeout> | undefined;
+            const { done, value } = await Promise.race([reader.read(), new Promise<never>((_, reject) => {
+              timer = setTimeout(() => { reject(new SafeError(504, "Hugo stopped responding. Send a fresh request.", true)); void reader.cancel(); }, 45_000);
+            })]).finally(() => clearTimeout(timer));
             if (done) break;
             if (cancelled) return;
             const chunk = decoder.decode(value, { stream: true });
             fullText += chunk;
+            if (fullText.length > 250_000) throw new SafeError(502, "Provider response exceeded the safe size limit.");
+            eventBuffer += chunk;
+            const lines = eventBuffer.split("\n"); eventBuffer = lines.pop() ?? "";
+            for (const line of lines) {
+              if (!line.startsWith("data:")) continue;
+              if (line.slice(5).trim() === "[DONE]") { completed = true; continue; }
+              try {
+                const event = JSON.parse(line.slice(5).trim());
+                if (event.error) {
+                  terminalFailure = true;
+                  if (event.error.status === 403 || event.error.type === "permission_error") await blockProvider("gateway", 403, event.error.message || "Provider access denied.");
+                }
+                if (event.choices?.[0]?.delta?.refusal) terminalFailure = true;
+              } catch (err) { if (err instanceof SafeError) throw err; }
+            }
             controller.enqueue(value);
+            if (terminalFailure) { controller.close(); await reader.cancel(); return; }
           }
           if (cancelled || req.signal.aborted) return;
+          if (!completed) throw new SafeError(502, "Hugo’s reply was interrupted. It has not been saved as a completed answer.", true);
           controller.close();
 
           // Parse accumulated SSE into the assistant message
@@ -487,9 +493,11 @@ serve(async (req) => {
         } catch (e) {
           if (!cancelled) {
             console.error("Hugo stream failed");
-            controller.error(e);
+            controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ error: { message: e instanceof SafeError ? e.message : "Hugo’s reply was interrupted. Send a fresh request.", retryable: e instanceof SafeError && e.retryable } })}\n\n`));
+            controller.close();
           }
         } finally {
+          await reader.cancel().catch(() => undefined);
           reader.releaseLock();
         }
       },
@@ -500,10 +508,10 @@ serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
     });
   } catch (e) {
-    console.error("hugo-chat request failed", { status: e instanceof HugoAccessError ? e.status : 500 });
+    console.error("hugo-chat request failed", { status: e instanceof HugoAccessError || e instanceof SafeError ? e.status : 500 });
     return new Response(
-      JSON.stringify({ error: e instanceof HugoAccessError ? e.message : "Hugo is temporarily unavailable." }),
-      { status: e instanceof HugoAccessError ? e.status : 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      JSON.stringify({ error: e instanceof HugoAccessError || e instanceof SafeError ? e.message : "Hugo is temporarily unavailable.", retryable: e instanceof SafeError && e.retryable }),
+      { status: e instanceof HugoAccessError || e instanceof SafeError ? e.status : 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   }
 });

@@ -42,13 +42,20 @@ export function extractCitations(text: string): Citation[] {
   return [...seen.values()].slice(0, 8);
 }
 
+export function officialSourceUrl(value: string): string | null {
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" && !url.username && !url.password && ["legislation.gov.uk", "www.legislation.gov.uk", "caselaw.nationalarchives.gov.uk", "nysenate.gov", "www.nysenate.gov"].includes(url.hostname) ? url.href : null;
+  } catch { return null; }
+}
+
 const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 
 /** Fail closed: a reviewed Act does not verify every section of that Act. */
 export function matchSource(c: Citation, sources: VerifiedSource[]): VerifiedSource | null {
   const section = (s: string) => s.replace(/\b(?:section|s\.)\s*/gi, "section ").replace(/§\s*/g, "section ");
   const key = norm(section(c.label));
-  const matches = sources.filter(s => s.reviewed_at && norm(section(s.title)) === key &&
+  const matches = sources.filter(s => s.reviewed_at && officialSourceUrl(s.source_url) && norm(section(s.title)) === key &&
     (/\b(?:NY|N\.Y\.|New York)\b/i.test(c.act) ? /new york|\bny\b/i.test(s.jurisdiction) :
       c.act.includes("Act") ? /england|united kingdom|\buk\b/i.test(s.jurisdiction) : false));
   return matches.length === 1 ? matches[0] : null;

@@ -1,3 +1,5 @@
+import { requireSession, readJson, SafeError, safeProviderFetch } from "../_shared/safety.ts";
+import { z } from "npm:zod@3.25.76";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
@@ -74,7 +76,7 @@ Content rules (mandatory):
 - Never assert that a statute or clause definitively applies to the reader's facts. Never predict outcomes.
 - Use Case File facts only as illustrative background, in conditional framing.
 - Placeholders {{Like This}} for private values, and for ALL strategic fields in the Template Outline type.
-- 5 to 8 sections in "sections". Each sectionTitle is a short noun phrase (no numbering, no colons at the end). Each sectionContent is flowing prose in complete sentences, separated into 1-4 paragraphs by blank lines (\\n\\n). No bullet characters, no dashes as list markers, no numbering, no headings within sectionContent.
+- Exactly 7 sections in "sections". Each sectionTitle is a short noun phrase (no numbering, no colons at the end). Each sectionContent is flowing prose in complete sentences, separated into 1-4 paragraphs by blank lines (\\n\\n). No bullet characters, no dashes as list markers, no numbering, no headings within sectionContent.
 - Plain ASCII only. Straight quotes, straight apostrophes, hyphens, periods. No em-dashes, smart quotes, Unicode bullets, markdown syntax, code fences.
 - No meta-commentary, no greetings, no "Here is your document", no AI self-reference. The disclaimer is rendered separately by the frontend template; do NOT include it in the payload.
 - Set needsExpertReview to true ONLY for active named court proceedings with real case numbers, or where a responsive draft would require specific legal advice.`;
@@ -89,7 +91,7 @@ Silently upgrade the draft:
 - For Template Outline drafts, restore {{placeholders}} for every strategic or negotiated field the generator may have hard-coded.
 - Remove any greeting, meta-commentary, disclaimers within the body, or first-person drafter voice. The "documentTitle" opens directly with substantive framing.
 - Convert non-ASCII: smart quotes -> straight quotes, em-dashes -> --, Unicode bullets -> hyphens. Strip any markdown syntax, code fences, HTML tags, or list characters.
-- Ensure exactly the schema shape. Ensure "sections" contains 5 to 8 entries. Ensure each "sectionContent" is flowing prose in paragraphs, no lists, no headings, no styling.
+- Ensure exactly the schema shape. Ensure "sections" contains exactly 7 entries. Ensure each "sectionContent" is flowing prose in paragraphs, no lists, no headings, no styling.
 - Return plain ASCII only inside string values. Return ONLY JSON. Only set needsExpertReview to true under the same narrow conditions as the generator.`;
 
 // ── Types ──────────────────────────────────────────────────────────
@@ -221,28 +223,18 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const authHeader = req.headers.get("authorization");
-    if (!authHeader) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    const { admin: supabase, user } = await requireSession(req);
+    const parsed = z.object({ document_type: z.enum(["overview", "checklist", "template", "comparative"]), topic: z.string().trim().min(1).max(500), chat_id: z.string().uuid().nullish(), request_id: z.string().uuid().nullish(), conversation_context: z.string().max(12000).nullish() }).strict().safeParse(await readJson(req));
+    if (!parsed.success) throw new SafeError(400, "Check the document topic and conversation details.");
+    const { document_type, topic, chat_id, request_id, conversation_context } = parsed.data;
+    if (chat_id) {
+      const { data, error } = await supabase.from("hugo_chats").select("id").eq("id", chat_id).eq("user_id", user.id).maybeSingle();
+      if (error || !data) throw new SafeError(403, "This conversation is not available to your account.");
     }
-
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-    const token = authHeader.replace("Bearer ", "");
-    const anon = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!);
-    const { data: { user }, error: authError } = await anon.auth.getUser(token);
-    if (authError || !user) {
-      return new Response(JSON.stringify({ error: "Invalid token" }), {
-        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    if (request_id) {
+      const { data, error } = await supabase.from("legal_requests").select("id").eq("id", request_id).eq("user_id", user.id).maybeSingle();
+      if (error || !data) throw new SafeError(403, "This request is not available to your account.");
     }
-
-    const body = await req.json();
-    const { document_type, topic, chat_id, request_id, conversation_context } = body;
 
     if (!document_type || !DOCUMENT_TYPES[document_type]) {
       return new Response(JSON.stringify({ error: "Invalid document_type" }), {
@@ -288,7 +280,7 @@ serve(async (req) => {
     const userPayload = `ROLE: ${docConfig.role}\nDOCUMENT TYPE: ${docConfig.label}\nCLIENT TOPIC: ${topic}\nCURRENT DATE: ${dateLabel}\n\nDRAFTING BRIEF:\n${docConfig.prompt}${caseFileBlock}\n\nEmit the JSON payload now.`;
 
     // GENERATE
-    const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const aiResponse = await safeProviderFetch("gateway", "https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -329,7 +321,7 @@ serve(async (req) => {
     }
 
     // REVIEW
-    const reviewResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const reviewResponse = await safeProviderFetch("gateway", "https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -390,8 +382,8 @@ serve(async (req) => {
   } catch (e) {
     console.error("generate-document error:", e);
     return new Response(
-      JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      JSON.stringify({ error: e instanceof SafeError ? e.message : "Document generation unavailable. Please try again." }),
+      { status: e instanceof SafeError ? e.status : 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   }
 });

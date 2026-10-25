@@ -4,6 +4,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { rememberLastChat, getOrCreateSessionId } from "@/lib/hugoMemory";
 import { fetchHugo } from "@/lib/hugoTransport";
+import { readHugoStream } from "@/lib/hugoStream";
+import { normalizeHugoText } from "@/lib/hugoContractInput";
 
 // Establish a recovery session id as soon as the hook module loads.
 try { getOrCreateSessionId(); } catch { /* SSR safe */ }
@@ -49,6 +51,8 @@ export function useHugoChat(chatId?: string | null) {
   const [messages, setMessages] = useState<HugoMessage[]>([]);
   const [loading, setLoading] = useState(false);
   const [streaming, setStreaming] = useState(false);
+  const [responseError, setResponseError] = useState<string | null>(null);
+  const sendingRef = useRef(false);
   const [currentChatId, setCurrentChatId] = useState<string | null>(chatId ?? null);
   const [currentTitle, setCurrentTitle] = useState<string>("New Chat");
   const [historyLoading, setHistoryLoading] = useState(false);
@@ -59,6 +63,8 @@ export function useHugoChat(chatId?: string | null) {
   messagesRef.current = messages;
   // Track IDs of assistant messages created in this session (not loaded from DB)
   const newAssistantIdsRef = useRef<Set<string>>(new Set());
+
+  useEffect(() => () => { abortRef.current?.abort(); }, []);
 
   // Load messages for an existing chat
   const loadMessages = useCallback(async (cId: string) => {
@@ -160,7 +166,10 @@ export function useHugoChat(chatId?: string | null) {
 
   // Stream and persist
   const sendMessage = useCallback(async (text: string, opts?: { precise?: boolean; mode?: "auto" | "blitz" | "consilium" }) => {
-    if (!text.trim() || streaming || historyLoading || !user) return;
+    if (!text.trim() || sendingRef.current || streaming || historyLoading || !user) return;
+    try { text = normalizeHugoText(text); } catch (err) { toast.error(err instanceof Error ? err.message : "Invalid message."); return { failed: true }; }
+    sendingRef.current = true;
+    setResponseError(null);
 
     let cId = currentChatId;
     const isFirst = !cId;
@@ -168,7 +177,7 @@ export function useHugoChat(chatId?: string | null) {
     // Create chat if needed
     if (!cId) {
       cId = await createChat();
-      if (!cId) return;
+      if (!cId) { sendingRef.current = false; return { failed: true }; }
     }
 
     // Add user message optimistically
@@ -181,34 +190,26 @@ export function useHugoChat(chatId?: string | null) {
     if (!savedId) {
       setMessages(prev => prev.filter(m => m.id !== userMsg.id));
       setStreaming(false);
+      sendingRef.current = false;
       toast.error("Unable to save this message. Please try again.");
       return { failed: true, chatId: cId };
     }
+    const temporaryUserId = userMsg.id;
+    setMessages(prev => prev.map(m => m.id === temporaryUserId ? { ...m, id: savedId } : m));
     userMsg.id = savedId;
 
     // Stream Hugo's response
-    const allMsgs = [...messagesRef.current, userMsg];
+    const allMsgs = [...messagesRef.current.filter(m => m.id !== savedId && m.id !== temporaryUserId), userMsg];
     const apiMessages = allMsgs.map(m => ({ role: m.role, content: m.content }));
 
+    const assistantId = crypto.randomUUID();
     try {
       const controller = new AbortController();
       abortRef.current = controller;
 
       const resp = await fetchHugo({ messages: apiMessages, chat_id: cId, precise_mode: !!opts?.precise, mode: opts?.mode ?? "auto" }, controller.signal);
 
-      if (!resp.ok) {
-        if (resp.status === 429) throw new Error("Too many requests — please wait a moment.");
-        if (resp.status === 402) throw new Error("AI credits exhausted.");
-        throw new Error("Hugo is temporarily unavailable.");
-      }
-
-      if (!resp.body) throw new Error("No response stream");
-
-      const reader = resp.body.getReader();
-      const decoder = new TextDecoder();
-      let buf = "";
       let full = "";
-      const assistantId = crypto.randomUUID();
       newAssistantIdsRef.current.add(assistantId);
 
       const updateAssistant = (text: string) => {
@@ -225,25 +226,7 @@ export function useHugoChat(chatId?: string | null) {
         });
       };
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buf += decoder.decode(value, { stream: true });
-
-        let nl: number;
-        while ((nl = buf.indexOf("\n")) !== -1) {
-          let line = buf.slice(0, nl);
-          buf = buf.slice(nl + 1);
-          if (line.endsWith("\r")) line = line.slice(0, -1);
-          if (!line.startsWith("data: ")) continue;
-          const json = line.slice(6).trim();
-          if (json === "[DONE]") break;
-          try {
-            const c = JSON.parse(json).choices?.[0]?.delta?.content;
-            if (c) { full += c; updateAssistant(full); }
-          } catch { buf = line + "\n" + buf; break; }
-        }
-      }
+      full = await readHugoStream(resp, updateAssistant, controller.signal);
 
       // Strip metrics tags and Consilium signal from the persisted response
       const wasConsilium = /\[CONSILIUM_ACTIVE\]/.test(full);
@@ -299,27 +282,18 @@ export function useHugoChat(chatId?: string | null) {
 
       return { escalated: full.includes("[ESCALATE_TO_EXPERT]"), suggestPrecise, suggestConsilium, chatId: cId };
     } catch (err: any) {
+      // Failed/partial answers never enter stored conversation context.
+      setMessages(prev => prev.filter(m => m.id !== assistantId));
+      newAssistantIdsRef.current.delete(assistantId);
       if (err.name !== "AbortError") {
-        toast.error(err.message || "Something went wrong.");
-        const errId = crypto.randomUUID();
-        newAssistantIdsRef.current.add(errId);
-        const errMsg: HugoMessage = {
-          id: errId,
-          role: "assistant",
-          content: "I'm sorry, I wasn't able to process that right now. Please try again in a moment.",
-        };
-        setMessages(prev => [...prev, errMsg]);
-        if (cId) {
-          const storedErrId = await saveMessage(cId, "assistant", errMsg.content);
-          if (storedErrId) {
-            newAssistantIdsRef.current.delete(errId);
-            setMessages(prev => prev.map(m => m.id === errId ? { ...m, id: storedErrId } : m));
-          }
-        }
+        const message = err.message || "Hugo could not complete this reply. Send a fresh request.";
+        setResponseError(message);
+        toast.error(message);
       }
-      return { escalated: false, suggestPrecise: false, suggestConsilium: false, chatId: cId };
+      return { responseFailed: true, chatId: cId };
     } finally {
       setStreaming(false);
+      sendingRef.current = false;
       abortRef.current = null;
     }
   }, [streaming, historyLoading, user, currentChatId, createChat, saveMessage, updateTitle]);
@@ -354,6 +328,8 @@ export function useHugoChat(chatId?: string | null) {
 
   // Start a new chat (reset state)
   const startNewChat = useCallback(() => {
+    abortRef.current?.abort();
+    setResponseError(null);
     loadVersionRef.current += 1;
     setHistoryLoading(false);
     setConversationUnavailable(false);
@@ -366,6 +342,7 @@ export function useHugoChat(chatId?: string | null) {
     messages,
     setMessages,
     streaming,
+    responseError,
     loading,
     historyLoading,
     conversationUnavailable,

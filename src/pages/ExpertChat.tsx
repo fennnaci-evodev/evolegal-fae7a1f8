@@ -30,7 +30,7 @@ import { HugoRecallBanner } from "@/components/HugoRecallBanner";
 import { HugoCitationChips } from "@/components/HugoCitationChips";
 import { HugoContractCard } from "@/components/HugoContractCard";
 import { looksLikeContract } from "@/lib/contractRisk";
-import { CONTRACT_MESSAGE_LIMIT, prepareContractAttachment } from "@/lib/hugoContractInput";
+import { CONTRACT_MESSAGE_LIMIT, prepareContractAttachment, readContractFile, normalizeHugoText } from "@/lib/hugoContractInput";
 const ExpertChat = () => {
   const { chatId: paramChatId } = useParams<{ chatId?: string }>();
   const [searchParams] = useSearchParams();
@@ -41,6 +41,7 @@ const ExpertChat = () => {
   const {
     messages,
     streaming,
+    responseError,
     historyLoading,
     conversationUnavailable,
     currentChatId,
@@ -71,9 +72,7 @@ const ExpertChat = () => {
   const handleContractFile = async (file?: File) => {
     if (!file) return;
     try {
-      if (!/\.(txt|md)$/i.test(file.name)) throw new Error("Attach a .txt or .md contract.");
-      if (file.size > CONTRACT_MESSAGE_LIMIT * 4) throw new Error("Contract too long — up to 30,000 characters including the audit request.");
-      setInput(prepareContractAttachment(await file.text()));
+      setInput(prepareContractAttachment(await readContractFile(file)));
       textareaRef.current?.focus();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Unable to read this file. Try another text contract.");
@@ -138,7 +137,8 @@ const ExpertChat = () => {
       return;
     }
 
-    const text = input;
+    let text: string;
+    try { text = normalizeHugoText(input); } catch (err) { toast.error(err instanceof Error ? err.message : "Invalid input."); return; }
     setInput("");
     setEditingMode(false);
     setSuggestConsilium(false);
@@ -310,7 +310,7 @@ const ExpertChat = () => {
                     exit={{ height: 0, opacity: 0 }}
                     className="text-[10px] text-muted-foreground leading-relaxed overflow-hidden"
                   >
-                    Every response is carefully reviewed by our Experts — structured with Options → Risks → Resources. You will get your answer as soon as possible. It always depends on the complexity of your case.
+                    General legal information structured around options, risks, and resources. Human expert review is separate.
                   </motion.p>
                 )}
               </AnimatePresence>
@@ -479,6 +479,8 @@ const ExpertChat = () => {
             <div ref={bottomRef} />
           </div>
 
+          {responseError && <div role="alert" className="mb-2 rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-foreground">{responseError}</div>}
+
           {/* Permanent UPL Notice — always visible, keeps bubbles clean */}
           <div className="mb-2">
             <HugoUPLNotice />
@@ -527,6 +529,7 @@ const ExpertChat = () => {
               placeholder="Enter a contract question or audit objective…"
               className="chat-input-plain flex-1 bg-transparent border-0 resize-none text-sm placeholder:text-muted-foreground focus:outline-none leading-relaxed"
               disabled={streaming || historyLoading}
+              maxLength={CONTRACT_MESSAGE_LIMIT}
               rows={1}
               style={{ maxHeight: 120, minHeight: 36 }}
             />

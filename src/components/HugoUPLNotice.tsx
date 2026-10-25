@@ -26,7 +26,7 @@ export function HugoUPLNotice({ compact = false }: { compact?: boolean }) {
         className="leading-snug text-muted-foreground/70 select-text"
         style={{ fontSize: compact ? 9.5 : 10.5, letterSpacing: "0.005em" }}
       >
-        EvoLegal provides automated legal information and frameworks for human review. Hugo does not provide individual legal advice. Fully verified cases require human lawyer QA.
+        AI-generated legal analysis, not formal legal advice. Review important decisions with a qualified lawyer.
       </p>
     </div>
   );

@@ -159,9 +159,7 @@ const SubmitRequest = () => {
       hideLoader();
 
       if (error || !data) {
-        // On error, proceed without clarification
-        console.warn("Hugo clarification unavailable, proceeding:", error);
-        await saveRequest();
+        toast.error("Hugo could not validate this submission. Please try again.");
       } else if (data.clear) {
         // Input is clear — save directly
         await saveRequest();
@@ -175,8 +173,7 @@ const SubmitRequest = () => {
     } catch (err) {
       console.error("Clarification check failed:", err);
       hideLoader();
-      // Fallback: save anyway
-      await saveRequest();
+      toast.error("Hugo could not validate this submission. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -199,7 +196,9 @@ const SubmitRequest = () => {
         },
       });
 
-      if (error || !data || data.clear) {
+      if (error || !data) {
+        toast.error("Hugo could not validate the added context. Please try again or explicitly continue without clarification.");
+      } else if (data.clear) {
         // Clear now or error — save with context
         setClarifyOpen(false);
         await saveRequest(combined);
@@ -211,8 +210,7 @@ const SubmitRequest = () => {
         await saveRequest(combined);
       }
     } catch {
-      setClarifyOpen(false);
-      await saveRequest(combined);
+      toast.error("Clarification failed. Please try again or explicitly continue without clarification.");
     } finally {
       setClarifyLoading(false);
     }

@@ -8,6 +8,7 @@ import { InlineELoader } from "@/components/InlineELoader";
 import { Send, ArrowRight, BookOpen } from "lucide-react";
 import { toast } from "sonner";
 import { fetchHugo } from "@/lib/hugoTransport";
+import { readHugoStream } from "@/lib/hugoStream";
 
 interface Message {
   id: string;
@@ -77,8 +78,8 @@ const WorkflowGuides = () => {
         [{ id: "1", role: "user" as const, content: `I'd like to go through the "${wf.title}" workflow. Please guide me step by step.` }],
         wf.systemContext
       );
-    } catch {
-      toast.error("Hugo is temporarily unavailable.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Hugo is temporarily unavailable.");
     } finally {
       setLoading(false);
     }
@@ -92,46 +93,15 @@ const WorkflowGuides = () => {
 
     const resp = await fetchHugo({ messages: apiMessages });
 
-    if (!resp.ok || !resp.body) throw new Error("Stream failed");
-
-    const reader = resp.body.getReader();
-    const decoder = new TextDecoder();
-    let textBuffer = "";
-    let assistantSoFar = "";
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      textBuffer += decoder.decode(value, { stream: true });
-
-      let newlineIndex: number;
-      while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
-        let line = textBuffer.slice(0, newlineIndex);
-        textBuffer = textBuffer.slice(newlineIndex + 1);
-        if (line.endsWith("\r")) line = line.slice(0, -1);
-        if (!line.startsWith("data: ")) continue;
-
-        const jsonStr = line.slice(6).trim();
-        if (jsonStr === "[DONE]") break;
-
-        try {
-          const parsed = JSON.parse(jsonStr);
-          const content = parsed.choices?.[0]?.delta?.content;
-          if (content) {
-            assistantSoFar += content;
-            setMessages(prev => {
-              const last = prev[prev.length - 1];
-              if (last?.role === "assistant") {
-                return prev.map((m, i) => i === prev.length - 1 ? { ...m, content: assistantSoFar } : m);
-              }
-              return [...prev, { id: Date.now().toString(), role: "assistant", content: assistantSoFar }];
-            });
-          }
-        } catch {
-          textBuffer = line + "\n" + textBuffer;
-          break;
-        }
-      }
+    const assistantId = crypto.randomUUID();
+    try {
+      await readHugoStream(resp, text => setMessages(prev => {
+        const existing = prev.some(m => m.id === assistantId);
+        return existing ? prev.map(m => m.id === assistantId ? { ...m, content: text } : m) : [...prev, { id: assistantId, role: "assistant", content: text }];
+      }));
+    } catch (err) {
+      setMessages(prev => prev.filter(m => m.id !== assistantId));
+      throw err;
     }
   }, []);
 
@@ -145,8 +115,8 @@ const WorkflowGuides = () => {
 
     try {
       await streamChat(updated, activeWorkflow.systemContext);
-    } catch {
-      toast.error("Something went wrong.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Hugo could not complete this reply.");
     } finally {
       setLoading(false);
     }
