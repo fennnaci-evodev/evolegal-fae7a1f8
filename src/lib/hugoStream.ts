@@ -28,7 +28,7 @@ export async function readHugoStream(response: Response, onText?: (text: string)
       if (signal?.aborted) throw new DOMException("Cancelled", "AbortError");
       let timer: ReturnType<typeof setTimeout> | undefined;
       const chunk = await Promise.race([reader.read(), new Promise<never>((_, reject) => {
-        timer = setTimeout(() => { void reader.cancel(); reject(new HugoStreamError("Hugo stopped responding. Send a new request when the connection is stable.", true)); }, idleMs);
+        timer = setTimeout(() => { reject(new HugoStreamError("Hugo stopped responding. Send a new request when the connection is stable.", true)); void reader.cancel(); }, idleMs);
       })]).finally(() => clearTimeout(timer));
       if (signal?.aborted) throw new DOMException("Cancelled", "AbortError");
       buffer += chunk.done ? decoder.decode() : decoder.decode(chunk.value, { stream: true });

@@ -76,7 +76,7 @@ Content rules (mandatory):
 - Never assert that a statute or clause definitively applies to the reader's facts. Never predict outcomes.
 - Use Case File facts only as illustrative background, in conditional framing.
 - Placeholders {{Like This}} for private values, and for ALL strategic fields in the Template Outline type.
-- 5 to 8 sections in "sections". Each sectionTitle is a short noun phrase (no numbering, no colons at the end). Each sectionContent is flowing prose in complete sentences, separated into 1-4 paragraphs by blank lines (\\n\\n). No bullet characters, no dashes as list markers, no numbering, no headings within sectionContent.
+- Exactly 7 sections in "sections". Each sectionTitle is a short noun phrase (no numbering, no colons at the end). Each sectionContent is flowing prose in complete sentences, separated into 1-4 paragraphs by blank lines (\\n\\n). No bullet characters, no dashes as list markers, no numbering, no headings within sectionContent.
 - Plain ASCII only. Straight quotes, straight apostrophes, hyphens, periods. No em-dashes, smart quotes, Unicode bullets, markdown syntax, code fences.
 - No meta-commentary, no greetings, no "Here is your document", no AI self-reference. The disclaimer is rendered separately by the frontend template; do NOT include it in the payload.
 - Set needsExpertReview to true ONLY for active named court proceedings with real case numbers, or where a responsive draft would require specific legal advice.`;
@@ -91,7 +91,7 @@ Silently upgrade the draft:
 - For Template Outline drafts, restore {{placeholders}} for every strategic or negotiated field the generator may have hard-coded.
 - Remove any greeting, meta-commentary, disclaimers within the body, or first-person drafter voice. The "documentTitle" opens directly with substantive framing.
 - Convert non-ASCII: smart quotes -> straight quotes, em-dashes -> --, Unicode bullets -> hyphens. Strip any markdown syntax, code fences, HTML tags, or list characters.
-- Ensure exactly the schema shape. Ensure "sections" contains 5 to 8 entries. Ensure each "sectionContent" is flowing prose in paragraphs, no lists, no headings, no styling.
+- Ensure exactly the schema shape. Ensure "sections" contains exactly 7 entries. Ensure each "sectionContent" is flowing prose in paragraphs, no lists, no headings, no styling.
 - Return plain ASCII only inside string values. Return ONLY JSON. Only set needsExpertReview to true under the same narrow conditions as the generator.`;
 
 // ── Types ──────────────────────────────────────────────────────────
@@ -232,7 +232,7 @@ serve(async (req) => {
       if (error || !data) throw new SafeError(403, "This conversation is not available to your account.");
     }
     if (request_id) {
-      const { data, error } = await supabase.from("requests").select("id").eq("id", request_id).eq("user_id", user.id).maybeSingle();
+      const { data, error } = await supabase.from("legal_requests").select("id").eq("id", request_id).eq("user_id", user.id).maybeSingle();
       if (error || !data) throw new SafeError(403, "This request is not available to your account.");
     }
 

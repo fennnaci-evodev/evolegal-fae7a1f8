@@ -424,6 +424,7 @@ serve(async (req) => {
 
     let cancelled = false;
     let terminalFailure = false;
+    let completed = false;
     let eventBuffer = "";
     const stream = new ReadableStream({
       async start(controller) {
@@ -431,7 +432,7 @@ serve(async (req) => {
           while (true) {
             let timer: ReturnType<typeof setTimeout> | undefined;
             const { done, value } = await Promise.race([reader.read(), new Promise<never>((_, reject) => {
-              timer = setTimeout(() => { void reader.cancel(); reject(new SafeError(504, "Hugo stopped responding. Send a fresh request.", true)); }, 45_000);
+              timer = setTimeout(() => { reject(new SafeError(504, "Hugo stopped responding. Send a fresh request.", true)); void reader.cancel(); }, 45_000);
             })]).finally(() => clearTimeout(timer));
             if (done) break;
             if (cancelled) return;
@@ -442,6 +443,7 @@ serve(async (req) => {
             const lines = eventBuffer.split("\n"); eventBuffer = lines.pop() ?? "";
             for (const line of lines) {
               if (!line.startsWith("data:")) continue;
+              if (line.slice(5).trim() === "[DONE]") { completed = true; continue; }
               try {
                 const event = JSON.parse(line.slice(5).trim());
                 if (event.error) {
@@ -455,6 +457,7 @@ serve(async (req) => {
             if (terminalFailure) { controller.close(); await reader.cancel(); return; }
           }
           if (cancelled || req.signal.aborted) return;
+          if (!completed) throw new SafeError(502, "Hugo’s reply was interrupted. It has not been saved as a completed answer.", true);
           controller.close();
 
           // Parse accumulated SSE into the assistant message
