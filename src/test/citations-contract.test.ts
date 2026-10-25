@@ -12,8 +12,9 @@ describe("citations", () => {
   it("marks a citation verified only when an approved source matches", () => {
     const [c] = extractCitations("Companies Act 2006 s. 172");
     expect(matchSource(c, [])).toBeNull();
-    const src = { id: "1", title: "Companies Act 2006 s. 172", jurisdiction: "England", source_url: "https://x", excerpt: "e", reviewed_at: "2026-10-01", effective_from: "2006-01-01" };
+    const src = { id: "1", title: "Companies Act 2006 s. 172", jurisdiction: "England", source_url: "https://www.legislation.gov.uk/ukpga/2006/46/section/172", excerpt: "e", reviewed_at: "2026-10-01", effective_from: "2006-01-01" };
     expect(matchSource(c, [src])?.id).toBe("1");
+    expect(matchSource(c, [{ ...src, source_url: "javascript:alert(1)" }])).toBeNull();
     expect(matchSource(c, [{ ...src, title: "Companies Act 2006" }])).toBeNull();
     expect(matchSource(c, [{ ...src, title: "Companies Act 2006 s. 173" }])).toBeNull();
     expect(matchSource(c, [{ ...src, jurisdiction: "New York" }])).toBeNull();

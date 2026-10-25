@@ -49,7 +49,7 @@ describe("Hugo conversation ownership", () => {
     expect(mocks.fetchHugo).not.toHaveBeenCalled();
   });
 
-  it.each([false, true])("keeps the complete reply visible after saving (request failure: %s)", async (requestFails) => {
+  it.each([false])("keeps the complete reply visible after saving (request failure: %s)", async (requestFails) => {
     const reply = requestFails
       ? "I'm sorry, I wasn't able to process that right now. Please try again in a moment."
       : "First sentence. Second sentence.\n\nFinal paragraph.";
@@ -93,4 +93,17 @@ describe("Hugo conversation ownership", () => {
     expect(chat?.messages.at(-1)?.id).toBe("stored-assistant");
     expect(screen.getByText(requestFails ? /Please try again in a moment/ : "Final paragraph.")).toBeVisible();
   });
+  it("clears loading without persisting a fake answer after provider failure", async () => {
+    const query = { insert: vi.fn(), select: vi.fn(), single: vi.fn().mockResolvedValue({ data: { id: "stored-user" }, error: null }) };
+    query.insert.mockReturnValue(query); query.select.mockReturnValue(query); mocks.from.mockReturnValue(query);
+    mocks.fetchHugo.mockRejectedValue(new Error("Provider access denied"));
+    const { result } = renderHook(() => useHugoChat());
+    act(() => result.current.setCurrentChatId("owned-chat"));
+    await act(async () => { await result.current.sendMessage("Test question"); });
+    expect(result.current.streaming).toBe(false);
+    expect(result.current.responseError).toBe("Provider access denied");
+    expect(result.current.messages.filter(m => m.role === "assistant")).toEqual([]);
+    expect(query.single).toHaveBeenCalledTimes(1);
+  });
+
 });

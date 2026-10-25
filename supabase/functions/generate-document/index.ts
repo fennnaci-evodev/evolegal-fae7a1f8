@@ -1,3 +1,5 @@
+import { requireSession, readJson, SafeError, safeProviderFetch } from "../_shared/safety.ts";
+import { z } from "npm:zod@3.25.76";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
@@ -221,28 +223,18 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const authHeader = req.headers.get("authorization");
-    if (!authHeader) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    const { admin: supabase, user } = await requireSession(req);
+    const parsed = z.object({ document_type: z.enum(["overview", "checklist", "template", "comparative"]), topic: z.string().trim().min(1).max(500), chat_id: z.string().uuid().nullish(), request_id: z.string().uuid().nullish(), conversation_context: z.string().max(12000).nullish() }).strict().safeParse(await readJson(req));
+    if (!parsed.success) throw new SafeError(400, "Check the document topic and conversation details.");
+    const { document_type, topic, chat_id, request_id, conversation_context } = parsed.data;
+    if (chat_id) {
+      const { data, error } = await supabase.from("hugo_chats").select("id").eq("id", chat_id).eq("user_id", user.id).maybeSingle();
+      if (error || !data) throw new SafeError(403, "This conversation is not available to your account.");
     }
-
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-    const token = authHeader.replace("Bearer ", "");
-    const anon = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!);
-    const { data: { user }, error: authError } = await anon.auth.getUser(token);
-    if (authError || !user) {
-      return new Response(JSON.stringify({ error: "Invalid token" }), {
-        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    if (request_id) {
+      const { data, error } = await supabase.from("requests").select("id").eq("id", request_id).eq("user_id", user.id).maybeSingle();
+      if (error || !data) throw new SafeError(403, "This request is not available to your account.");
     }
-
-    const body = await req.json();
-    const { document_type, topic, chat_id, request_id, conversation_context } = body;
 
     if (!document_type || !DOCUMENT_TYPES[document_type]) {
       return new Response(JSON.stringify({ error: "Invalid document_type" }), {
@@ -288,7 +280,7 @@ serve(async (req) => {
     const userPayload = `ROLE: ${docConfig.role}\nDOCUMENT TYPE: ${docConfig.label}\nCLIENT TOPIC: ${topic}\nCURRENT DATE: ${dateLabel}\n\nDRAFTING BRIEF:\n${docConfig.prompt}${caseFileBlock}\n\nEmit the JSON payload now.`;
 
     // GENERATE
-    const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const aiResponse = await safeProviderFetch("gateway", "https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -329,7 +321,7 @@ serve(async (req) => {
     }
 
     // REVIEW
-    const reviewResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const reviewResponse = await safeProviderFetch("gateway", "https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -390,8 +382,8 @@ serve(async (req) => {
   } catch (e) {
     console.error("generate-document error:", e);
     return new Response(
-      JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      JSON.stringify({ error: e instanceof SafeError ? e.message : "Document generation unavailable. Please try again." }),
+      { status: e instanceof SafeError ? e.status : 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   }
 });
