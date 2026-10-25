@@ -1,5 +1,7 @@
 # Roadmap
 
+- [ ] Audit and harden Hugo stream completion, timeouts, safe retries, document validation, secret isolation and legal/citation safeguards; run regression and authenticated checks and report remaining security risks.
+
 - [x] Verify updated Hugo signed in: text attachments, pasted contracts, saved replies, and UK/NY unverified citation popovers work. Fixed instruction contamination in clause excerpts, decoded-character limits and empty attachments, unsafe citation matching, 16px/10px chat blurs, and missing recovery-table requests. 34 regression tests pass. Headless frames varied 16.7–33.3ms median, so real-laptop 60 FPS is not established; verified-source popovers and legal accuracy remain unverified.
 
 - [x] Replace the heavy Hugo chat sphere with a custom lightweight continuous signature; full-page loaders unchanged. Isolated browser rendering verified at phone/desktop sizes, light theme and reduced motion; no sphere download. Live chat waiting state not exercised.
