@@ -1,7 +1,6 @@
 import { z } from "npm:zod@3.25.76";
-import { requireSession, readJson, SafeError } from "../_shared/safety.ts";
-import { complete } from "../hugo-chat/provider.ts";
-import { hugoPersonality } from "../hugo-chat/personality.ts";
+import { requireSession, readJson, SafeError, safeProviderFetch } from "../_shared/safety.ts";
+import { hugoPersonality } from "../_shared/hugoPersonality.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
@@ -41,7 +40,13 @@ serve(async (req) => {
     await requireSession(req);
     const body = z.object({ topic: z.string().trim().min(1).max(200), description: z.string().trim().min(1).max(10000), facts: z.string().max(10000).optional(), state: z.string().max(120).optional() }).strict().safeParse(await readJson(req));
     if (!body.success) throw new SafeError(400, "Check the topic, description and facts before submitting.");
-    const content = await complete({ tier: "main", json: true, system: `${hugoPersonality("auto", false, 1)}\n${SYSTEM_PROMPT}`, messages: [{ role: "user", content: JSON.stringify(body.data) }] });
+    const response = await safeProviderFetch("gateway", "https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST", headers: { Authorization: `Bearer ${Deno.env.get("LOVABLE_API_KEY")}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ model: "google/gemini-3-flash-preview", messages: [{ role: "system", content: `${hugoPersonality("auto", false, 1)}\n${SYSTEM_PROMPT}` }, { role: "user", content: JSON.stringify(body.data) }], response_format: { type: "json_object" } }),
+    });
+    const providerData = await response.json();
+    const content = providerData.choices?.[0]?.message?.content;
+    if (!content?.trim() || providerData.choices?.[0]?.message?.refusal) throw new SafeError(422, "The provider returned no clarification or declined the request.");
     let parsed;
     try { parsed = JSON.parse(content ?? ""); } catch { throw new SafeError(502, "Clarification could not be read. Please retry your submission."); }
     const result = z.object({ clear: z.boolean(), message: z.string().max(2000).optional() }).refine(v => v.clear || Boolean(v.message?.trim())).safeParse(parsed);
