@@ -26,3 +26,4 @@
 - Read all Hugo SSE through `src/lib/hugoStream.ts`; only terminally completed responses enter message storage or memory, preventing truncated or fabricated fallback answers.
 - Centralize server request bounds, verified-session throttles and provider failure handling in `supabase/functions/_shared/safety.ts`; only transient 429/5xx receive one delayed retry and permanent provider blocks persist until access is restored and an operator clears the pause.
 - Fetch monitored legal text only from allowlisted HTTPS publishers with no redirects and bounded time/bytes; source rows are untrusted and cannot authorize network destinations.
+- Wrap full Hugo chat routes in a render error boundary with an explicit reload action so rendering failures never leave a blank or frozen interface.

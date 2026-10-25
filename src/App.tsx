@@ -13,6 +13,7 @@ import { InitialLoader } from "@/components/InitialLoader";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
+import { HugoErrorBoundary } from "@/components/HugoErrorBoundary";
 import ExpertChat from "./pages/ExpertChat";
 import UserChat from "./pages/UserChat";
 import Library from "./pages/Library";
@@ -65,8 +66,8 @@ const App = () => {
                 <Route path="/blog/tenant-landlord-basics" element={<ArticleTenantLandlord />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/dashboard/chat" element={<ExpertChat />} />
-                <Route path="/dashboard/hugo/:chatId" element={<ExpertChat />} />
+                <Route path="/dashboard/chat" element={<HugoErrorBoundary><ExpertChat /></HugoErrorBoundary>} />
+                <Route path="/dashboard/hugo/:chatId" element={<HugoErrorBoundary><ExpertChat /></HugoErrorBoundary>} />
                 <Route path="/dashboard/chat/:requestId" element={<UserChat />} />
                 <Route path="/dashboard/library" element={<Library />} />
                 <Route path="/dashboard/submit" element={<SubmitRequest />} />
