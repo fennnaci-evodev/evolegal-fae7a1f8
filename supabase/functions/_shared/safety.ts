@@ -33,7 +33,10 @@ export async function boundedText(response: Response, limit: number): Promise<st
   const decoder = new TextDecoder();
   try {
     while (true) {
-      const { done, value } = await reader.read();
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      const { done, value } = await Promise.race([reader.read(), new Promise<never>((_, reject) => {
+        timer = setTimeout(() => { reject(new SafeError(408, "Reading the content timed out.")); void reader.cancel(); }, 15_000);
+      })]).finally(() => clearTimeout(timer));
       if (done) break;
       size += value.byteLength;
       if (size > limit) throw new SafeError(413, "Content exceeds the safe size limit.");
@@ -76,7 +79,9 @@ export async function safeProviderFetch(provider: string, url: string, init: Req
     const message = typeof payload.message === "string" ? payload.message : typeof payload.error?.message === "string" ? payload.error.message : typeof payload.error === "string" ? payload.error : "The provider could not complete this request.";
     const status = response.status;
     const type = payload.type || payload.error?.type;
-    const permanent = [401, 402, 403, 404].includes(status) || payload.props?.retryable === false || /account|billing|configuration|quota.*exhausted/i.test(type || "");
+    const refusal = /content.*filter|refusal|safety/i.test(type || "");
+    const permanent = !refusal && ([401, 402, 403, 404].includes(status) || payload.props?.retryable === false || /account|billing|configuration|quota.*exhausted/i.test(type || ""));
+    if (refusal) throw new SafeError(status, message);
     if (permanent) { await blockProvider(provider, status, message); throw new SafeError(status, message); }
     const retryable = status === 429 || status >= 500;
     if (retryable && attempt === 0) {

@@ -1,4 +1,4 @@
-import { safeProviderFetch, SafeError } from "../_shared/safety.ts";
+import { safeProviderFetch, SafeError, blockProvider } from "../_shared/safety.ts";
 /**
  * Provider boundary for Hugo. Callers pass a provider-neutral request and always
  * receive OpenAI-style output (JSON `choices[0].message.content` or SSE
@@ -102,7 +102,7 @@ export function anthropicToOpenAiSse(body: ReadableStream<Uint8Array>): Readable
   const dec = new TextDecoder();
   let buf = "";
   return body.pipeThrough(new TransformStream<Uint8Array, Uint8Array>({
-    transform(chunk, controller) {
+    async transform(chunk, controller) {
       buf += dec.decode(chunk, { stream: true });
       const lines = buf.split("\n");
       buf = lines.pop() ?? "";
@@ -113,8 +113,10 @@ export function anthropicToOpenAiSse(body: ReadableStream<Uint8Array>): Readable
           if (ev.type === "content_block_delta" && ev.delta?.type === "text_delta") {
             controller.enqueue(enc.encode(`data: ${JSON.stringify({ choices: [{ delta: { content: ev.delta.text } }] })}\n\n`));
           } else if (ev.type === "error") {
+            if (ev.error?.type === "permission_error") await blockProvider("anthropic", 403, ev.error.message || "Provider access denied.");
             controller.enqueue(enc.encode(`data: ${JSON.stringify({ error: { message: ev.error?.message || "The provider stream failed.", retryable: false } })}\n\n`));
             controller.terminate();
+            return;
           } else if (ev.type === "message_stop") {
             controller.enqueue(enc.encode("data: [DONE]\n\n"));
           }

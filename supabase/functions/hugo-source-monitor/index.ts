@@ -17,7 +17,7 @@ async function analyseImpact(title: string, before: string, after: string, effec
   const key = Deno.env.get("LOVABLE_API_KEY");
   if (!key) return { text: null, stop: 401 };
   let res: Response;
-  try { res = await safeProviderFetch("source-monitor", "https://ai.gateway.lovable.dev/v1/responses", {
+  try { res = await safeProviderFetch("gateway", "https://ai.gateway.lovable.dev/v1/responses", {
     method: "POST",
     headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
     body: JSON.stringify({

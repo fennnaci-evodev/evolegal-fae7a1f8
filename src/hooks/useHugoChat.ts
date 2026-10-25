@@ -194,10 +194,12 @@ export function useHugoChat(chatId?: string | null) {
       toast.error("Unable to save this message. Please try again.");
       return { failed: true, chatId: cId };
     }
+    const temporaryUserId = userMsg.id;
+    setMessages(prev => prev.map(m => m.id === temporaryUserId ? { ...m, id: savedId } : m));
     userMsg.id = savedId;
 
     // Stream Hugo's response
-    const allMsgs = [...messagesRef.current.filter(m => m.id !== savedId && m.id !== userMsg.id), userMsg];
+    const allMsgs = [...messagesRef.current.filter(m => m.id !== savedId && m.id !== temporaryUserId), userMsg];
     const apiMessages = allMsgs.map(m => ({ role: m.role, content: m.content }));
 
     const assistantId = crypto.randomUUID();
