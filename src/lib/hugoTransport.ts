@@ -1,49 +1,36 @@
 import { supabase } from "@/integrations/supabase/client";
+import { readHugoStream } from "@/lib/hugoStream";
 
-/** All Hugo requests use the user's session, never the public application key. */
+export class HugoRequestError extends Error {
+  constructor(message: string, public status: number, public retryable: boolean) { super(message); }
+}
+/** Retries live on the server only; never duplicate a provider attempt from the browser. */
 export async function fetchHugo(body: unknown, signal?: AbortSignal): Promise<Response> {
   const { data, error } = await supabase.auth.getSession();
-  if (error || !data.session?.access_token) throw new Error("Please sign in to continue with Hugo.");
-  const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/hugo-chat`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${data.session.access_token}` },
-    body: JSON.stringify(body),
-    signal,
-  });
-  if (!response.ok) {
-    const payload = await response.json().catch(() => null);
-    throw new Error(payload?.error || "Hugo is temporarily unavailable.");
-  }
-  return response;
-}
-
-export async function fetchHugoReply(message: string): Promise<string> {
-  const response = await fetchHugo({ message });
-  if (!response.body) throw new Error("No response stream.");
-  const reader = response.body.getReader();
-  const decoder = new TextDecoder();
-  let buffer = "";
-  let reply = "";
+  if (error || !data.session?.access_token) throw new HugoRequestError("Please sign in to continue with Hugo.", 401, false);
+  const controller = new AbortController();
+  const abort = () => controller.abort();
+  signal?.addEventListener("abort", abort, { once: true });
+  if (signal?.aborted) controller.abort();
+  const timer = setTimeout(() => controller.abort(), 90_000);
   try {
-    while (true) {
-      const { value, done } = await reader.read();
-      if (done) break;
-      buffer += decoder.decode(value, { stream: true });
-      let boundary: number;
-      while ((boundary = buffer.indexOf("\n")) !== -1) {
-        const line = buffer.slice(0, boundary).trim();
-        buffer = buffer.slice(boundary + 1);
-        if (!line.startsWith("data:")) continue;
-        const json = line.slice(5).trim();
-        if (json === "[DONE]") continue;
-        const event = JSON.parse(json);
-        if (event.error) throw new Error(event.error.message || "Hugo could not complete this response.");
-        reply += event.choices?.[0]?.delta?.content || "";
-      }
+    const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/hugo-chat`, {
+      method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${data.session.access_token}` },
+      body: JSON.stringify(body), signal: controller.signal,
+    });
+    if (!response.ok) {
+      const payload = await response.json().catch(() => null);
+      throw new HugoRequestError(payload?.error?.message || payload?.error || payload?.message || "Hugo is temporarily unavailable.", response.status,
+        payload?.retryable !== false && (response.status === 429 || response.status >= 500));
     }
-  } finally {
-    await reader.cancel().catch(() => undefined);
-    reader.releaseLock();
-  }
+    return response;
+  } catch (err) {
+    if (signal?.aborted) throw new DOMException("Cancelled", "AbortError");
+    if (err instanceof HugoRequestError) throw err;
+    throw new HugoRequestError(controller.signal.aborted ? "Hugo timed out. Check your connection and send a fresh request." : "Could not reach Hugo. Check your connection and send a fresh request.", 0, true);
+  } finally { clearTimeout(timer); signal?.removeEventListener("abort", abort); }
+}
+export async function fetchHugoReply(message: string): Promise<string> {
+  const reply = await readHugoStream(await fetchHugo({ message }));
   return reply.replace(/<!--METRICS:.*?-->/s, "").replace(/\[(?:CONSILIUM_ACTIVE|SUGGEST_CONSILIUM|SUGGEST_PRECISE_MODE)\]/g, "").trim();
 }

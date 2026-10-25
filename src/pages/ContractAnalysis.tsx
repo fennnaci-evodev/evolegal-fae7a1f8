@@ -11,6 +11,7 @@ import { filterRiskClauses, riskDisclaimer, riskLabels, sampleAnalysis, sampleSe
 import { exportRiskReport } from "@/lib/exportRiskReport";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { readContractFile } from "@/lib/hugoContractInput";
 
 const severityStyles: Record<ClauseSeverity, string> = {
   Green: "text-risk-safe border-risk-safe/30 bg-risk-safe/5",
@@ -44,13 +45,17 @@ export default function ContractAnalysis() {
 
   const handleUpload = async (file?: File) => {
     if (!file) return;
-    const isPdf = file.type === "application/pdf" || /\.pdf$/i.test(file.name);
-    const isText = /\.(txt|md)$/i.test(file.name);
-    if (!isPdf && !isText) { toast.error("Choose a PDF or text document."); return; }
-    if (file.size > 20 * 1024 * 1024) { toast.error("Choose a document under 20 MB."); return; }
-    setSelected(null);
-    setUpload(isPdf ? { name: file.name, url: URL.createObjectURL(file) } : { name: file.name, text: await file.text() });
-    toast.success("Document opened locally. Analysis is not connected yet.");
+    try {
+      const isPdf = /\.pdf$/i.test(file.name);
+      if (isPdf && file.type && file.type !== "application/pdf") throw new Error("PDF content type does not match its filename.");
+      if (!file.size) throw new Error("This document is empty.");
+      if (file.size > 15 * 1024 * 1024) throw new Error("Choose a document under 15 MB.");
+      if (isPdf && !new TextDecoder().decode(await file.slice(0, 5).arrayBuffer()).startsWith("%PDF-")) throw new Error("This file is not a valid PDF document.");
+      const opened = isPdf ? { name: file.name, url: URL.createObjectURL(file) } : { name: file.name, text: await readContractFile(file) };
+      setSelected(null);
+      setUpload(opened);
+      toast.success("Document opened locally. Analysis is not connected yet.");
+    } catch (err) { toast.error(err instanceof Error ? err.message : "Could not parse this document. Try a valid PDF or text contract."); }
   };
   const openClause = (clause: RiskClause) => {
     setSelected(clause);

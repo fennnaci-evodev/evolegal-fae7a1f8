@@ -4,12 +4,14 @@ import { BookOpen, ShieldCheck, ShieldAlert, ExternalLink } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { extractCitations, matchSource, type VerifiedSource } from "@/lib/citations";
+import { extractCitations, matchSource, officialSourceUrl, type VerifiedSource } from "@/lib/citations";
 
 export function useVerifiedSources() {
   return useQuery({
     queryKey: ["verified-hugo-citations"],
-    staleTime: 10 * 60_000,
+    staleTime: 0,
+    retry: false,
+    refetchInterval: 60_000,
     queryFn: async () => {
       const { data, error } = await (supabase.rpc as any)("list_verified_hugo_citations");
       if (error) return [] as VerifiedSource[];
@@ -50,7 +52,7 @@ export function HugoCitationChips({ content }: { content: string }) {
                     {src.jurisdiction} · Reviewed {src.reviewed_at ? new Date(src.reviewed_at).toLocaleDateString() : "—"}
                   </p>
                   <blockquote className="border-l-2 border-primary/40 pl-2 text-muted-foreground line-clamp-6">{src.excerpt}</blockquote>
-                  <a href={src.source_url} target="_blank" rel="noreferrer noopener" className="inline-flex items-center gap-1 text-primary underline underline-offset-2">
+                  <a href={officialSourceUrl(src.source_url) ?? undefined} target="_blank" rel="noreferrer noopener" className="inline-flex items-center gap-1 text-primary underline underline-offset-2">
                     Official text <ExternalLink className="h-3 w-3" />
                   </a>
                 </>
