@@ -1,6 +1,10 @@
 /** Official machine-readable XML for legislation.gov.uk and Find Case Law pages. */
 export function dataXmlUrl(sourceUrl: string): string {
-  return sourceUrl.replace(/\/+$/, "") + "/data.xml";
+  const url = new URL(sourceUrl);
+  if (url.protocol !== "https:" || url.username || url.password || !["legislation.gov.uk", "www.legislation.gov.uk", "caselaw.nationalarchives.gov.uk"].includes(url.hostname) || url.port) throw new Error("Unsupported official source URL");
+  url.search = ""; url.hash = "";
+  url.pathname = url.pathname.replace(/\/+$/, "") + "/data.xml";
+  return url.href;
 }
 const decode = (s: string) => s.replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;|&apos;/g, "'");
 /** Keeps only the legal body so publisher metadata timestamps do not trigger false changes. */

@@ -1,3 +1,5 @@
+import { requireSession, readJson, safeProviderFetch, SafeError } from "../_shared/safety.ts";
+import { z } from "npm:zod@3.25.76";
 // McCloder — System Guardian & Improvement Agent (analysis-only)
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
@@ -8,9 +10,9 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY") ?? "";
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
+const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 
 const GUARDIAN_PROMPT = `You are McCloder, the autonomous System Guardian and Improvement Agent of EvoLegal.
 
@@ -51,7 +53,7 @@ const REVIEW_PROMPT = `You are McCloder reviewing a code snippet for EvoLegal. I
 }`;
 
 async function callAI(systemPrompt: string, userPrompt: string) {
-  const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+  const res = await safeProviderFetch("gateway", "https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -67,16 +69,12 @@ async function callAI(systemPrompt: string, userPrompt: string) {
     }),
   });
 
-  if (!res.ok) {
-    const body = await res.text();
-    throw new Error(`AI gateway ${res.status}: ${body.slice(0, 300)}`);
-  }
   const data = await res.json();
   const content = data.choices?.[0]?.message?.content ?? "{}";
   try {
     return JSON.parse(content);
   } catch {
-    return { summary: "Parse error", raw: content };
+    throw new SafeError(502, "The assessment response could not be validated.");
   }
 }
 
@@ -102,7 +100,7 @@ async function gatherSystemSignals() {
       ethics_flag_count: (data ?? []).filter((r: any) => r.ethics_flags && r.ethics_flags !== "none").length,
       top_weakest: topWeakest(data),
     };
-  } catch (e: any) { signals.hugo_metrics = { error: String(e?.message ?? e) }; }
+  } catch (e: any) { signals.hugo_metrics = { error: e instanceof SafeError ? e.message : "Assessment unavailable." }; }
 
   try {
     const { data, error } = await admin.from("hugo_feedback" as any).select("rating").gte("created_at", since);
@@ -114,12 +112,12 @@ async function gatherSystemSignals() {
         negative: arr.filter(f => f.rating === "negative").length,
       };
     } else { signals.feedback = { error: error.message }; }
-  } catch (e: any) { signals.feedback = { error: String(e?.message ?? e) }; }
+  } catch (e: any) { signals.feedback = { error: e instanceof SafeError ? e.message : "Assessment unavailable." }; }
 
   try {
     const { count, error } = await admin.from("requests").select("id", { count: "exact", head: true }).gte("created_at", since);
     signals.requests_7d = error ? { error: error.message } : count;
-  } catch (e: any) { signals.requests_7d = { error: String(e?.message ?? e) }; }
+  } catch (e: any) { signals.requests_7d = { error: e instanceof SafeError ? e.message : "Assessment unavailable." }; }
 
   try {
     const { count: pending } = await admin.from("requests").select("id", { count: "exact", head: true }).eq("status", "pending");
@@ -149,7 +147,10 @@ function topWeakest(rows: any[] | null) {
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   try {
-    const body = await req.json().catch(() => ({}));
+    await requireSession(req, true);
+    const parsed = z.object({ action: z.enum(["assess", "generate_pr", "review"]).default("assess"), code: z.string().max(18000).optional(), context: z.string().max(1000).optional(), prior_lessons: z.array(z.string().max(1000)).max(15).optional(), report: z.record(z.unknown()).optional(), signals: z.record(z.unknown()).optional() }).strict().safeParse(await readJson(req, 80_000));
+    if (!parsed.success) throw new SafeError(400, "Invalid assessment request.");
+    const body = parsed.data;
     const action = body.action ?? "assess";
 
     if (action === "assess") {
@@ -226,8 +227,8 @@ Return the JSON report.`;
       status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e: any) {
-    return new Response(JSON.stringify({ ok: false, error: String(e?.message ?? e) }), {
-      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    return new Response(JSON.stringify({ ok: false, error: e instanceof SafeError ? e.message : "Assessment unavailable." }), {
+      status: e instanceof SafeError ? e.status : 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });
