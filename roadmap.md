@@ -1,5 +1,7 @@
 # Roadmap
 
+- [ ] Implement persistent owner-scoped in-chat contract audits, 22 MiB text input, expandable findings, clause redlines, and authenticated verification.
+
 - [x] Harden database administrator boundaries and stored-role verification. Private notes isolated; protected request mutations and expert impersonation denied; privileged edge requests return 403. Live standard/admin direct-API checks and Workdesk save/read-back passed; 90 tests, four Deno checks and preview build OK. Existing approved-source, publishing and provider blockers below remain unchanged.
 
 - [x] Verify administrator local viewing and standard-user document boundaries: admin opened 180,021 characters unscored and read an owned stored PDF; standard user redirected from admin viewer, read no foreign history rows and could not download the admin PDF. No roles changed. No stored-history UI or cross-owner admin PDF flow exists; storage remains owner-only.
