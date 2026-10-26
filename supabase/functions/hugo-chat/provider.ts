@@ -1,3 +1,5 @@
+export * from "../_shared/hugoProvider.ts";
+/* Legacy implementation retained below temporarily; shared module is authoritative. */
 import { safeProviderFetch, SafeError, blockProvider } from "../_shared/safety.ts";
 /**
  * Provider boundary for Hugo. Callers pass a provider-neutral request and always
