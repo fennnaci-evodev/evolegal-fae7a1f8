@@ -30,10 +30,10 @@ import { HugoRecallBanner } from "@/components/HugoRecallBanner";
 import { HugoCitationChips } from "@/components/HugoCitationChips";
 import { HugoContractCard } from "@/components/HugoContractCard";
 import { looksLikeContract } from "@/lib/contractRisk";
-import { CONTRACT_MESSAGE_LIMIT, prepareContractAttachment, readContractFile, normalizeHugoText } from "@/lib/hugoContractInput";
+import { CONTRACT_MESSAGE_LIMIT, normalizeHugoText } from "@/lib/hugoContractInput";
 import { useContractAudits } from "@/hooks/useContractAudits";
 import { ContractRiskSummaryCard } from "@/components/ContractRiskSummaryCard";
-import { readAuditFile, normalizeAuditText, CONTRACT_AUDIT_BYTES } from "@/lib/contractAuditInput";
+import { readAuditFile, normalizeAuditText } from "@/lib/contractAuditInput";
 const ExpertChat = () => {
   const { chatId: paramChatId } = useParams<{ chatId?: string }>();
   const [searchParams] = useSearchParams();
