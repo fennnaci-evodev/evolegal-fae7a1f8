@@ -64,6 +64,13 @@
       "when": 1793039342490,
       "tag": "0008_enforce_admin_boundaries",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1793039407257,
+      "tag": "0009_remove_private_notes_anonymous_grants",
+      "breakpoints": true
     }
   ]
 }
