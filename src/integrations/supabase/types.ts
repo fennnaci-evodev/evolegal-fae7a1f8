@@ -437,6 +437,32 @@ export type Database = {
           },
         ]
       }
+      legal_request_admin_notes: {
+        Row: {
+          notes: string
+          request_id: string
+          updated_at: string
+        }
+        Insert: {
+          notes?: string
+          request_id: string
+          updated_at?: string
+        }
+        Update: {
+          notes?: string
+          request_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "legal_request_admin_notes_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: true
+            referencedRelation: "legal_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       legal_requests: {
         Row: {
           admin_notes: string | null
@@ -600,6 +626,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_admin: { Args: never; Returns: boolean }
       list_verified_hugo_citations: {
         Args: never
         Returns: {
