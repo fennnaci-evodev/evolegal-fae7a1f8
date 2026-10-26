@@ -1,5 +1,7 @@
 # Roadmap
 
+- [ ] Harden database administrator boundaries and stored-role verification; deploy and test privileged edge denials while preserving owned user workflows.
+
 - [x] Verify administrator local viewing and standard-user document boundaries: admin opened 180,021 characters unscored and read an owned stored PDF; standard user redirected from admin viewer, read no foreign history rows and could not download the admin PDF. No roles changed. No stored-history UI or cross-owner admin PDF flow exists; storage remains owner-only.
 - [x] Patch npm advisories: fresh synchronized npm lock audit reports zero findings; patched Router/Vite/Vitest/Zod and compatible transitive dependencies. 84 client and seven provider/request tests pass; four functions compile and deploy. Real chat, clarification and seven-section long-context generation return 200.
 - [ ] Complete approved-source citation verification. Live reply and unverified chip/popover persisted after reload; request returned 200 in 9.2 seconds without 429/timeout or page errors. Blocked: the authenticated citation RPC returns zero eligible sources for both roles; genuine legal review is required before a verified badge can be tested.
