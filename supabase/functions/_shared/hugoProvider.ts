@@ -13,6 +13,7 @@ export interface ProviderRequest {
   messages: ChatTurn[];
   temperature?: number;
   json?: boolean;
+  outputSchema?: Record<string, unknown>;
   signal?: AbortSignal;
 }
 
@@ -42,7 +43,7 @@ export function toAnthropicMessages(messages: ChatTurn[]): ChatTurn[] {
 }
 
 function callAnthropic(req: ProviderRequest, stream: boolean) {
-  const system = req.json ? `${req.system}\n\nRespond with a single valid JSON object only.` : req.system;
+  const system = req.json ? `${req.system}\n\nRespond with a single valid JSON object only.${req.outputSchema ? ` Required JSON schema: ${JSON.stringify(req.outputSchema)}` : ""}` : req.system;
   return safeProviderFetch("anthropic", "https://api.anthropic.com/v1/messages", {
     method: "POST",
     signal: req.signal,
@@ -72,7 +73,7 @@ function callGateway(req: ProviderRequest, stream: boolean) {
       messages: [{ role: "system", content: req.system }, ...req.messages],
       temperature: req.temperature,
       stream,
-      ...(req.json ? { response_format: { type: "json_object" } } : {}),
+      ...(req.outputSchema ? { response_format: { type: "json_schema", json_schema: { name: "contract_audit", strict: true, schema: req.outputSchema } } } : req.json ? { response_format: { type: "json_object" } } : {}),
     }),
   });
 }
