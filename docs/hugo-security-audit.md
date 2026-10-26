@@ -1,5 +1,16 @@
 # EvoLegal / Hugo security audit — 25 October 2026
 
+## Administrator boundary hardening — 26 October 2026
+
+- Applied caller-bound `is_admin()` role verification with a fixed empty search path and no anonymous execution. Authority remains protected `user_roles`, never profile/auth metadata.
+- Administrative source/history/metrics/role/safety tables and private notes enforce RLS; removed inherited anonymous table privileges and dangerous authenticated TRUNCATE/TRIGGER/REFERENCES grants. Metrics and immutable review history are read-only to authenticated callers, with administrator-only reads.
+- Moved private request notes out of user-readable request rows into an administrator-only store, backfilled existing notes and cleared/deprecated the old field. Workdesk uses the new store. A database trigger rejects user changes to status, assignment, responses and audit fields; initial submission audit entries are created by the database before automatic assignment.
+- Owner message inserts require `sender_role=user`, preventing expert impersonation. Explicit resulting-row owner checks were added for requests, chats, profiles and feedback. The existing chat/profile UPDATE policies implicitly inherited USING as WITH CHECK; these additions make that boundary explicit, not a newly discovered ownership exploit.
+- Deployed hugo-chat, hugo-clarify, generate-document and McCloder. Missing/invalid sessions now return 403; privileged scopes/metrics require the caller-JWT database predicate. Regular own-user clarification, chat and document generation remain permitted. Foreign request document generation requires stored admin authorization; foreign chat continuation remains forbidden for administrators too.
+- Live standard-user API tests: no rows exposed from sources, changes, reviews, metrics or private notes; role/metric/note writes returned 403; protected request-field mutations and expert impersonation returned 403; owner request edits and user messages succeeded. All three requested functions denied privileged standard-user, missing-session and invalid-session calls with 403.
+- Live administrator checks: database predicate true; metrics 200; cross-owner request status update succeeded; private notes saved through Workdesk and read back, with zero page errors. Standard owner could not read the private note through either store. Administrator clarification and cross-owner request document generation returned 200. Temporary test request/messages/notes were removed afterward.
+- 90 client/regression tests passed, all four affected functions passed Deno checks, and preview build OK. RLS SELECT denials deliberately return filtered empty rows; PostgreSQL permission failures use SQLSTATE 42501 (mapped to 403 for signed-in writes), not an HTTP status embedded in a policy. No contract-audit storage table exists: the local viewer remains unscored and local, so it cannot be protected by database RLS. No claim of exhaustive penetration testing or immediate revocation of previously issued document bearer URLs.
+
 ## Implemented
 - Verified sessions for clarification and document generation; stored administrator roles for McCloder. Private document history requires chat/request ownership.
 - Server-owned, shared request throttle (15 requests per minute per user), explicit grants and RLS-protected safety state.
