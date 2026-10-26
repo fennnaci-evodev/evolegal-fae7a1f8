@@ -80,6 +80,60 @@ export type Database = {
         }
         Relationships: []
       }
+      hugo_contract_audits: {
+        Row: {
+          analysis: Json | null
+          chat_id: string
+          created_at: string
+          error_message: string | null
+          file_name: string
+          file_path: string
+          id: string
+          message_id: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          analysis?: Json | null
+          chat_id: string
+          created_at?: string
+          error_message?: string | null
+          file_name: string
+          file_path: string
+          id?: string
+          message_id?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          analysis?: Json | null
+          chat_id?: string
+          created_at?: string
+          error_message?: string | null
+          file_name?: string
+          file_path?: string
+          id?: string
+          message_id?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hugo_contract_audits_chat_id_fkey"
+            columns: ["chat_id"]
+            isOneToOne: false
+            referencedRelation: "hugo_chats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hugo_contract_audits_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "hugo_messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       hugo_feedback: {
         Row: {
           chat_id: string
