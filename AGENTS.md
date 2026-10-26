@@ -30,3 +30,4 @@
 - Fetch monitored legal text only from allowlisted HTTPS publishers with no redirects and bounded time/bytes; source rows are untrusted and cannot authorize network destinations.
 - Wrap full Hugo chat routes in a render error boundary with an explicit reload action so rendering failures never leave a blank or frozen interface.
 - Keep browser and edge request validation on patched Zod 4 APIs, with explicit record key schemas; npm dependency updates do not update Deno's pinned imports.
+- Keep Bun and npm locks synchronized after dependency patches; constrain selector-parser and esbuild to patched releases for legacy tooling chains and rerun tests before claiming a clean advisory audit.
