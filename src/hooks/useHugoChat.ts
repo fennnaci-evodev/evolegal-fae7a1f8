@@ -349,6 +349,8 @@ export function useHugoChat(chatId?: string | null) {
     currentChatId,
     currentTitle,
     sendMessage,
+    createChat,
+    saveMessage,
     editLastMessage,
     startNewChat,
     loadMessages,
