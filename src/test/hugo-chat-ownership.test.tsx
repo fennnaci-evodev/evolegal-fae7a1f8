@@ -90,7 +90,7 @@ describe("Hugo conversation ownership", () => {
       await sending;
     });
     expect(chat?.streaming).toBe(false);
-    expect(chat?.messages.at(-1)?.id).toBe("stored-assistant");
+    expect(chat?.messages[chat.messages.length - 1]?.id).toBe("stored-assistant");
     expect(screen.getByText(requestFails ? /Please try again in a moment/ : "Final paragraph.")).toBeVisible();
   });
   it("clears loading without persisting a fake answer after provider failure", async () => {

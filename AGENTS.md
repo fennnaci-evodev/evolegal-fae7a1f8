@@ -29,3 +29,4 @@
 - Centralize server request bounds, verified-session throttles and provider failure handling in `supabase/functions/_shared/safety.ts`; only transient 429/5xx receive one delayed retry and permanent provider blocks persist until access is restored and an operator clears the pause.
 - Fetch monitored legal text only from allowlisted HTTPS publishers with no redirects and bounded time/bytes; source rows are untrusted and cannot authorize network destinations.
 - Wrap full Hugo chat routes in a render error boundary with an explicit reload action so rendering failures never leave a blank or frozen interface.
+- Keep browser and edge request validation on patched Zod 4 APIs, with explicit record key schemas; npm dependency updates do not update Deno's pinned imports.
