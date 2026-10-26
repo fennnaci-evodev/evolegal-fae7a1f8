@@ -4,8 +4,10 @@ import { readContractViewerFile } from "@/lib/contractViewerInput";
 import { normalizeHugoText } from "@/lib/hugoContractInput";
 
 function fileFrom(bytes: Uint8Array, name = "contract.txt", type = "text/plain"): File {
-  const file = new File([bytes], name, { type });
-  Object.defineProperty(file, "arrayBuffer", { value: async () => bytes.buffer });
+  const buffer = new ArrayBuffer(bytes.byteLength);
+  new Uint8Array(buffer).set(bytes);
+  const file = new File([buffer], name, { type });
+  Object.defineProperty(file, "arrayBuffer", { value: async () => buffer });
   return file;
 }
 const textFile = (text: string) => fileFrom(new TextEncoder().encode(text));
