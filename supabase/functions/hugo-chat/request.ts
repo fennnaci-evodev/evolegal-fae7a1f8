@@ -4,6 +4,7 @@ const safeText = z.string().min(1).max(30000).transform(s => s.replace(/^\uFEFF/
 const message = z.object({ role: z.enum(["user", "assistant"]), content: safeText });
 export const HugoBodySchema = z.object({
   action: z.enum(["chat", "generate_title", "recall_memory", "metrics_summary"]).default("chat"),
+  access_scope: z.enum(["own", "admin"]).default("own"),
   chat_id: z.string().uuid().nullish(),
   user_id: z.string().uuid().nullish(),
   messages: z.array(message).min(1).max(100).optional(),

@@ -1,5 +1,7 @@
 # Project Rules
 
+- Verify privileged edge execution through the caller-JWT-bound `is_admin` database predicate; deny missing/invalid sessions with 403, preserve owner-only conversational operations, and keep private request notes in an admin-RLS store so mixed user/admin request reads cannot expose them.
+
 - Keep Contract Risk Analysis provider payloads separate from document text and illustrative baselines; uploaded documents remain unscored until an actual provider returns their analysis, so sample risks cannot be mistaken for findings about a user's contract.
 
 - Keep customer-facing plan prices, quotas, and review expectations in `src/lib/pricing.ts` so every pricing surface remains consistent.

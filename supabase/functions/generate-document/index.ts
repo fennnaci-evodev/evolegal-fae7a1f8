@@ -1,4 +1,4 @@
-import { requireSession, readJson, SafeError, safeProviderFetch } from "../_shared/safety.ts";
+import { requireSession, requireStoredAdmin, readJson, SafeError, safeProviderFetch } from "../_shared/safety.ts";
 import { z } from "npm:zod@4.6.7";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
@@ -225,16 +225,18 @@ serve(async (req) => {
   try {
     const { admin: supabase, user } = await requireSession(req);
     // readJson still bounds total request bytes; normalize context rather than rejecting long chats.
-    const parsed = z.object({ document_type: z.enum(["overview", "checklist", "template", "comparative"]), topic: z.string().trim().min(1).max(500), chat_id: z.string().uuid().nullish(), request_id: z.string().uuid().nullish(), conversation_context: z.string().nullish().transform(context => context?.slice(0, 4000)) }).strict().safeParse(await readJson(req));
+    const parsed = z.object({ access_scope: z.enum(["own", "admin"]).default("own"), document_type: z.enum(["overview", "checklist", "template", "comparative"]), topic: z.string().trim().min(1).max(500), chat_id: z.string().uuid().nullish(), request_id: z.string().uuid().nullish(), conversation_context: z.string().nullish().transform(context => context?.slice(0, 4000)) }).strict().safeParse(await readJson(req));
     if (!parsed.success) throw new SafeError(400, "Check the document topic and conversation details.");
+    if (parsed.data.access_scope === "admin") await requireStoredAdmin(req, user.id);
     const { document_type, topic, chat_id, request_id, conversation_context } = parsed.data;
     if (chat_id) {
       const { data, error } = await supabase.from("hugo_chats").select("id").eq("id", chat_id).eq("user_id", user.id).maybeSingle();
       if (error || !data) throw new SafeError(403, "This conversation is not available to your account.");
     }
     if (request_id) {
-      const { data, error } = await supabase.from("legal_requests").select("id").eq("id", request_id).eq("user_id", user.id).maybeSingle();
+      const { data, error } = await supabase.from("legal_requests").select("id,user_id").eq("id", request_id).maybeSingle();
       if (error || !data) throw new SafeError(403, "This request is not available to your account.");
+      if (data.user_id !== user.id) await requireStoredAdmin(req, user.id);
     }
 
     if (!document_type || !DOCUMENT_TYPES[document_type]) {

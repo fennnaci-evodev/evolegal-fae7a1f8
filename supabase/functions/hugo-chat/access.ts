@@ -9,14 +9,14 @@ export interface AccessDependencies {
 /** No private query or provider call may run before this gate completes. */
 export async function authorizeHugo(
   authorization: string | null,
-  body: { user_id?: string | null; chat_id?: string | null; action?: string },
+  body: { user_id?: string | null; chat_id?: string | null; action?: string; access_scope?: "own" | "admin" },
   dependencies: AccessDependencies,
 ): Promise<string> {
-  if (!authorization?.startsWith("Bearer ") || !authorization.slice(7).trim()) throw new HugoAccessError(401, "Please sign in to continue with Hugo.");
+  if (!authorization?.startsWith("Bearer ") || !authorization.slice(7).trim()) throw new HugoAccessError(403, "Forbidden: please sign in to continue with Hugo.");
   const userId = await dependencies.verifyToken(authorization.slice(7));
-  if (!userId) throw new HugoAccessError(401, "Your session has expired. Please sign in again.");
+  if (!userId) throw new HugoAccessError(403, "Forbidden: your session has expired. Please sign in again.");
   if (body.user_id && body.user_id !== userId) throw new HugoAccessError(403, "Access denied.");
   if (body.chat_id && !await dependencies.ownsChat(body.chat_id, userId)) throw new HugoAccessError(403, "This conversation is not available to this account.");
-  if (body.action === "metrics_summary" && !await dependencies.isAdmin(userId)) throw new HugoAccessError(403, "Administrator access is required.");
+  if ((body.action === "metrics_summary" || body.access_scope === "admin") && !await dependencies.isAdmin(userId)) throw new HugoAccessError(403, "Forbidden: administrator access required.");
   return userId;
 }

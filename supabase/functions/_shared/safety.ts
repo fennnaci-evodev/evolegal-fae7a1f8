@@ -1,4 +1,5 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { assertStoredAdmin, AdminAccessError } from "./adminAccess.ts";
 export class SafeError extends Error {
   constructor(public status: number, message: string, public retryable = false) { super(message); }
 }
@@ -10,16 +11,28 @@ function adminClient() {
 export async function requireSession(req: Request, adminOnly = false) {
   if (req.method !== "POST") throw new SafeError(405, "POST required.");
   const token = req.headers.get("Authorization")?.match(/^Bearer\s+(\S+)$/i)?.[1];
-  if (!token) throw new SafeError(401, "Please sign in to continue.");
+  if (!token) throw new SafeError(403, "Forbidden: please sign in to continue.");
   const admin = adminClient();
   const { data, error } = await admin.auth.getUser(token);
-  if (error || !data.user || data.user.is_anonymous) throw new SafeError(401, "Your session has expired. Please sign in again.");
-  if (adminOnly) {
-    const { data: role, error: roleError } = await admin.from("user_roles").select("id").eq("user_id", data.user.id).eq("role", "admin").maybeSingle();
-    if (roleError || !role) throw new SafeError(403, "Administrator access required.");
-  }
+  if (error || !data.user || data.user.is_anonymous) throw new SafeError(403, "Forbidden: your session has expired. Please sign in again.");
+  if (adminOnly) await requireStoredAdmin(req, data.user.id);
   await consumeRequest(data.user.id, "llm");
   return { admin, user: data.user };
+}
+/** Executes auth.uid()-bound role verification with the caller's JWT, not service identity. */
+export async function requireStoredAdmin(req: Request, userId: string) {
+  const url = Deno.env.get("SUPABASE_URL"), key = Deno.env.get("SUPABASE_ANON_KEY");
+  if (!url || !key) throw new SafeError(503, "Role verification unavailable.");
+  const caller = createClient(url, key, { global: { headers: { Authorization: req.headers.get("Authorization") ?? "" } }, auth: { persistSession: false } });
+  try {
+    await assertStoredAdmin(userId, async () => {
+      const { data, error } = await caller.rpc("is_admin");
+      return !error && data === true;
+    });
+  } catch (error) {
+    if (error instanceof AdminAccessError) throw new SafeError(403, error.message);
+    throw new SafeError(403, "Forbidden: administrator access could not be verified.");
+  }
 }
 export async function consumeRequest(userId: string, bucket: string) {
   const { data, error } = await adminClient().rpc("consume_hugo_request", { p_user: userId, p_bucket: bucket });

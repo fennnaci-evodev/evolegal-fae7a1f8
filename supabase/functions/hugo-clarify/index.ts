@@ -1,5 +1,5 @@
 import { z } from "npm:zod@4.6.7";
-import { requireSession, readJson, SafeError, safeProviderFetch } from "../_shared/safety.ts";
+import { requireSession, requireStoredAdmin, readJson, SafeError, safeProviderFetch } from "../_shared/safety.ts";
 import { hugoPersonality } from "../_shared/hugoPersonality.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
@@ -37,9 +37,10 @@ Always respond with valid JSON only, nothing else.`;
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   try {
-    await requireSession(req);
-    const body = z.object({ topic: z.string().trim().min(1).max(200), description: z.string().trim().min(1).max(10000), facts: z.string().max(10000).optional(), state: z.string().max(120).optional() }).strict().safeParse(await readJson(req));
+    const { user } = await requireSession(req);
+    const body = z.object({ access_scope: z.enum(["own", "admin"]).default("own"), topic: z.string().trim().min(1).max(200), description: z.string().trim().min(1).max(10000), facts: z.string().max(10000).optional(), state: z.string().max(120).optional() }).strict().safeParse(await readJson(req));
     if (!body.success) throw new SafeError(400, "Check the topic, description and facts before submitting.");
+    if (body.data.access_scope === "admin") await requireStoredAdmin(req, user.id);
     const response = await safeProviderFetch("gateway", "https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST", headers: { Authorization: `Bearer ${Deno.env.get("LOVABLE_API_KEY")}`, "Content-Type": "application/json" },
       body: JSON.stringify({ model: "google/gemini-3-flash-preview", messages: [{ role: "system", content: `${hugoPersonality("auto", false, 1)}\n${SYSTEM_PROMPT}` }, { role: "user", content: JSON.stringify(body.data) }], response_format: { type: "json_object" } }),

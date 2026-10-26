@@ -190,7 +190,11 @@ const ExpertDashboard = () => {
     if (selectedId) {
       loadMessages(selectedId);
       if (selected) {
-        setNotes(selected.admin_notes || "");
+        setNotes("");
+        void supabase.from("legal_request_admin_notes").select("notes").eq("request_id", selectedId).maybeSingle().then(({ data, error }) => {
+          if (error) toast.error("Failed to load private notes");
+          else setNotes(data?.notes || "");
+        });
       }
     }
   }, [selectedId]);
@@ -356,8 +360,11 @@ const ExpertDashboard = () => {
   };
 
   const saveNotes = async () => {
+    if (!selectedId) return;
     setSavingNotes(true);
-    await updateRequestField("admin_notes", notes);
+    const { error } = await supabase.from("legal_request_admin_notes").upsert({ request_id: selectedId, notes, updated_at: new Date().toISOString() });
+    if (error) toast.error("Failed to save private notes");
+    else toast.success("Updated");
     setSavingNotes(false);
   };
 

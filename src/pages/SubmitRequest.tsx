@@ -90,7 +90,6 @@ const SubmitRequest = () => {
         description: finalDescription,
         facts: keyFacts.trim() ? { summary: keyFacts.trim() } : {},
         state: state,
-        audit_log: [{ timestamp: new Date().toISOString(), action: "created", actor: "user", note: "Request submitted" }],
       }).select("ticket_number").single();
 
       if (error) {
