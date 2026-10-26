@@ -1,6 +1,6 @@
 # Roadmap
 
-- [ ] Fix and verify monitoring findings for long-chat document generation and local text-contract viewing without weakening Hugo chat safeguards.
+- [x] Fix monitoring findings for long-chat document generation and local text-contract viewing. Bounded browser excerpts and server normalization preserve request caps; separate local reader accepts text up to 20 MB, page breaks and Windows-1252. 29 regression tests pass; deployed generator returned a real payload for signed-in context over 30,000 characters. Live administrator viewer check unavailable for the requesting account; parser tests verify long contracts, boundary sizes and encodings. Hugo limits and unscored-upload behavior unchanged.
 
 - [x] Audit/harden Hugo streams, contract validation, secret isolation and citation/disclaimer safeguards; secure clarification and McCloder actions, owned document history and source-fetch destinations. Deployed five functions; 76 client tests and seven server tests pass. Signed-in reply, visible terminal errors, binary upload rejection, owned reload and five signed-out 401 gates verified. Remaining dependency advisories, real-device performance, approved legal citations and deep penetration testing are not verified.
 
