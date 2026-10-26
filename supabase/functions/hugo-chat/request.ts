@@ -1,4 +1,4 @@
-import { z } from "npm:zod@3.25.76";
+import { z } from "npm:zod@4.6.7";
 
 const safeText = z.string().min(1).max(30000).transform(s => s.replace(/^\uFEFF/, "").replace(/\r\n?/g, "\n").replace(/[\u200B\u202A-\u202E\u2066-\u2069]/g, "")).refine(s => s.trim().length > 0 && !/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F\uFFFD]/u.test(s), "Invalid text input.");
 const message = z.object({ role: z.enum(["user", "assistant"]), content: safeText });

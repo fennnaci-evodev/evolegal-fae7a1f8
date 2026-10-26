@@ -1,8 +1,8 @@
 # Roadmap
 
-- [ ] Verify administrator local viewing and standard-user document boundaries with stored-role sessions; never elevate accounts for testing.
-- [ ] Audit and patch remaining npm dependency advisories; run relevant client/provider regressions and a fresh advisory check.
-- [ ] Verify live Hugo citation flow and source-library availability; approved-source success requires a genuinely reviewed record, not test approval of law.
+- [x] Verify administrator local viewing and standard-user document boundaries: admin opened 180,021 characters unscored and read an owned stored PDF; standard user redirected from admin viewer, read no foreign history rows and could not download the admin PDF. No roles changed. No stored-history UI or cross-owner admin PDF flow exists; storage remains owner-only.
+- [x] Patch npm advisories: fresh synchronized npm lock audit reports zero findings; patched Router/Vite/Vitest/Zod and compatible transitive dependencies. 84 client and seven provider/request tests pass; four functions compile and deploy. Real chat, clarification and seven-section long-context generation return 200.
+- [ ] Complete approved-source citation verification. Live reply and unverified chip/popover persisted after reload; request returned 200 in 9.2 seconds without 429/timeout or page errors. Blocked: the authenticated citation RPC returns zero eligible sources for both roles; genuine legal review is required before a verified badge can be tested.
 
 - [x] Fix monitoring findings for long-chat document generation and local text-contract viewing. Bounded browser excerpts and server normalization preserve request caps; separate local reader accepts text up to 20 MB, page breaks and Windows-1252. 29 regression tests pass; deployed generator returned a real payload for signed-in context over 30,000 characters. Live administrator viewer check unavailable for the requesting account; parser tests verify long contracts, boundary sizes and encodings. Hugo limits and unscored-upload behavior unchanged.
 
