@@ -19,9 +19,9 @@
 - Approved excerpts must be verbatim quotes of the stored official text, enforced both in `src/lib/sourceReview.ts` and in `review_hugo_source`, so paraphrased or invented law cannot be approved.
 - Ambient backgrounds are static SVG animated only with CSS transform/opacity (no per-frame JavaScript), so pages stay smooth on low-end phones.
 - Hugo's inline thinking indicator uses a shared vector signature animated with CSS transform/opacity, avoiding image downloads and per-frame JavaScript; full-page loaders remain independent.
-- Hugo's model calls go only through `supabase/functions/hugo-chat/provider.ts`, which always emits OpenAI-style output; switching to Anthropic needs only `HUGO_PROVIDER=anthropic` plus `ANTHROPIC_API_KEY`, with no client changes.
+- Hugo and contract-audit model calls share `_shared/hugoProvider.ts` (re-exported by `hugo-chat/provider.ts`) with OpenAI-style output, keeping provider changes server-only.
 - Citation chips show "verified" only for an unambiguous exact statute/section title and jurisdiction match to a reviewed source returned by `list_verified_hugo_citations`; matching an Act never verifies all its sections.
-- In-chat contract cards detect clauses only and stay unscored, consistent with the Contract Risk Analysis rule against invented scores.
+- In-chat audits use private owner/chat-scoped attachments and server-only provider analysis; scores appear only after validated completed output, with explicit partial-text coverage and unverified authority disclosures. Ordinary chat limits remain independent of attachment limits.
 - Normalize attached contract input in `hugoContractInput.ts`, enforcing the complete message limit and stripping the audit instruction before clause detection to prevent invented excerpts.
 - Keep local text viewing in `contractViewerInput.ts` separate from Hugo message validation so large view-only contracts do not weaken chat limits; render uploaded text as literal text and never assign sample findings.
 - Bound supplemental document context before browser transmission and normalize it on the server within the shared request-byte cap so long chats cannot break document extraction.

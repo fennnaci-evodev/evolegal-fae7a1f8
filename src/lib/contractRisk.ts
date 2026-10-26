@@ -17,6 +17,23 @@ export interface ContractRiskAnalysis {
   clauses: RiskClause[];
 }
 
+export interface AuditedClause extends RiskClause { excerpt: string; recommendation: string }
+export interface SavedContractAnalysis extends ContractRiskAnalysis {
+  clauses: AuditedClause[];
+  assessed_characters: number;
+  total_characters: number;
+  partial: boolean;
+  redlines: Record<string, { original: string; suggested: string; reasoning: string }>;
+}
+export interface ChatContractAudit {
+  id: string; chat_id: string; message_id: string | null; file_name: string; file_path: string;
+  status: "pending" | "complete" | "error"; analysis: SavedContractAnalysis | null;
+  error_message: string | null; created_at: string;
+}
+export function exposureCounts(clauses: RiskClause[]) {
+  return { High: clauses.filter(c => c.severity === "Red").length, Medium: clauses.filter(c => c.severity === "Amber").length, Low: clauses.filter(c => c.severity === "Green").length };
+}
+
 export interface ContractSection {
   title: string;
   text: string;

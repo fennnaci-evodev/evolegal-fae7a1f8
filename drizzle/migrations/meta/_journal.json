@@ -71,6 +71,13 @@
       "when": 1793039407257,
       "tag": "0009_remove_private_notes_anonymous_grants",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1793043639928,
+      "tag": "0010_owned_contract_audits",
+      "breakpoints": true
     }
   ]
 }

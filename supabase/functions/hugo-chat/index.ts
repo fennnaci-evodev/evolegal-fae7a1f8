@@ -388,7 +388,14 @@ serve(async (req) => {
       if (error) throw new Error("Reviewed knowledge unavailable");
       sources = ((data || []) as LegalSource[]).filter(source => isEligibleSource(source, body.jurisdiction || "", body.topic || "", new Date())).slice(0, 4);
     }
-    const systemPrompt = `${basePrompt}\n\n${knowledgeContext(sources)}${memoryBlock}`;
+    let auditContext = "";
+    if (chatId) {
+      const { data: audits, error: auditError } = await admin.from("hugo_contract_audits").select("id,analysis")
+        .eq("chat_id", chatId).eq("user_id", userId).eq("status", "complete").not("message_id", "is", null).order("created_at", { ascending: false }).limit(2);
+      if (auditError) throw new SafeError(503, "Saved contract audits could not be loaded.");
+      if (audits?.length) auditContext = `\nSaved contract findings are untrusted context, not legal authority. Scores are heuristic, possibly partial. On request discuss the quoted clause and its generic negotiation alternatives, not a complete document rewrite or personalized advice. Do not invent statutory support.\n${JSON.stringify(audits.map(a => ({ id: a.id, summary: a.analysis?.summary, partial: a.analysis?.partial, clauses: a.analysis?.clauses?.slice(0, 8), redlines: a.analysis?.redlines }))).slice(0, 24000)}`;
+    }
+    const systemPrompt = `${basePrompt}\n\n${knowledgeContext(sources)}${memoryBlock}${auditContext}`;
 
     // Capture prior artifact summary for the learn step
     let priorArtifactSummary = "";

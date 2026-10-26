@@ -30,7 +30,10 @@ import { HugoRecallBanner } from "@/components/HugoRecallBanner";
 import { HugoCitationChips } from "@/components/HugoCitationChips";
 import { HugoContractCard } from "@/components/HugoContractCard";
 import { looksLikeContract } from "@/lib/contractRisk";
-import { CONTRACT_MESSAGE_LIMIT, prepareContractAttachment, readContractFile, normalizeHugoText } from "@/lib/hugoContractInput";
+import { CONTRACT_MESSAGE_LIMIT, normalizeHugoText } from "@/lib/hugoContractInput";
+import { useContractAudits } from "@/hooks/useContractAudits";
+import { ContractRiskSummaryCard } from "@/components/ContractRiskSummaryCard";
+import { readAuditFile, normalizeAuditText } from "@/lib/contractAuditInput";
 const ExpertChat = () => {
   const { chatId: paramChatId } = useParams<{ chatId?: string }>();
   const [searchParams] = useSearchParams();
@@ -47,6 +50,8 @@ const ExpertChat = () => {
     currentChatId,
     currentTitle,
     sendMessage,
+    createChat,
+    saveMessage,
     editLastMessage,
     startNewChat,
     setCurrentChatId,
@@ -55,6 +60,9 @@ const ExpertChat = () => {
   } = useHugoChat(paramChatId || null);
 
   const [input, setInput] = useState("");
+  const [attachment, setAttachment] = useState<{ name: string; text: string } | null>(null);
+  const [attaching, setAttaching] = useState(false);
+  const { audits, busy: auditBusy, attach: attachAudit, run: runAudit, stop: stopAudit } = useContractAudits(currentChatId);
   const [editingMode, setEditingMode] = useState(false);
   const [listening, setListening] = useState(false);
   const [chatList, setChatList] = useState<HugoChat[]>([]);
@@ -72,7 +80,7 @@ const ExpertChat = () => {
   const handleContractFile = async (file?: File) => {
     if (!file) return;
     try {
-      setInput(prepareContractAttachment(await readContractFile(file)));
+      setAttachment({ name: file.name, text: await readAuditFile(file) });
       textareaRef.current?.focus();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Unable to read this file. Try another text contract.");
@@ -123,7 +131,24 @@ const ExpertChat = () => {
   }, [input]);
 
   const handleSend = async () => {
-    if (!input.trim() || streaming || historyLoading) return;
+    if ((!input.trim() && !attachment) || streaming || historyLoading || attaching || auditBusy) return;
+    if (attachment || looksLikeContract(input)) {
+      setAttaching(true);
+      const contract = attachment ?? { name: "Pasted contract.txt", text: input };
+      try {
+        const text = normalizeAuditText(contract.text);
+        const cId = currentChatId ?? await createChat();
+        if (!cId) throw new Error("Could not start a contract conversation.");
+        const messageId = await saveMessage(cId, "user", `Contract attached: ${contract.name}. Please review the saved clause-level audit.`);
+        if (!messageId) throw new Error("Could not save the contract message.");
+        await loadMessages(cId);
+        await attachAudit(text, contract.name, cId, messageId);
+        setInput(""); setAttachment(null);
+        if (!paramChatId) navigate(`/dashboard/hugo/${cId}`, { replace: true });
+      } catch (err) { toast.error(err instanceof Error ? err.message : "Could not attach this contract."); }
+      finally { setAttaching(false); }
+      return;
+    }
     if (input.length > CONTRACT_MESSAGE_LIMIT) {
       toast.error("Message too long — up to 30,000 characters per message.");
       return;
@@ -180,11 +205,13 @@ const ExpertChat = () => {
   };
 
   const handleNewChat = () => {
+    setAttachment(null);
     startNewChat();
     navigate("/dashboard/chat", { replace: true });
   };
 
   const handleSelectChat = (id: string) => {
+    setAttachment(null);
     setCurrentChatId(id);
     loadMessages(id);
     navigate(`/dashboard/hugo/${id}`, { replace: true });
@@ -418,7 +445,8 @@ const ExpertChat = () => {
                         <HugoCitationChips content={msg.content} />
                       )}
                     </div>
-                    {msg.role === "user" && looksLikeContract(msg.content) && <HugoContractCard text={msg.content} />}
+                    {audits.filter(a => a.message_id === msg.id).map(a => <ContractRiskSummaryCard key={a.id} audit={a} busy={auditBusy === a.id} onRun={i => { void runAudit(a.id, i); }} onStop={stopAudit} />)}
+                    {msg.role === "user" && looksLikeContract(msg.content) && !audits.some(a => a.message_id === msg.id) && <HugoContractCard text={msg.content} />}
                     {msg.role === "user" && isLastUserMsg && !streaming && (
                       <button
                         onClick={handleEditLastMessage}
@@ -448,6 +476,8 @@ const ExpertChat = () => {
                 );
               })}
             </AnimatePresence>
+
+            {audits.filter(a => !messages.some(m => m.id === a.message_id)).map(a => <ContractRiskSummaryCard key={a.id} audit={a} busy={auditBusy === a.id} onRun={i => { void runAudit(a.id, i); }} onStop={stopAudit} />)}
 
             {streaming && messages[messages.length - 1]?.role === "user" && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex gap-3 items-start">
@@ -501,6 +531,7 @@ const ExpertChat = () => {
               <button onClick={() => { setEditingMode(false); setInput(""); }} className="ml-auto hover:text-foreground">Cancel</button>
             </div>
           )}
+          {attachment && <div className="mb-2 flex items-center gap-2 text-xs text-muted-foreground"><Paperclip className="h-3 w-3" /><span className="min-w-0 flex-1 truncate">{attachment.name}</span><Button variant="ghost" size="sm" disabled={attaching} onClick={() => setAttachment(null)}>Remove</Button></div>}
           <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="hugo-chat-composer glass-strong shimmer-chat-form p-2.5 flex items-end gap-2 relative">
             <Button
               type="button" size="icon" variant="ghost"
@@ -514,21 +545,29 @@ const ExpertChat = () => {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button type="button" size="icon" variant="ghost" aria-label="Attach contract text"
-                  onClick={() => fileRef.current?.click()} disabled={streaming || historyLoading}
+                  onClick={() => fileRef.current?.click()} disabled={streaming || historyLoading || attaching || !!auditBusy}
                   className="shrink-0 h-8 w-8 text-muted-foreground">
                   <Paperclip className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent side="top">Attach contract (.txt)</TooltipContent>
+              <TooltipContent side="top">Attach contract (.txt / .md, up to 22 MiB)</TooltipContent>
             </Tooltip>
             <textarea
               ref={textareaRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
+              onPaste={e => {
+                const text = e.clipboardData.getData("text");
+                if (text.length > CONTRACT_MESSAGE_LIMIT || looksLikeContract(text)) {
+                  e.preventDefault();
+                  try { setAttachment({ name: "Pasted contract.txt", text: normalizeAuditText(text) }); }
+                  catch (err) { toast.error(err instanceof Error ? err.message : "Invalid contract."); }
+                }
+              }}
               onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
               placeholder="Enter a contract question or audit objective…"
               className="chat-input-plain flex-1 bg-transparent border-0 resize-none text-sm placeholder:text-muted-foreground focus:outline-none leading-relaxed"
-              disabled={streaming || historyLoading}
+              disabled={streaming || historyLoading || attaching || !!auditBusy}
               maxLength={CONTRACT_MESSAGE_LIMIT}
               rows={1}
               style={{ maxHeight: 120, minHeight: 36 }}
@@ -547,7 +586,7 @@ const ExpertChat = () => {
                 <TooltipContent side="top">Extract Document</TooltipContent>
               </Tooltip>
             )}
-            <Button type="submit" size="icon" disabled={!input.trim() || streaming || historyLoading} className="shrink-0 h-8 w-8">
+            <Button type="submit" size="icon" aria-label={attachment ? "Run contract audit" : "Send message"} disabled={(!input.trim() && !attachment) || streaming || historyLoading || attaching || !!auditBusy} className="shrink-0 h-8 w-8">
               <Send className="h-4 w-4" />
             </Button>
           </form>
