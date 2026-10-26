@@ -1,5 +1,5 @@
 import { requireSession, readJson, safeProviderFetch, SafeError } from "../_shared/safety.ts";
-import { z } from "npm:zod@3.25.76";
+import { z } from "npm:zod@4.6.7";
 // McCloder — System Guardian & Improvement Agent (analysis-only)
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
@@ -148,7 +148,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   try {
     await requireSession(req, true);
-    const parsed = z.object({ action: z.enum(["assess", "generate_pr", "review"]).default("assess"), code: z.string().max(18000).optional(), context: z.string().max(1000).optional(), prior_lessons: z.array(z.string().max(1000)).max(15).optional(), report: z.record(z.unknown()).optional(), signals: z.record(z.unknown()).optional() }).strict().safeParse(await readJson(req, 80_000));
+    const parsed = z.object({ action: z.enum(["assess", "generate_pr", "review"]).default("assess"), code: z.string().max(18000).optional(), context: z.string().max(1000).optional(), prior_lessons: z.array(z.string().max(1000)).max(15).optional(), report: z.record(z.string(), z.unknown()).optional(), signals: z.record(z.string(), z.unknown()).optional() }).strict().safeParse(await readJson(req, 80_000));
     if (!parsed.success) throw new SafeError(400, "Invalid assessment request.");
     const body = parsed.data;
     const action = body.action ?? "assess";

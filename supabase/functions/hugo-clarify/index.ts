@@ -1,4 +1,4 @@
-import { z } from "npm:zod@3.25.76";
+import { z } from "npm:zod@4.6.7";
 import { requireSession, readJson, SafeError, safeProviderFetch } from "../_shared/safety.ts";
 import { hugoPersonality } from "../_shared/hugoPersonality.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
