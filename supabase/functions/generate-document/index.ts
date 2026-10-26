@@ -224,7 +224,8 @@ serve(async (req) => {
 
   try {
     const { admin: supabase, user } = await requireSession(req);
-    const parsed = z.object({ document_type: z.enum(["overview", "checklist", "template", "comparative"]), topic: z.string().trim().min(1).max(500), chat_id: z.string().uuid().nullish(), request_id: z.string().uuid().nullish(), conversation_context: z.string().max(12000).nullish() }).strict().safeParse(await readJson(req));
+    // readJson still bounds total request bytes; normalize context rather than rejecting long chats.
+    const parsed = z.object({ document_type: z.enum(["overview", "checklist", "template", "comparative"]), topic: z.string().trim().min(1).max(500), chat_id: z.string().uuid().nullish(), request_id: z.string().uuid().nullish(), conversation_context: z.string().nullish().transform(context => context?.slice(0, 4000)) }).strict().safeParse(await readJson(req));
     if (!parsed.success) throw new SafeError(400, "Check the document topic and conversation details.");
     const { document_type, topic, chat_id, request_id, conversation_context } = parsed.data;
     if (chat_id) {

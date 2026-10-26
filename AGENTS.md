@@ -21,6 +21,8 @@
 - Citation chips show "verified" only for an unambiguous exact statute/section title and jurisdiction match to a reviewed source returned by `list_verified_hugo_citations`; matching an Act never verifies all its sections.
 - In-chat contract cards detect clauses only and stay unscored, consistent with the Contract Risk Analysis rule against invented scores.
 - Normalize attached contract input in `hugoContractInput.ts`, enforcing the complete message limit and stripping the audit instruction before clause detection to prevent invented excerpts.
+- Keep local text viewing in `contractViewerInput.ts` separate from Hugo message validation so large view-only contracts do not weaken chat limits; render uploaded text as literal text and never assign sample findings.
+- Bound supplemental document context before browser transmission and normalize it on the server within the shared request-byte cap so long chats cannot break document extraction.
 - Recover chats through owner-validated local pointers and existing owned chat history, never an optional missing recovery table; this preserves recovery without failing requests.
 
 - Read all Hugo SSE through `src/lib/hugoStream.ts`; only terminally completed responses enter message storage or memory, preventing truncated or fabricated fallback answers.

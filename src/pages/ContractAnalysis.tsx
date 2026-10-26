@@ -11,7 +11,7 @@ import { filterRiskClauses, riskDisclaimer, riskLabels, sampleAnalysis, sampleSe
 import { exportRiskReport } from "@/lib/exportRiskReport";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { readContractFile } from "@/lib/hugoContractInput";
+import { readContractViewerFile } from "@/lib/contractViewerInput";
 
 const severityStyles: Record<ClauseSeverity, string> = {
   Green: "text-risk-safe border-risk-safe/30 bg-risk-safe/5",
@@ -49,9 +49,9 @@ export default function ContractAnalysis() {
       const isPdf = /\.pdf$/i.test(file.name);
       if (isPdf && file.type && file.type !== "application/pdf") throw new Error("PDF content type does not match its filename.");
       if (!file.size) throw new Error("This document is empty.");
-      if (file.size > 15 * 1024 * 1024) throw new Error("Choose a document under 15 MB.");
+      if (isPdf && file.size > 15 * 1024 * 1024) throw new Error("Choose a PDF under 15 MB.");
       if (isPdf && !new TextDecoder().decode(await file.slice(0, 5).arrayBuffer()).startsWith("%PDF-")) throw new Error("This file is not a valid PDF document.");
-      const opened = isPdf ? { name: file.name, url: URL.createObjectURL(file) } : { name: file.name, text: await readContractFile(file) };
+      const opened = isPdf ? { name: file.name, url: URL.createObjectURL(file) } : { name: file.name, text: await readContractViewerFile(file) };
       setSelected(null);
       setUpload(opened);
       toast.success("Document opened locally. Analysis is not connected yet.");
