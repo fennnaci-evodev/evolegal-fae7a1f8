@@ -1,5 +1,7 @@
 # Roadmap
 
+- [ ] Fix and verify monitoring findings for long-chat document generation and local text-contract viewing without weakening Hugo chat safeguards.
+
 - [x] Audit/harden Hugo streams, contract validation, secret isolation and citation/disclaimer safeguards; secure clarification and McCloder actions, owned document history and source-fetch destinations. Deployed five functions; 76 client tests and seven server tests pass. Signed-in reply, visible terminal errors, binary upload rejection, owned reload and five signed-out 401 gates verified. Remaining dependency advisories, real-device performance, approved legal citations and deep penetration testing are not verified.
 
 - [x] Verify updated Hugo signed in: text attachments, pasted contracts, saved replies, and UK/NY unverified citation popovers work. Fixed instruction contamination in clause excerpts, decoded-character limits and empty attachments, unsafe citation matching, 16px/10px chat blurs, and missing recovery-table requests. 34 regression tests pass. Headless frames varied 16.7–33.3ms median, so real-laptop 60 FPS is not established; verified-source popovers and legal accuracy remain unverified.

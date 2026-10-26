@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { exportDocumentPdf, downloadPdfBlob } from "@/lib/exportDocumentPdf";
 import { DocumentTemplate, type DocumentPayload } from "@/components/DocumentTemplate";
+import { documentContextExcerpt } from "@/lib/documentContext";
 
 const DOCUMENT_TYPES = [
   { id: "overview", label: "Extract Information Overview", badge: "Self-Help Outline", desc: "Structured summary of relevant frameworks and considerations" },
@@ -61,7 +62,7 @@ export function DocumentFactoryButton({ topic, chatId, requestId, conversationCo
             topic,
             chat_id: chatId || undefined,
             request_id: requestId || undefined,
-            conversation_context: conversationContext || undefined,
+            conversation_context: documentContextExcerpt(conversationContext) || undefined,
           }),
         }
       );
