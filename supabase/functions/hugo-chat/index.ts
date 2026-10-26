@@ -1,4 +1,4 @@
-import { SafeError, readJson, consumeRequest, blockProvider } from "../_shared/safety.ts";
+import { SafeError, readJson, consumeRequest, blockProvider, requireStoredAdmin } from "../_shared/safety.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.97.0";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
@@ -261,9 +261,9 @@ serve(async (req) => {
     const sessionClient = createClient(supabaseUrl, anonKey, { auth: { persistSession: false, autoRefreshToken: false } });
     const authHeader = req.headers.get("Authorization");
     // Verify the current server-side user before parsing or using client identity/context.
-    if (!authHeader?.startsWith("Bearer ")) throw new HugoAccessError(401, "Please sign in to continue with Hugo.");
+    if (!authHeader?.startsWith("Bearer ")) throw new HugoAccessError(403, "Forbidden: please sign in to continue with Hugo.");
     const { data: authData, error: authError } = await sessionClient.auth.getUser(authHeader.slice(7));
-    if (authError || !authData.user || authData.user.is_anonymous) throw new HugoAccessError(401, "Your session has expired. Please sign in again.");
+    if (authError || !authData.user || authData.user.is_anonymous) throw new HugoAccessError(403, "Forbidden: your session has expired. Please sign in again.");
     const verifiedUserId = authData.user.id;
     let rawBody: unknown;
     try { rawBody = await readJson(req, 600_000); } catch { throw new HugoAccessError(400, "Invalid request body."); }
@@ -280,13 +280,12 @@ serve(async (req) => {
         return Boolean(data);
       },
       isAdmin: async (id) => {
-        const { data, error } = await admin.from("user_roles").select("id").eq("user_id", id).eq("role", "admin").maybeSingle();
-        if (error) throw new Error("Role access could not be verified");
-        return Boolean(data);
+        await requireStoredAdmin(req, id);
+        return true;
       },
     });
     await consumeRequest(userId, "llm");
-    if (!providerConfigured()) throw new Error("Provider configuration unavailable");
+    if (action !== "metrics_summary" && action !== "recall_memory" && !providerConfigured()) throw new Error("Provider configuration unavailable");
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY") ?? "";
 
     // ---- Title generation ----
