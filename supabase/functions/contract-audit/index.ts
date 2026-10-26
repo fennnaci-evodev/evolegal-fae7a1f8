@@ -82,7 +82,8 @@ Deno.serve(async req => {
         if (saveError) throw new SafeError(503, "Could not save the audit. Findings are not complete.");
         emit({ audit: saved });
       } catch (err) {
-        const message = err instanceof SafeError ? err.message : "Could not complete this audit. Start a fresh request.";
+        console.error("contract audit failed", { kind: err instanceof z.ZodError ? "schema" : err instanceof SyntaxError ? "json" : err instanceof Error ? err.name : "unknown", issues: err instanceof z.ZodError ? err.issues.map(i => ({ path: i.path, code: i.code })) : undefined });
+        const message = err instanceof SafeError ? err.message : err instanceof z.ZodError ? "The provider returned incomplete audit fields. No findings were saved; start a fresh request." : err instanceof SyntaxError ? "The provider returned unreadable audit data. No findings were saved; start a fresh request." : "Could not complete this audit. Start a fresh request.";
         if (body.action === "analyze") await admin.from("hugo_contract_audits").update({ status: "error", error_message: message }).eq("id", audit.id).eq("user_id", user.id);
         emit({ error: message });
       } finally { clearInterval(heartbeat); controller.close(); }
