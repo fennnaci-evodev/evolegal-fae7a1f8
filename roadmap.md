@@ -1,6 +1,6 @@
 # Roadmap
 
-- [ ] Implement persistent owner-scoped in-chat contract audits, 22 MiB text input, expandable findings, clause redlines, and authenticated verification.
+- [x] Implement owner-scoped in-chat text contract audits: 22 MiB input, saved provider scores/counts, expandable findings, persisted clause diffs, and saved-audit follow-up context. Live upload, redline, reload, follow-up reply, long-paste staging, phone layout and 403 gates verified; score overwrite and owner spoof denied. 96 frontend and five server tests pass. Coverage beyond 60,000 characters is explicitly partial, not a full-document audit; PDF/DOCX parsing and genuine reviewed statutory reasoning are not implemented. Legal accuracy and real-device performance remain unverified.
 
 - [x] Harden database administrator boundaries and stored-role verification. Private notes isolated; protected request mutations and expert impersonation denied; privileged edge requests return 403. Live standard/admin direct-API checks and Workdesk save/read-back passed; 90 tests, four Deno checks and preview build OK. Existing approved-source, publishing and provider blockers below remain unchanged.
 
