@@ -31,22 +31,47 @@ export function sanitizeExtracted(text: string): string {
     .replace(/\u00A0/g, " ").replace(/[ \t]+\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
 }
 
-const PAGE_NUMBER = /^(page\s*)?\d{1,4}(\s*(of|\/)\s*\d{1,4})?$|^[-–—]\s*\d{1,4}\s*[-–—]$/i;
-/** Drop page numbers and lines repeated at the top/bottom of most pages (headers/footers). */
+// Tier 1: purely technical noise, stripped wherever it forms a whole line.
+const TECHNICAL_NOISE: RegExp[] = [
+  /^(page\s*)?\d{1,4}(\s*(of|\/)\s*\d{1,4})?$/i,
+  /^[-–—]\s*\d{1,4}\s*[-–—]$/,
+  /^(docusign\s+envelope\s+id|adobe\s+sign\s+(document|transaction|agreement)\s+id)\s*:?\s*[A-Z0-9-]{8,}$/i,
+  /^([a-z]:\\|\\\\|\/)[^\s]*([\\/][^\\/]*)*\.(docx?|pdf|txt|rtf|odt)$/i,
+  /^[\w\-. ()]{1,120}\.(docx?|pdf|rtf|odt)$/i,
+  /^((printed|exported|generated|saved|created|last\s+(modified|saved))(\s+on)?\s*:?\s*)?\d{1,4}[\/.-]\d{1,2}[\/.-]\d{1,4}([ ,T]+\d{1,2}:\d{2}(:\d{2})?\s*(am|pm)?(\s*(utc|gmt|[A-Z]{2,4}))?)?$/i,
+  /^(printed|exported|generated|saved)(\s+on)?\s*:?\s*.{0,40}\d{1,2}:\d{2}.*$/i,
+];
+// Tier 2: substantive legal wording that must never be removed.
+const LEGAL_ANCHOR = /\b(governing\s+law|governed\s+by|jurisdiction|liabilit(y|ies)|liable|indemni\w*|arbitrat\w*|dispute\s+resolution|severab\w*|terminat\w*)\b/i;
+const OPERATIVE_VERB = /\b(shall|will|must|agrees?|undertakes?|warrants?|represents?|acknowledges?|covenants?|may\s+not|is\s+entitled|subject\s+to)\b/i;
+const SENTENCE_END = /[.;:!?]["')\]]?$/;
+
+export const isTechnicalNoise = (line: string) => TECHNICAL_NOISE.some(r => r.test(line.trim()));
+export const isProtectedLegalLine = (line: string) => {
+  const l = line.trim();
+  return LEGAL_ANCHOR.test(l) || (OPERATIVE_VERB.test(l) && SENTENCE_END.test(l));
+};
+const isSafeStamp = (line: string) => { const l = line.trim(); return l.length > 0 && l.length < 80 && !/[.;:!?]/.test(l) && !isProtectedLegalLine(l); };
+
+/** Three-tier cleanup: strip technical noise, protect legal text, then drop only short repeated title/draft stamps at page edges. */
 export function stripRepeatedPageNoise(pages: string[]): string[] {
-  if (pages.length < 3) return pages.map(p => p.split("\n").filter(l => !PAGE_NUMBER.test(l.trim())).join("\n"));
-  const key = (l: string) => l.trim().toLowerCase().replace(/\bpage\s*\d+(\s*(of|\/)\s*\d+)?\b/g, "page #");
+  const drop = (l: string) => !isProtectedLegalLine(l) && isTechnicalNoise(l);
+  if (pages.length < 3) return pages.map(p => p.split("\n").filter(l => !drop(l)).join("\n"));
+  const key = (l: string) => l.trim().toLowerCase().replace(/\s+/g, " ");
+  const edgeIndexes = (lines: string[]) => {
+    const kept = lines.map((l, i) => [l, i] as const).filter(([l]) => l.trim() && !drop(l));
+    return new Set([...kept.slice(0, 2), ...kept.slice(-2)].map(([, i]) => i));
+  };
   const counts = new Map<string, number>();
   for (const page of pages) {
-    const lines = page.split("\n").map(l => l.trim()).filter(Boolean);
-    new Set([...lines.slice(0, 2), ...lines.slice(-2)].map(key)).forEach(k => counts.set(k, (counts.get(k) ?? 0) + 1));
+    const lines = page.split("\n"); const edges = edgeIndexes(lines);
+    new Set([...edges].map(i => lines[i]).filter(isSafeStamp).map(key)).forEach(k => counts.set(k, (counts.get(k) ?? 0) + 1));
   }
   const threshold = Math.max(3, Math.ceil(pages.length * 0.6));
-  const noisy = new Set([...counts].filter(([k, c]) => c >= threshold && k.length > 0 && k.length < 160).map(([k]) => k));
+  const stamps = new Set([...counts].filter(([, c]) => c >= threshold).map(([k]) => k));
   return pages.map(page => {
-    const lines = page.split("\n");
-    const kept = lines.map((l, i) => [l, i] as const).filter(([l]) => l.trim()); const edgeIdx = new Set([...kept.slice(0, 2), ...kept.slice(-2)].map(([, i]) => i)); const edge = (i: number) => edgeIdx.has(i);
-    return lines.filter((l, i) => !(PAGE_NUMBER.test(l.trim()) || (edge(i) && noisy.has(key(l))))).join("\n");
+    const lines = page.split("\n"); const edges = edgeIndexes(lines);
+    return lines.filter((l, i) => !(drop(l) || (edges.has(i) && isSafeStamp(l) && stamps.has(key(l))))).join("\n");
   });
 }
 
