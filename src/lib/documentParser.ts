@@ -39,13 +39,13 @@ export function stripRepeatedPageNoise(pages: string[]): string[] {
   const counts = new Map<string, number>();
   for (const page of pages) {
     const lines = page.split("\n").map(l => l.trim()).filter(Boolean);
-    new Set([...lines.slice(0, 3), ...lines.slice(-3)].map(key)).forEach(k => counts.set(k, (counts.get(k) ?? 0) + 1));
+    new Set([...lines.slice(0, 2), ...lines.slice(-2)].map(key)).forEach(k => counts.set(k, (counts.get(k) ?? 0) + 1));
   }
   const threshold = Math.max(3, Math.ceil(pages.length * 0.6));
   const noisy = new Set([...counts].filter(([k, c]) => c >= threshold && k.length > 0 && k.length < 160).map(([k]) => k));
   return pages.map(page => {
     const lines = page.split("\n");
-    const edge = (i: number) => i < 4 || i >= lines.length - 4;
+    const kept = lines.map((l, i) => [l, i] as const).filter(([l]) => l.trim()); const edgeIdx = new Set([...kept.slice(0, 2), ...kept.slice(-2)].map(([, i]) => i)); const edge = (i: number) => edgeIdx.has(i);
     return lines.filter((l, i) => !(PAGE_NUMBER.test(l.trim()) || (edge(i) && noisy.has(key(l))))).join("\n");
   });
 }
