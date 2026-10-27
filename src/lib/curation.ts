@@ -9,7 +9,7 @@ export const FEEDBACK_REASONS = [
 export type FeedbackReason = (typeof FEEDBACK_REASONS)[number]["id"];
 
 export interface StagedPair {
-  id: string; track: "sft" | "dpo"; status: string; prompt: string;
+  id: string; track: string; status: string; prompt: string;
   chosen: string | null; rejected: string | null; reasons: string[]; source_kind: string;
 }
 
