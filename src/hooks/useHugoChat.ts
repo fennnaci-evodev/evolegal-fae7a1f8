@@ -1,3 +1,4 @@
+import { playChime } from "@/lib/sound";
 import { useState, useCallback, useRef, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -265,6 +266,7 @@ export function useHugoChat(chatId?: string | null) {
           // Already displayed while streaming; the saved row must not replay on remount.
           newAssistantIdsRef.current.delete(assistantId);
           setMessages(prev => prev.map(m => m.id === assistantId ? { ...m, id: storedId } : m));
+          playChime();
         }
       }
 

@@ -1,3 +1,4 @@
+import { playChime } from "@/lib/sound";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { runContractAudit } from "@/lib/contractAuditTransport";
@@ -38,6 +39,7 @@ export function useContractAudits(chatId: string | null) {
     try {
       const saved = await runContractAudit(id, clauseIndex, controller.signal);
       if (version === versionRef.current) setAudits(prev => prev.map(a => a.id === id ? saved : a));
+      if (clauseIndex === undefined && saved?.status === "complete") playChime();
       return true;
     } catch (err) {
       const raw = err instanceof Error ? err.message : "Audit failed.";
