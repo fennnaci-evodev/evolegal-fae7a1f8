@@ -1,6 +1,6 @@
 import { ReactNode, useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Home, PlayCircle, MessageCircle, FileText, BookOpen, Settings, LogOut, ShieldCheck, LayoutDashboard, Route as RouteIcon, PanelLeftClose, PanelLeftOpen, ScanText } from "lucide-react";
+import { Home, PlayCircle, MessageCircle, FileText, BookOpen, Settings, LogOut, ShieldCheck, LayoutDashboard, Route as RouteIcon, PanelLeftClose, PanelLeftOpen, ScanText, Database } from "lucide-react";
 import { motion } from "framer-motion";
 import { EvoLogo } from "./EvoLogo";
 import { useAuth } from "@/hooks/useAuth";
@@ -41,6 +41,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
         { title: "Contract Analysis", url: "/dashboard/admin/contracts", icon: ScanText },
         { title: "Request Register", url: "/dashboard/admin/requests", icon: ShieldCheck },
         { title: "Source Verification", url: "/dashboard/admin/sources", icon: BookOpen },
+        { title: "Dataset Curation", url: "/dashboard/admin/curation", icon: Database },
         { title: "Settings", url: "/dashboard/settings", icon: Settings },
       ]
     : navItems;
