@@ -15,7 +15,7 @@ interface Props {
   existingRating?: Rating | null;
 }
 
-const iconBtn = "inline-flex h-9 w-10 items-center justify-center rounded-full transition-colors duration-100 sm:h-7 sm:w-8 disabled:opacity-60";
+const iconBtn = "inline-flex h-11 w-11 items-center justify-center rounded-full transition-colors duration-100 sm:h-7 sm:w-8 disabled:opacity-60";
 
 /**
  * One tap saves the rating. Diagnostic reasons and the optional note update the
