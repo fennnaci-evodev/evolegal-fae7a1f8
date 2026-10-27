@@ -15,7 +15,7 @@ interface Props {
   existingRating?: Rating | null;
 }
 
-const iconBtn = "inline-flex h-11 w-11 items-center justify-center rounded-full transition-colors duration-100 sm:h-7 sm:w-7 disabled:opacity-60";
+const iconBtn = "inline-flex h-9 w-10 items-center justify-center rounded-full transition-colors duration-100 sm:h-7 sm:w-8 disabled:opacity-60";
 
 /**
  * One tap saves the rating. Diagnostic reasons and the optional note update the
@@ -84,15 +84,18 @@ export function HugoFeedbackButtons({ messageId, chatId, auditId, userId, existi
 
   return (
     <div className="mt-1">
-      <div className="flex items-center gap-0.5">
-        <button type="button" aria-label="Helpful" aria-pressed={rating === "positive"} onClick={() => rate("positive")} disabled={saving && rating === "positive"}
-          className={`${iconBtn} ${rating === "positive" ? "bg-risk-safe/15 text-risk-safe" : "text-muted-foreground/70 hover:bg-muted/40 hover:text-risk-safe"}`}>
-          <ThumbsUp className="h-3.5 w-3.5" />
-        </button>
-        <button type="button" aria-label="Inaccurate or unhelpful" aria-pressed={rating === "negative"} onClick={() => rating !== "negative" && rate("negative")}
-          className={`${iconBtn} ${rating === "negative" ? "bg-risk-high/15 text-risk-high" : "text-muted-foreground/70 hover:bg-muted/40 hover:text-risk-high"}`}>
-          <ThumbsDown className="h-3.5 w-3.5" />
-        </button>
+      <div className="flex items-center gap-2">
+        <div className="inline-flex items-center rounded-full border border-border/70 bg-card/40 p-0.5">
+          <button type="button" aria-label="Helpful" aria-pressed={rating === "positive"} onClick={() => rate("positive")} disabled={saving && rating === "positive"}
+            className={`${iconBtn} ${rating === "positive" ? "bg-risk-safe/15 text-risk-safe" : "text-muted-foreground hover:bg-muted/40 hover:text-risk-safe"}`}>
+            <ThumbsUp className="h-4 w-4" strokeWidth={1.75} />
+          </button>
+          <span className="h-4 w-px bg-border/70" aria-hidden />
+          <button type="button" aria-label="Inaccurate or unhelpful" aria-pressed={rating === "negative"} onClick={() => rating !== "negative" && rate("negative")}
+            className={`${iconBtn} ${rating === "negative" ? "bg-risk-high/15 text-risk-high" : "text-muted-foreground hover:bg-muted/40 hover:text-risk-high"}`}>
+            <ThumbsDown className="h-4 w-4" strokeWidth={1.75} />
+          </button>
+        </div>
         {rating && <span className="ml-1 inline-flex items-center gap-1 text-[11px] text-muted-foreground" aria-live="polite">
           <Check className="h-3 w-3" />{saving ? "Saving" : "Saved"}
         </span>}
