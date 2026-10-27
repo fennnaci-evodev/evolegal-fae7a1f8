@@ -34,3 +34,4 @@
 - Keep browser and edge request validation on patched Zod 4 APIs, with explicit record key schemas; npm dependency updates do not update Deno's pinned imports.
 - Keep Bun and npm locks synchronized after dependency patches; constrain selector-parser and esbuild to patched releases for legacy tooling chains and rerun tests before claiming a clean advisory audit.
 - Extract PDF/DOCX contract text in the browser via `src/lib/documentParser.ts` (pdfjs-dist, mammoth) and store only normalized text, so storage and edge audits stay text-only and parse failures never consume audit quota.
+- Training curation requires stored opt-in consent; PII is redacted by `_shared/anonymize.ts` (citations shielded first) before staging, and only expert-approved pairs export as SFT/DPO JSONL, so raw user text never reaches a dataset.
