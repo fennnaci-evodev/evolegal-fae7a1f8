@@ -186,7 +186,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
             <EvoLogo size="sm" animate={false} showText={false} />
           </Link>
           <span className="flex-1 truncate text-sm font-medium text-foreground/90">{currentTitle}</span>
-          <QuickPreferencesButton />
+          {!hideBottomNav && <QuickPreferencesButton />}
         </div>
 
         <main className={`flex-1 md:p-8 p-4 pt-[4.5rem] md:pt-8 overflow-auto ${hideBottomNav ? "" : "pb-24 md:pb-8"}`}>
