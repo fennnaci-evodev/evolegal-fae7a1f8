@@ -77,7 +77,10 @@ Deno.serve(async req => {
         let analysis, essence;
         if (body.action === "analyze") {
           const result = analysisSchema.parse(output);
-          if (result.clauses.some(c => !coverage.text.includes(c.excerpt))) throw new SafeError(502, "The provider returned a clause not found in the assessed text. No findings were saved.");
+          // Verbatim check tolerant only of whitespace: extracted PDF/DOCX text wraps lines mid-sentence.
+          const flat = (s: string) => s.replace(/\s+/g, " ").trim();
+          const assessed = flat(coverage.text);
+          if (result.clauses.some(c => !flat(c.excerpt) || !assessed.includes(flat(c.excerpt)))) throw new SafeError(502, "The provider returned a clause not found in the assessed text. No findings were saved.");
           analysis = { ...result, ...coverage, text: undefined, provider: activeProvider(), redlines: {}, authority_status: "unverified" };
           essence = buildContractEssence(result, coverage.text, coverage.partial);
         } else {
