@@ -7,12 +7,6 @@ export function normalizeAuditText(text: string): string {
   return value;
 }
 export async function readAuditFile(file: File) {
-  if (!/\.(txt|md)$/i.test(file.name) || (file.type && !["text/plain", "text/markdown", "text/x-markdown"].includes(file.type))) throw new Error("Choose a .txt or .md contract.");
-  if (file.size > CONTRACT_AUDIT_BYTES) throw new Error("Choose a contract no larger than 22 MiB.");
-  let timer: ReturnType<typeof setTimeout> | undefined;
-  const bytes = await Promise.race([file.arrayBuffer(), new Promise<never>((_, reject) => { timer = setTimeout(() => reject(new Error("Reading this contract timed out. Try another text file.")), 15000); })]).finally(() => clearTimeout(timer));
-  let text: string;
-  try { text = new TextDecoder("utf-8", { fatal: true }).decode(bytes); }
-  catch { text = new TextDecoder("windows-1252").decode(bytes); }
-  return normalizeAuditText(text);
+  const { extractDocumentText } = await import("./documentParser");
+  return normalizeAuditText((await extractDocumentText(file, CONTRACT_AUDIT_BYTES)).text);
 }
