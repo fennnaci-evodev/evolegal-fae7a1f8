@@ -1,3 +1,4 @@
+import { playChime } from "@/lib/sound";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { runContractAudit } from "@/lib/contractAuditTransport";
