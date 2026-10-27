@@ -931,3 +931,16 @@ html.light .hero-neon-emphasis {
 @media (prefers-reduced-motion: reduce) {
   .neural-glow, .neural-drift-a, .neural-drift-b, .evo-enter { animation: none !important; }
 }
+
+/* Lightweight UI motion: transform/opacity/grid-rows only, first mount only. */
+@keyframes evo-reveal { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+@keyframes evo-meter { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.evo-reveal { animation: evo-reveal 160ms ease-out both; }
+.evo-meter { transform-origin: left; animation: evo-meter 300ms ease-out both; }
+.evo-collapse { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows 180ms ease-out, opacity 140ms ease-out; }
+.evo-collapse[data-open="true"] { grid-template-rows: 1fr; opacity: 1; }
+.evo-collapse-inner { overflow: hidden; min-height: 0; }
+@media (prefers-reduced-motion: reduce) {
+  .evo-reveal, .evo-meter { animation: none; }
+  .evo-collapse { transition: none; }
+}
