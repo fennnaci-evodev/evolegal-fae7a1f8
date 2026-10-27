@@ -34,7 +34,7 @@ const PAGE_NUMBER = /^(page\s*)?\d{1,4}(\s*(of|\/)\s*\d{1,4})?$|^[-–—]\s*\d{
 /** Drop page numbers and lines repeated at the top/bottom of most pages (headers/footers). */
 export function stripRepeatedPageNoise(pages: string[]): string[] {
   if (pages.length < 3) return pages.map(p => p.split("\n").filter(l => !PAGE_NUMBER.test(l.trim())).join("\n"));
-  const key = (l: string) => l.trim().toLowerCase().replace(/\d+/g, "#");
+  const key = (l: string) => l.trim().toLowerCase().replace(/\bpage\s*\d+(\s*(of|\/)\s*\d+)?\b/g, "page #");
   const counts = new Map<string, number>();
   for (const page of pages) {
     const lines = page.split("\n").map(l => l.trim()).filter(Boolean);
