@@ -59,8 +59,9 @@ async function readPdf(bytes: ArrayBuffer) {
   const pdfjs = await import("pdfjs-dist");
   const worker = await import("pdfjs-dist/build/pdf.worker.min.mjs?url");
   pdfjs.GlobalWorkerOptions.workerSrc = worker.default;
+  const task = pdfjs.getDocument({ data: new Uint8Array(bytes), isEvalSupported: false, disableFontFace: true, useSystemFonts: false });
   let doc;
-  try { doc = await pdfjs.getDocument({ data: new Uint8Array(bytes), isEvalSupported: false, disableFontFace: true }).promise; }
+  try { doc = await task.promise; }
   catch (e) {
     const name = (e as { name?: string })?.name;
     if (name === "PasswordException") throw new DocumentParseError("This PDF is password-protected. Remove the password and upload it again.", "password");
@@ -82,7 +83,7 @@ async function readPdf(bytes: ArrayBuffer) {
     const chars = pages.join("").replace(/\s/g, "").length;
     if (chars < Math.max(40, doc.numPages * 20)) throw new DocumentParseError("This PDF appears to be a scanned image without selectable text. Upload a digital PDF, or export it to Word or text first.", "scanned");
     return stripRepeatedPageNoise(pages).join("\n\n");
-  } finally { await doc.destroy(); }
+  } finally { await task.destroy().catch(() => undefined); }
 }
 
 async function readDocx(bytes: ArrayBuffer) {
