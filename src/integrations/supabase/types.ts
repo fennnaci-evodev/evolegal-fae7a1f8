@@ -53,6 +53,32 @@ export type Database = {
         }
         Relationships: []
       }
+      hugo_audit_usage: {
+        Row: {
+          audit_id: string
+          created_at: string
+          user_id: string
+        }
+        Insert: {
+          audit_id: string
+          created_at?: string
+          user_id: string
+        }
+        Update: {
+          audit_id?: string
+          created_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hugo_audit_usage_audit_id_fkey"
+            columns: ["audit_id"]
+            isOneToOne: true
+            referencedRelation: "hugo_contract_audits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       hugo_chats: {
         Row: {
           created_at: string
@@ -86,6 +112,7 @@ export type Database = {
           chat_id: string
           created_at: string
           error_message: string | null
+          essence: Json | null
           file_name: string
           file_path: string
           id: string
@@ -98,6 +125,7 @@ export type Database = {
           chat_id: string
           created_at?: string
           error_message?: string | null
+          essence?: Json | null
           file_name: string
           file_path: string
           id?: string
@@ -110,6 +138,7 @@ export type Database = {
           chat_id?: string
           created_at?: string
           error_message?: string | null
+          essence?: Json | null
           file_name?: string
           file_path?: string
           id?: string
@@ -668,6 +697,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      audit_quota_status: {
+        Args: never
+        Returns: {
+          monthly_limit: number
+          unlimited: boolean
+          used: number
+        }[]
+      }
+      consume_audit_credit: {
+        Args: { p_audit: string; p_limit?: number; p_user: string }
+        Returns: boolean
+      }
       consume_hugo_request: {
         Args: { p_bucket: string; p_user: string }
         Returns: boolean
