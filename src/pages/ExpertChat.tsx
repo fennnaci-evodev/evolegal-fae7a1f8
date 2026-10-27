@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { useSearchParams, useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { DashboardLayout } from "@/components/DashboardLayout";
@@ -43,6 +44,7 @@ const ExpertChat = () => {
 
   const {
     messages,
+    setMessages,
     streaming,
     responseError,
     historyLoading,
