@@ -26,7 +26,6 @@ export function HugoFeedbackButtons({ messageId, chatId, auditId, userId, existi
   const [reasons, setReasons] = useState<FeedbackReason[]>([]);
   const [comment, setComment] = useState("");
   const [savedComment, setSavedComment] = useState("");
-  const [saving, setSaving] = useState(false);
   const seq = useRef(0);
   // "Saving"/"Saved" is a brief confirmation only; it never persists on the row.
   const [flash, setFlash] = useState<"saving" | "saved" | null>(null);
