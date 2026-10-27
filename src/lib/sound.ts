@@ -13,17 +13,37 @@ export function setSoundEnabled(on: boolean) {
   try { localStorage.setItem(KEY, on ? "1" : "0"); } catch { /* ignore */ }
 }
 
+function getCtx(): AudioContext | null {
+  const AC = typeof window !== "undefined" ? (window.AudioContext || (window as any).webkitAudioContext) : null;
+  if (!AC) return null;
+  ctx ??= new AC();
+  return ctx;
+}
+
+// Browsers (Safari/iOS especially) only allow audio after a user gesture.
+// Unlock the context on the first tap/key so later async chimes can play.
+if (typeof window !== "undefined") {
+  const unlock = () => {
+    const ac = getCtx();
+    if (!ac) return;
+    if (ac.state !== "running") void ac.resume();
+    // A silent one-sample buffer fully unlocks iOS WebKit.
+    try { const b = ac.createBuffer(1, 1, 22050); const s = ac.createBufferSource(); s.buffer = b; s.connect(ac.destination); s.start(0); } catch { /* ignore */ }
+    if (ac.state === "running") ["pointerdown", "keydown", "touchend"].forEach((e) => window.removeEventListener(e, unlock));
+  };
+  ["pointerdown", "keydown", "touchend"].forEach((e) => window.addEventListener(e, unlock, { passive: true }));
+}
+
 function ready(force = false): AudioContext | null {
   if (typeof window === "undefined" || document.hidden) return null;
   if (!force && !isSoundEnabled()) return null;
   const now = performance.now();
   if (now - last < COOLDOWN_MS) return null;
   last = now;
-  const AC = window.AudioContext || (window as any).webkitAudioContext;
-  if (!AC) return null;
-  ctx ??= new AC();
-  if (ctx.state === "suspended") void ctx.resume();
-  return ctx;
+  const ac = getCtx();
+  if (!ac) return null;
+  if (ac.state !== "running") void ac.resume();
+  return ac;
 }
 
 /** Soft harmonic dyad for completed Hugo replies and audits. */
