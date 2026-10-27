@@ -23,7 +23,7 @@
 - Citation chips show "verified" only for an unambiguous exact statute/section title and jurisdiction match to a reviewed source returned by `list_verified_hugo_citations`; matching an Act never verifies all its sections.
 - In-chat audits use private owner/chat-scoped attachments and server-only provider analysis; scores appear only after validated completed output, with explicit partial-text coverage and unverified authority disclosures. Ordinary chat limits remain independent of attachment limits.
 - Normalize attached contract input in `hugoContractInput.ts`, enforcing the complete message limit and stripping the audit instruction before clause detection to prevent invented excerpts.
-- Keep local text viewing in `contractViewerInput.ts` separate from Hugo message validation so large view-only contracts do not weaken chat limits; render uploaded text as literal text and never assign sample findings.
+- Keep local document viewing in `contractViewerInput.ts` (literal plain text via the shared parser) separate from Hugo message validation so large view-only contracts do not weaken chat limits; render uploaded text as literal text and never assign sample findings.
 - Bound supplemental document context before browser transmission and normalize it on the server within the shared request-byte cap so long chats cannot break document extraction.
 - Recover chats through owner-validated local pointers and existing owned chat history, never an optional missing recovery table; this preserves recovery without failing requests.
 
@@ -33,3 +33,4 @@
 - Wrap full Hugo chat routes in a render error boundary with an explicit reload action so rendering failures never leave a blank or frozen interface.
 - Keep browser and edge request validation on patched Zod 4 APIs, with explicit record key schemas; npm dependency updates do not update Deno's pinned imports.
 - Keep Bun and npm locks synchronized after dependency patches; constrain selector-parser and esbuild to patched releases for legacy tooling chains and rerun tests before claiming a clean advisory audit.
+- Extract PDF/DOCX contract text in the browser via `src/lib/documentParser.ts` (pdfjs-dist, mammoth) and store only normalized text, so storage and edge audits stay text-only and parse failures never consume audit quota.
