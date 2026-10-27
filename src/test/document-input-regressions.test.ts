@@ -22,10 +22,10 @@ describe("Document input regression safeguards", () => {
     const text = "Contract clause.\n".repeat(10_000);
     await expect(readContractViewerFile(textFile(text))).resolves.toBe(text);
   });
-  it("allows text viewing at the 20 MB boundary but rejects larger files", async () => {
+  it("allows text viewing at the 22 MiB boundary but rejects larger files", async () => {
     const text = "x".repeat(20 * 1024 * 1024);
     await expect(readContractViewerFile(textFile(text))).resolves.toHaveLength(20 * 1024 * 1024);
-    await expect(readContractViewerFile(textFile(text + "x"))).rejects.toThrow("20 MB");
+    await expect(readContractViewerFile(textFile(text + "x"))).rejects.toThrow("22 MiB");
   });
   it("normalizes exported page breaks without rejecting a contract", async () => {
     await expect(readContractViewerFile(textFile("Clause A\fClause B"))).resolves.toBe("Clause A\n\nClause B");
