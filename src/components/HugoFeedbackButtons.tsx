@@ -83,8 +83,8 @@ export function HugoFeedbackButtons({ messageId, chatId, auditId, userId, existi
   const open = rating === "negative";
 
   return (
-    <div className="mt-1">
-      <div className="flex items-center">
+    <>
+      <div className="flex items-center mt-1">
         <button type="button" aria-label="Helpful" aria-pressed={rating === "positive"} onClick={() => rate("positive")} disabled={saving && rating === "positive"}
             className={`${iconBtn} ${rating === "positive" ? "text-risk-safe" : "text-muted-foreground/50 hover:text-risk-safe"}`}>
           <ThumbsUp className="h-4 w-4" strokeWidth={1.75} />
@@ -97,7 +97,7 @@ export function HugoFeedbackButtons({ messageId, chatId, auditId, userId, existi
           <Check className="h-3 w-3" />{saving ? "Saving" : "Saved"}
         </span>}
       </div>
-      <div className="evo-collapse" data-open={open} aria-hidden={!open}>
+      <div className="evo-collapse basis-full min-w-0 overflow-hidden" data-open={open} aria-hidden={!open}>
         <div className="evo-collapse-inner">
           <div className="mt-2 max-w-md rounded-lg border border-border bg-card p-3">
             <p className="mb-2 text-xs text-muted-foreground">Optional: what went wrong?</p>
@@ -115,6 +115,6 @@ export function HugoFeedbackButtons({ messageId, chatId, auditId, userId, existi
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
