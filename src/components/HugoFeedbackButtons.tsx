@@ -26,8 +26,12 @@ export function HugoFeedbackButtons({ messageId, chatId, auditId, userId, existi
   const [reasons, setReasons] = useState<FeedbackReason[]>([]);
   const [comment, setComment] = useState("");
   const [savedComment, setSavedComment] = useState("");
-  const [saving, setSaving] = useState(false);
   const seq = useRef(0);
+  // "Saving"/"Saved" is a brief confirmation only; it never persists on the row.
+  const [flash, setFlash] = useState<"saving" | "saved" | null>(null);
+  const flashTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => () => { if (flashTimer.current) clearTimeout(flashTimer.current); }, []);
 
   useEffect(() => {
     if (existingRating !== undefined) return;
@@ -44,7 +48,7 @@ export function HugoFeedbackButtons({ messageId, chatId, auditId, userId, existi
 
   const save = async (next: Rating, nextReasons: FeedbackReason[], nextComment: string, announce: boolean) => {
     const id = ++seq.current;
-    setSaving(true);
+    setFlash("saving");
     const payload = {
       rating: next,
       reasons: next === "negative" ? nextReasons : [],
@@ -54,8 +58,12 @@ export function HugoFeedbackButtons({ messageId, chatId, auditId, userId, existi
     const { error } = auditId
       ? await supabase.from("hugo_audit_feedback").upsert({ audit_id: auditId, user_id: userId, ...payload }, { onConflict: "audit_id,user_id" })
       : await supabase.from("hugo_feedback").upsert({ message_id: messageId!, chat_id: chatId!, user_id: userId, ...payload }, { onConflict: "message_id,user_id" });
-    if (id === seq.current) setSaving(false);
-    if (error) { toast.error("Feedback could not be saved. Please retry."); return false; }
+    if (error) { if (id === seq.current) setFlash(null); toast.error("Feedback could not be saved. Please retry."); return false; }
+    if (id === seq.current) {
+      setFlash("saved");
+      if (flashTimer.current) clearTimeout(flashTimer.current);
+      flashTimer.current = setTimeout(() => setFlash(null), 2000);
+    }
     if (announce) toast.success("Feedback recorded.");
     return true;
   };
@@ -85,16 +93,16 @@ export function HugoFeedbackButtons({ messageId, chatId, auditId, userId, existi
   return (
     <>
       <div className="flex items-center mt-1">
-        <button type="button" aria-label="Helpful" aria-pressed={rating === "positive"} onClick={() => rate("positive")} disabled={saving && rating === "positive"}
+        <button type="button" aria-label="Helpful" aria-pressed={rating === "positive"} onClick={() => rate("positive")} disabled={flash === "saving" && rating === "positive"}
             className={`${iconBtn} ${rating === "positive" ? "text-risk-safe" : "text-muted-foreground/50 hover:text-risk-safe"}`}>
           <ThumbsUp className="h-4 w-4" strokeWidth={1.75} />
         </button>
-        <button type="button" aria-label="Inaccurate or unhelpful" aria-pressed={rating === "negative"} onClick={() => rating !== "negative" && rate("negative")}
+        <button type="button" aria-label="Inaccurate or unhelpful" aria-pressed={rating === "negative"} onClick={() => rating !== "negative" && rate("negative")} disabled={flash === "saving" && rating === "negative"}
             className={`${iconBtn} ${rating === "negative" ? "text-risk-high" : "text-muted-foreground/50 hover:text-risk-high"}`}>
           <ThumbsDown className="h-4 w-4" strokeWidth={1.75} />
         </button>
-        {rating && <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground" aria-live="polite">
-          <Check className="h-3 w-3" />{saving ? "Saving" : "Saved"}
+        {flash && <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground" aria-live="polite">
+          {flash === "saved" && <Check className="h-3 w-3" />}{flash === "saving" ? "Saving" : "Saved"}
         </span>}
       </div>
       <div className="evo-collapse basis-full min-w-0 overflow-hidden" data-open={open} aria-hidden={!open}>
