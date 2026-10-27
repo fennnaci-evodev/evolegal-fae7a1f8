@@ -146,7 +146,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
               {!collapsed && (
                 <span className="text-[10px] uppercase tracking-wider text-muted-foreground/50">Theme</span>
               )}
-              <ThemeToggle />
+              <div className="flex items-center"><ThemeToggle />{!collapsed && <QuickPreferencesButton />}</div>
             </div>
             {!collapsed && (
               <p className="px-3 py-2 text-[10px] text-muted-foreground/40 leading-relaxed">

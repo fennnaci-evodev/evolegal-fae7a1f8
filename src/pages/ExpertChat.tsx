@@ -6,7 +6,8 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { HugoThinkingLoader } from "@/components/HugoThinkingLoader";
 import { HugoAvatar } from "@/components/HugoAvatar";
 import { Button } from "@/components/ui/button";
-import { Send, User, Info, Paperclip, Mic, MicOff, Plus, Trash2, MessageCircle, FileText, ChevronDown, PanelLeftClose, PanelLeftOpen, Pencil } from "lucide-react";
+import { Send, User, Info, Paperclip, Mic, MicOff, Plus, Trash2, MessageCircle, FileText, ChevronDown, PanelLeftClose, PanelLeftOpen, Pencil, SlidersHorizontal } from "lucide-react";
+import { openQuickPreferences } from "@/components/QuickPreferences";
 import { HugoFeedbackButtons } from "@/components/HugoFeedbackButtons";
 import { HugoCopyButton } from "@/components/HugoCopyButton";
 import { HugoModeBadge, getHugoModePref, setHugoModePref, useHugoMode, type HugoMode } from "@/components/HugoModeBadge";
@@ -362,9 +363,12 @@ const ExpertChat = () => {
               </AnimatePresence>
             </div>
             <ChevronDown className={`h-3.5 w-3.5 text-muted-foreground shrink-0 transition-transform md:hidden ${headerExpanded ? "rotate-180" : ""}`} />
-            <Button variant="ghost" size="icon" className="md:hidden shrink-0" onClick={(e) => { e.stopPropagation(); setShowSidebar(!showSidebar); }}>
+            <span role="button" tabIndex={0} aria-label="Show chat list" className="md:hidden shrink-0 inline-flex h-11 w-11 items-center justify-center rounded-full text-muted-foreground hover:bg-muted/30" onClick={(e) => { e.stopPropagation(); setShowSidebar(!showSidebar); }} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); setShowSidebar(!showSidebar); } }}>
               <MessageCircle className="h-4 w-4" />
-            </Button>
+            </span>
+            <span role="button" tabIndex={0} aria-label="Open quick preferences" title="Quick preferences (Ctrl+,)" className="shrink-0 inline-flex h-11 w-11 items-center justify-center rounded-full text-muted-foreground hover:bg-muted/30 hover:text-foreground" onClick={(e) => { e.stopPropagation(); openQuickPreferences(); }} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); openQuickPreferences(); } }}>
+              <SlidersHorizontal className="h-[18px] w-[18px]" />
+            </span>
           </button>
 
           {/* Mobile sidebar overlay */}
