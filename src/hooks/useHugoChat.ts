@@ -265,6 +265,7 @@ export function useHugoChat(chatId?: string | null) {
           // Already displayed while streaming; the saved row must not replay on remount.
           newAssistantIdsRef.current.delete(assistantId);
           setMessages(prev => prev.map(m => m.id === assistantId ? { ...m, id: storedId } : m));
+          playChime();
         }
       }
 

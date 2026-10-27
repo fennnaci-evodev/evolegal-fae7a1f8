@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { playSwitch } from "@/lib/sound";
 
 export function TrainingConsentCard({ userId }: { userId: string }) {
   const [on, setOn] = useState(false);
@@ -14,7 +15,7 @@ export function TrainingConsentCard({ userId }: { userId: string }) {
       .then(({ data }) => { setOn(!!data?.allow_training_curation); setReady(true); });
   }, [userId]);
   const change = async (next: boolean) => {
-    setOn(next);
+    setOn(next); playSwitch();
     const { error } = await supabase.from("hugo_training_consent").upsert({ user_id: userId, allow_training_curation: next }, { onConflict: "user_id" });
     if (error) { setOn(!next); toast.error("Preference could not be saved."); return; }
     toast.success(next ? "Quality Improvement enabled." : "Consent withdrawn. All unexported records from your account were deleted.");

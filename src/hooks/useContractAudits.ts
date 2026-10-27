@@ -38,6 +38,7 @@ export function useContractAudits(chatId: string | null) {
     try {
       const saved = await runContractAudit(id, clauseIndex, controller.signal);
       if (version === versionRef.current) setAudits(prev => prev.map(a => a.id === id ? saved : a));
+      if (clauseIndex === undefined && saved?.status === "completed") playChime();
       return true;
     } catch (err) {
       const raw = err instanceof Error ? err.message : "Audit failed.";
