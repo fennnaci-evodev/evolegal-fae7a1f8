@@ -5,7 +5,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useAdminRole } from "@/hooks/useAdminRole";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
+import { SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,11 +25,23 @@ import {
   Eye, EyeOff, CheckCircle, Monitor, Smartphone, LogOut, Camera, X
 } from "lucide-react";
 
-const fadeUp = { initial: { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.4 } };
+const fadeUp = { initial: { opacity: 0, y: 8 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.2 } };
+
+const SETTINGS_TABS = [
+  { key: "general", label: "General", icon: User },
+  { key: "preferences", label: "Preferences", icon: SlidersHorizontal },
+  { key: "privacy", label: "Privacy", icon: Lock },
+  { key: "security", label: "Security", icon: Shield },
+] as const;
+type SettingsTab = (typeof SETTINGS_TABS)[number]["key"];
 
 export default function Settings() {
   const { user, signOut } = useAuth();
   const { isAdmin } = useAdminRole();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialTab = searchParams.get("tab");
+  const [tab, setTab] = useState<SettingsTab>(SETTINGS_TABS.some((t) => t.key === initialTab) ? (initialTab as SettingsTab) : "general");
+  const selectTab = (t: SettingsTab) => { setTab(t); setSearchParams({ tab: t }, { replace: true }); };
 
   // Profile
   const [firstName, setFirstName] = useState("");
@@ -110,12 +123,27 @@ export default function Settings() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-3xl mx-auto space-y-8 pb-12">
-        <motion.div {...fadeUp}>
-          <h1 className="text-2xl font-display font-bold text-foreground">Account Settings</h1>
-          <p className="text-muted-foreground text-sm mt-1">Manage your profile, security, and preferences.</p>
-        </motion.div>
+      <div className="max-w-3xl mx-auto space-y-6 pb-12">
+        <div>
+          <h1 className="text-2xl font-display font-bold text-foreground">Settings</h1>
+          <p className="text-muted-foreground text-sm mt-1">Profile, preferences, privacy, and security.</p>
+        </div>
 
+        <div role="tablist" aria-label="Settings sections" className="grid grid-cols-2 gap-1 rounded-2xl border border-border/30 p-1 sm:grid-cols-4 sm:rounded-full">
+          {SETTINGS_TABS.map((t) => (
+            <button
+              key={t.key}
+              role="tab"
+              aria-selected={tab === t.key}
+              onClick={() => selectTab(t.key)}
+              className={`flex h-11 items-center justify-center gap-2 rounded-xl text-xs font-medium transition-colors sm:rounded-full ${tab === t.key ? "bg-primary/12 text-primary" : "text-muted-foreground hover:text-foreground"}`}
+            >
+              <t.icon className="h-4 w-4" />{t.label}
+            </button>
+          ))}
+        </div>
+
+        {tab === "general" && (<>
         {/* Admin Tools */}
         {isAdmin && (
           <motion.div {...fadeUp} transition={{ delay: 0.05 }}>
@@ -207,10 +235,9 @@ export default function Settings() {
             </CardContent>
           </Card>
         </motion.div>
+        </>)}
 
-        {user && <motion.div {...fadeUp} transition={{ delay: 0.12 }}><TrainingConsentCard userId={user.id} /></motion.div>}
-        <motion.div {...fadeUp} transition={{ delay: 0.13 }}><SoundSettingsCard /></motion.div>
-
+        {tab === "security" && (<>
         {/* Security */}
         <motion.div {...fadeUp} transition={{ delay: 0.15 }}>
           <Card className={glassCard}>
@@ -318,7 +345,10 @@ export default function Settings() {
             </CardContent>
           </Card>
         </motion.div>
+        </>)}
 
+        {tab === "preferences" && (<>
+        <motion.div {...fadeUp} transition={{ delay: 0.05 }}><SoundSettingsCard /></motion.div>
         {/* Notifications */}
         <motion.div {...fadeUp} transition={{ delay: 0.25 }}>
           <Card className={glassCard}>
@@ -359,7 +389,10 @@ export default function Settings() {
             </CardContent>
           </Card>
         </motion.div>
+        </>)}
 
+        {tab === "privacy" && (<>
+        {user && <motion.div {...fadeUp} transition={{ delay: 0.05 }}><TrainingConsentCard userId={user.id} /></motion.div>}
         {/* Privacy & Data */}
         <motion.div {...fadeUp} transition={{ delay: 0.3 }}>
           <Card className={glassCard}>
@@ -404,6 +437,7 @@ export default function Settings() {
             </CardContent>
           </Card>
         </motion.div>
+        </>)}
       </div>
     </DashboardLayout>
   );

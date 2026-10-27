@@ -1,6 +1,6 @@
 import { ReactNode, useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Home, PlayCircle, MessageCircle, FileText, BookOpen, Settings, LogOut, ShieldCheck, LayoutDashboard, Route as RouteIcon, PanelLeftClose, PanelLeftOpen, ScanText, Database } from "lucide-react";
+import { Home, PlayCircle, MessageCircle, FileText, BookOpen, Settings, LogOut, ShieldCheck, LayoutDashboard, Route as RouteIcon, PanelLeftClose, PanelLeftOpen, ScanText, Database, Menu } from "lucide-react";
 import { motion } from "framer-motion";
 import { EvoLogo } from "./EvoLogo";
 import { useAuth } from "@/hooks/useAuth";
@@ -9,6 +9,8 @@ import { AdminModeToggle } from "./AdminModeToggle";
 import { ThemeToggle } from "./ThemeToggle";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { BackButton } from "./BackButton";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { QuickPreferences, QuickPreferencesButton } from "./QuickPreferences";
 
 const SIDEBAR_KEY = "evo_sidebar_collapsed";
 
@@ -45,6 +47,29 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
         { title: "Settings", url: "/dashboard/settings", icon: Settings },
       ]
     : navItems;
+
+  const [moreOpen, setMoreOpen] = useState(false);
+  useEffect(() => { setMoreOpen(false); }, [location.pathname]);
+  const hideBottomNav = location.pathname === "/dashboard/chat" || location.pathname.startsWith("/dashboard/hugo/") || location.pathname.startsWith("/dashboard/chat/");
+  const adminView = isAdmin && mode === "admin";
+  const bottomItems = adminView
+    ? [
+        { title: "Workdesk", url: "/dashboard/admin/workdesk", icon: LayoutDashboard },
+        { title: "Contracts", url: "/dashboard/admin/contracts", icon: ScanText },
+        { title: "Requests", url: "/dashboard/admin/requests", icon: ShieldCheck },
+        { title: "Settings", url: "/dashboard/settings", icon: Settings },
+        { title: "More", url: "#more", icon: Menu },
+      ]
+    : [
+        { title: "Home", url: "/dashboard", icon: Home },
+        { title: "Hugo", url: "/dashboard/chat", icon: MessageCircle },
+        { title: "Review", url: "/dashboard/submit", icon: FileText },
+        { title: "Settings", url: "/dashboard/settings", icon: Settings },
+        { title: "More", url: "#more", icon: Menu },
+      ];
+  const currentTitle = [...allNavItems, ...bottomItems].find((i) => i.url === location.pathname)?.title ?? "Dashboard";
+
+
 
   return (
     <TooltipProvider delayDuration={200}>
@@ -121,7 +146,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
               {!collapsed && (
                 <span className="text-[10px] uppercase tracking-wider text-muted-foreground/50">Theme</span>
               )}
-              <ThemeToggle />
+              <div className="flex items-center"><ThemeToggle />{!collapsed && <QuickPreferencesButton />}</div>
             </div>
             {!collapsed && (
               <p className="px-3 py-2 text-[10px] text-muted-foreground/40 leading-relaxed">
@@ -154,34 +179,62 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
           </div>
         </aside>
 
-        {/* Mobile header */}
-        <div className="md:hidden fixed top-0 left-0 right-0 z-40 glass-strong border-b border-border/30 px-4 py-3 flex items-center justify-between" style={{ borderRadius: 0 }}>
-          <div className="flex items-center gap-2">
-            <BackButton />
-            <Link to="/">
-              <EvoLogo size="sm" animate={false} showText={false} />
-            </Link>
-          </div>
-          <div className="flex gap-1">
-            {allNavItems.slice(0, 5).map((item) => (
-              <Link
-                key={item.url}
-                to={item.url}
-                className={`p-2 rounded-lg transition-colors ${
-                  location.pathname === item.url ? "text-primary bg-primary/10" : "text-muted-foreground"
-                }`}
-              >
-                <item.icon className="h-4 w-4" />
-              </Link>
-            ))}
-            <ThemeToggle className="ml-1" />
-          </div>
+        {/* Mobile header: back, logo, current view, quick preferences */}
+        <div className="md:hidden fixed top-0 left-0 right-0 z-40 glass-strong border-b border-border/30 px-2 h-14 flex items-center gap-1" style={{ borderRadius: 0 }}>
+          <BackButton />
+          <Link to="/" aria-label="EvoLegal home" className="flex h-11 w-11 items-center justify-center">
+            <EvoLogo size="sm" animate={false} showText={false} />
+          </Link>
+          <span className="flex-1 truncate text-sm font-medium text-foreground/90">{currentTitle}</span>
+          {!hideBottomNav && <QuickPreferencesButton />}
         </div>
 
-        {/* Main content */}
-        <main className="flex-1 md:p-8 p-4 pt-16 md:pt-8 overflow-auto" style={{ transition: "margin 0.25s ease" }}>
+        <main className={`flex-1 md:p-8 p-4 pt-[4.5rem] md:pt-8 overflow-auto ${hideBottomNav ? "" : "pb-24 md:pb-8"}`}>
           {children}
         </main>
+
+        {/* Mobile bottom navigation — hidden in Hugo chat so the conversation and keyboard get full height */}
+        {!hideBottomNav && (
+          <nav
+            aria-label="Primary"
+            className="md:hidden fixed bottom-0 left-0 right-0 z-40 glass-strong border-t border-border/30 pb-[env(safe-area-inset-bottom)]"
+            style={{ borderRadius: 0 }}
+          >
+            <div className="grid grid-cols-5">
+              {bottomItems.map((item) => {
+                const active = item.url === "#more" ? moreOpen : location.pathname === item.url;
+                const cls = `flex h-14 flex-col items-center justify-center gap-1 text-[10px] font-medium transition-colors ${active ? "text-primary" : "text-muted-foreground"}`;
+                const inner = (<><item.icon className="h-5 w-5" /><span className="truncate max-w-full px-1">{item.title}</span></>);
+                return item.url === "#more" ? (
+                  <button key="more" type="button" onClick={() => setMoreOpen(true)} className={cls} aria-label="More navigation">{inner}</button>
+                ) : (
+                  <Link key={item.url} to={item.url} className={cls} aria-current={active ? "page" : undefined}>{inner}</Link>
+                );
+              })}
+            </div>
+          </nav>
+        )}
+
+        <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
+          <SheetContent side="bottom" className="md:hidden border-border/40 bg-background pb-[max(1rem,env(safe-area-inset-bottom))]">
+            <SheetHeader className="text-left"><SheetTitle className="text-base">Navigate</SheetTitle></SheetHeader>
+            {isAdmin && <div className="mt-3"><AdminModeToggle /></div>}
+            <div className="mt-2 space-y-0.5">
+              {allNavItems.map((item) => (
+                <Link key={item.url} to={item.url} onClick={() => setMoreOpen(false)}
+                  className={`flex min-h-[48px] items-center gap-3 rounded-xl px-3 text-sm ${location.pathname === item.url ? "text-primary bg-primary/10" : "text-muted-foreground hover:text-foreground"}`}>
+                  <item.icon className="h-4 w-4" />{item.title}
+                </Link>
+              ))}
+              <button type="button" onClick={async () => { setMoreOpen(false); await signOut(); navigate("/"); }}
+                className="flex min-h-[48px] w-full items-center gap-3 rounded-xl px-3 text-sm text-muted-foreground hover:text-foreground">
+                <LogOut className="h-4 w-4" />Sign Out
+              </button>
+            </div>
+          </SheetContent>
+        </Sheet>
+
+        <QuickPreferences />
       </div>
     </TooltipProvider>
   );
