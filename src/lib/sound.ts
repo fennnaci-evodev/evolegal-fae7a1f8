@@ -1,6 +1,6 @@
 // Synthesized UI sounds (Web Audio API, no assets). Off by default.
 const KEY = "evolegal_sound_enabled";
-const MASTER = 0.12;
+const MASTER = 0.25;
 const COOLDOWN_MS = 350;
 
 let ctx: AudioContext | null = null;
@@ -49,7 +49,7 @@ function ready(force = false): AudioContext | null {
 /** Soft harmonic dyad for completed Hugo replies and audits. */
 export function playChime() {
   const ac = ready(); if (!ac) return;
-  const t = ac.currentTime;
+  const t = ac.currentTime + 0.02;
   const out = ac.createGain(); out.gain.value = MASTER;
   const lp = ac.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 2400;
   lp.connect(out); out.connect(ac.destination);
@@ -67,12 +67,12 @@ export function playChime() {
 /** Short damped click for switches. `force` lets the sound toggle preview itself. */
 export function playSwitch(force = false) {
   const ac = ready(force); if (!ac) return;
-  const t = ac.currentTime;
+  const t = ac.currentTime + 0.02;
   const o = ac.createOscillator(); o.type = "triangle";
   o.frequency.setValueAtTime(1200, t);
   o.frequency.exponentialRampToValueAtTime(600, t + 0.032);
   const g = ac.createGain();
-  g.gain.setValueAtTime(0.08 * (MASTER / 0.12), t);
+  g.gain.setValueAtTime(0.18 * (MASTER / 0.25), t);
   g.gain.exponentialRampToValueAtTime(0.0001, t + 0.04);
   o.connect(g); g.connect(ac.destination);
   o.start(t); o.stop(t + 0.05);
