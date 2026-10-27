@@ -53,6 +53,47 @@ export type Database = {
         }
         Relationships: []
       }
+      hugo_audit_feedback: {
+        Row: {
+          audit_id: string
+          comment: string | null
+          created_at: string
+          id: string
+          rating: string
+          reasons: string[]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          audit_id: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          rating: string
+          reasons?: string[]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          audit_id?: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          rating?: string
+          reasons?: string[]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hugo_audit_feedback_audit_id_fkey"
+            columns: ["audit_id"]
+            isOneToOne: false
+            referencedRelation: "hugo_contract_audits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       hugo_audit_usage: {
         Row: {
           audit_id: string
@@ -163,6 +204,60 @@ export type Database = {
           },
         ]
       }
+      hugo_curation_staging: {
+        Row: {
+          chosen: string | null
+          created_at: string
+          id: string
+          prompt: string
+          reasons: string[]
+          redactions: number
+          rejected: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          reviewer_notes: string | null
+          source_id: string
+          source_kind: string
+          source_user_id: string
+          status: string
+          track: string
+        }
+        Insert: {
+          chosen?: string | null
+          created_at?: string
+          id?: string
+          prompt: string
+          reasons?: string[]
+          redactions?: number
+          rejected?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          source_id: string
+          source_kind: string
+          source_user_id: string
+          status?: string
+          track: string
+        }
+        Update: {
+          chosen?: string | null
+          created_at?: string
+          id?: string
+          prompt?: string
+          reasons?: string[]
+          redactions?: number
+          rejected?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          source_id?: string
+          source_kind?: string
+          source_user_id?: string
+          status?: string
+          track?: string
+        }
+        Relationships: []
+      }
       hugo_feedback: {
         Row: {
           chat_id: string
@@ -171,6 +266,7 @@ export type Database = {
           id: string
           message_id: string
           rating: string
+          reasons: string[]
           updated_at: string
           user_id: string
         }
@@ -181,6 +277,7 @@ export type Database = {
           id?: string
           message_id: string
           rating: string
+          reasons?: string[]
           updated_at?: string
           user_id: string
         }
@@ -191,6 +288,7 @@ export type Database = {
           id?: string
           message_id?: string
           rating?: string
+          reasons?: string[]
           updated_at?: string
           user_id?: string
         }
@@ -519,6 +617,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      hugo_training_consent: {
+        Row: {
+          allow_training_curation: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          allow_training_curation?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          allow_training_curation?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       legal_request_admin_notes: {
         Row: {

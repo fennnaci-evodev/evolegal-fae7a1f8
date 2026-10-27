@@ -85,6 +85,13 @@
       "when": 1793103709995,
       "tag": "0011_audit_quota_and_essence",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1793112805547,
+      "tag": "0012_training_curation",
+      "breakpoints": true
     }
   ]
 }
