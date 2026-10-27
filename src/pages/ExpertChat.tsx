@@ -475,14 +475,12 @@ const ExpertChat = () => {
                       </button>
                     )}
                     {msg.role === "assistant" && (
-                      <div className="flex items-center justify-between gap-2 mt-1 w-full flex-wrap">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          {user && currentChatId ? (
-                            <HugoFeedbackButtons messageId={msg.id} chatId={currentChatId} userId={user.id} />
-                          ) : null}
-                          <HugoModeBadge consilium={(msg as any).consilium} />
-                        </div>
+                      <div className="flex items-center gap-1 mt-1 w-full flex-wrap">
                         <HugoCopyButton content={msg.content} />
+                        <HugoModeBadge consilium={(msg as any).consilium} />
+                        {user && currentChatId ? (
+                          <HugoFeedbackButtons messageId={msg.id} chatId={currentChatId} userId={user.id} />
+                        ) : null}
                       </div>
                     )}
                   </div>
