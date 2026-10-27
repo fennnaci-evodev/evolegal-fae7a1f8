@@ -204,7 +204,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
               {bottomItems.map((item) => {
                 const active = item.url === "#more" ? moreOpen : location.pathname === item.url;
                 const cls = `flex h-12 flex-col items-center justify-center gap-0.5 text-[9.5px] font-medium tracking-wide transition-colors ${active ? "text-foreground" : "text-muted-foreground/70 hover:text-foreground"}`;
-                const inner = (<><item.icon className="h-[18px] w-[18px]" strokeWidth={active ? 2 : 1.6" /><span className="truncate max-w-full px-1">{item.title}</span></>);
+                const inner = (<><item.icon className="h-[18px] w-[18px]" strokeWidth={active ? 2 : 1.6} /><span className="truncate max-w-full px-1">{item.title}</span></>);
                 return item.url === "#more" ? (
                   <button key="more" type="button" onClick={() => setMoreOpen(true)} className={cls} aria-label="More navigation">{inner}</button>
                 ) : (
