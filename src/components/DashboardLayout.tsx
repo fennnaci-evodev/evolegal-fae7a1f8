@@ -1,6 +1,6 @@
 import { ReactNode, useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Home, PlayCircle, MessageCircle, FileText, BookOpen, Settings, LogOut, ShieldCheck, LayoutDashboard, Route as RouteIcon, PanelLeftClose, PanelLeftOpen, ScanText, Database } from "lucide-react";
+import { Home, PlayCircle, MessageCircle, FileText, BookOpen, Settings, LogOut, ShieldCheck, LayoutDashboard, Route as RouteIcon, PanelLeftClose, PanelLeftOpen, ScanText, Database, Menu } from "lucide-react";
 import { motion } from "framer-motion";
 import { EvoLogo } from "./EvoLogo";
 import { useAuth } from "@/hooks/useAuth";
@@ -9,6 +9,8 @@ import { AdminModeToggle } from "./AdminModeToggle";
 import { ThemeToggle } from "./ThemeToggle";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { BackButton } from "./BackButton";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { QuickPreferences, QuickPreferencesButton } from "./QuickPreferences";
 
 const SIDEBAR_KEY = "evo_sidebar_collapsed";
 
@@ -45,6 +47,29 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
         { title: "Settings", url: "/dashboard/settings", icon: Settings },
       ]
     : navItems;
+
+  const [moreOpen, setMoreOpen] = useState(false);
+  useEffect(() => { setMoreOpen(false); }, [location.pathname]);
+  const hideBottomNav = location.pathname === "/dashboard/chat" || location.pathname.startsWith("/dashboard/hugo/") || location.pathname.startsWith("/dashboard/chat/");
+  const adminView = isAdmin && mode === "admin";
+  const bottomItems = adminView
+    ? [
+        { title: "Workdesk", url: "/dashboard/admin/workdesk", icon: LayoutDashboard },
+        { title: "Contracts", url: "/dashboard/admin/contracts", icon: ScanText },
+        { title: "Requests", url: "/dashboard/admin/requests", icon: ShieldCheck },
+        { title: "Settings", url: "/dashboard/settings", icon: Settings },
+        { title: "More", url: "#more", icon: Menu },
+      ]
+    : [
+        { title: "Home", url: "/dashboard", icon: Home },
+        { title: "Hugo", url: "/dashboard/chat", icon: MessageCircle },
+        { title: "Review", url: "/dashboard/submit", icon: FileText },
+        { title: "Settings", url: "/dashboard/settings", icon: Settings },
+        { title: "More", url: "#more", icon: Menu },
+      ];
+  const currentTitle = [...allNavItems, ...bottomItems].find((i) => i.url === location.pathname)?.title ?? "Dashboard";
+
+
 
   return (
     <TooltipProvider delayDuration={200}>
