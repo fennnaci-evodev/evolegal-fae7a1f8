@@ -111,14 +111,14 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
                   className={`flex items-center gap-3 rounded-lg text-sm font-medium transition-all relative ${
                     collapsed ? "justify-center px-2 py-2.5" : "px-3 py-2.5"
                   } ${
-                    isActive ? "text-primary" : "text-muted-foreground hover:text-foreground hover:bg-muted/30"
+                    isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted/30"
                   }`}
                 >
                   {isActive && (
                     <motion.div
                       layoutId="sidebar-active"
                       className="absolute inset-0 bg-primary/8 rounded-lg"
-                      style={{ background: "hsla(186, 100%, 50%, 0.08)" }}
+                      style={{ background: "hsl(var(--foreground) / 0.06)" }}
                       transition={{ type: "spring", duration: 0.4 }}
                     />
                   )}
@@ -180,7 +180,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
         </aside>
 
         {/* Mobile header: back, logo, current view, quick preferences */}
-        <div className="md:hidden fixed top-0 left-0 right-0 z-40 glass-strong border-b border-border/30 px-2 h-14 flex items-center gap-1" style={{ borderRadius: 0 }}>
+        <div className="md:hidden fixed top-0 left-0 right-0 z-40 surface-bar border-b border-border/50 px-2 h-14 flex items-center gap-1" style={{ borderRadius: 0 }}>
           <BackButton />
           <Link to="/" aria-label="EvoLegal home" className="flex h-11 w-11 items-center justify-center">
             <EvoLogo size="sm" animate={false} showText={false} />
@@ -189,7 +189,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
           {!hideBottomNav && <QuickPreferencesButton />}
         </div>
 
-        <main className={`flex-1 md:p-8 p-4 pt-[4.5rem] md:pt-8 overflow-auto ${hideBottomNav ? "" : "pb-24 md:pb-8"}`}>
+        <main className={`flex-1 md:p-8 p-4 pt-[4.5rem] md:pt-8 overflow-auto ${hideBottomNav ? "" : "pb-[calc(4.5rem+env(safe-area-inset-bottom))] md:pb-8"}`}>
           {children}
         </main>
 
@@ -197,14 +197,14 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
         {!hideBottomNav && (
           <nav
             aria-label="Primary"
-            className="md:hidden fixed bottom-0 left-0 right-0 z-40 glass-strong border-t border-border/30 pb-[env(safe-area-inset-bottom)]"
+            className="md:hidden fixed bottom-0 left-0 right-0 z-40 surface-bar border-t border-border/50 pb-[env(safe-area-inset-bottom)]"
             style={{ borderRadius: 0 }}
           >
             <div className="grid grid-cols-5">
               {bottomItems.map((item) => {
                 const active = item.url === "#more" ? moreOpen : location.pathname === item.url;
-                const cls = `flex h-14 flex-col items-center justify-center gap-1 text-[10px] font-medium transition-colors ${active ? "text-primary" : "text-muted-foreground"}`;
-                const inner = (<><item.icon className="h-5 w-5" /><span className="truncate max-w-full px-1">{item.title}</span></>);
+                const cls = `flex h-12 flex-col items-center justify-center gap-0.5 text-[9.5px] font-medium tracking-wide transition-colors ${active ? "text-foreground" : "text-muted-foreground/70 hover:text-foreground"}`;
+                const inner = (<><item.icon className="h-[18px] w-[18px]" strokeWidth={active ? 2 : 1.6} /><span className="truncate max-w-full px-1">{item.title}</span></>);
                 return item.url === "#more" ? (
                   <button key="more" type="button" onClick={() => setMoreOpen(true)} className={cls} aria-label="More navigation">{inner}</button>
                 ) : (
@@ -222,7 +222,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
             <div className="mt-2 space-y-0.5">
               {allNavItems.map((item) => (
                 <Link key={item.url} to={item.url} onClick={() => setMoreOpen(false)}
-                  className={`flex min-h-[48px] items-center gap-3 rounded-xl px-3 text-sm ${location.pathname === item.url ? "text-primary bg-primary/10" : "text-muted-foreground hover:text-foreground"}`}>
+                  className={`flex min-h-[48px] items-center gap-3 rounded-xl px-3 text-sm ${location.pathname === item.url ? "text-foreground bg-foreground/[0.06]" : "text-muted-foreground hover:text-foreground"}`}>
                   <item.icon className="h-4 w-4" />{item.title}
                 </Link>
               ))}

@@ -9,9 +9,9 @@ export function SoundSettingsCard() {
   const [on, setOn] = useState(isSoundEnabled);
   const change = (next: boolean) => { setSoundEnabled(next); setOn(next); if (next) playSwitch(true); };
   return (
-    <Card className="glass-card border border-border/20">
+    <Card className="surface-card shadow-none">
       <CardHeader>
-        <div className="flex items-center gap-2"><Volume2 className="h-5 w-5 text-primary" /><CardTitle className="text-lg">Sound Effects</CardTitle></div>
+        <div className="flex items-center gap-2"><Volume2 className="h-4 w-4 text-muted-foreground" /><CardTitle className="text-[15px] font-semibold tracking-tight">Sound Effects</CardTitle></div>
         <CardDescription>Off by default. A quiet chime when Hugo finishes a reply or audit, and a soft click on switches.</CardDescription>
       </CardHeader>
       <CardContent className="flex items-center justify-between gap-4">

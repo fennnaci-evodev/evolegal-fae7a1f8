@@ -21,14 +21,14 @@ export function TrainingConsentCard({ userId }: { userId: string }) {
     toast.success(next ? "Quality Improvement enabled." : "Consent withdrawn. All unexported records from your account were deleted.");
   };
   return (
-    <Card className="glass-card border border-border/20">
+    <Card className="surface-card shadow-none">
       <CardHeader>
         <div className="mb-3 rounded-2xl border border-border/30 bg-muted/20 p-4">
           <div className="mb-2 flex items-center gap-2 text-sm font-semibold"><Lock className="h-4 w-4 text-primary" />Data Privacy &amp; Protection (GDPR)</div>
           <p className="text-xs leading-relaxed text-muted-foreground">All uploaded documents are encrypted. Personal data is removed prior to any quality-improvement review. System improvement is strictly subject to explicit user consent.</p>
           <p className="mt-2 text-xs leading-relaxed text-muted-foreground">Enabling Quality Improvement authorizes the processing of anonymized interaction data for future model development. This consent is revocable at any time with immediate effect via a single click, resulting in the prompt deletion of all unexported records.</p>
         </div>
-        <div className="flex items-center gap-2"><Database className="h-5 w-5 text-primary" /><CardTitle className="text-lg">Quality Improvement</CardTitle></div>
+        <div className="flex items-center gap-2"><Database className="h-4 w-4 text-muted-foreground" /><CardTitle className="text-[15px] font-semibold tracking-tight">Quality Improvement</CardTitle></div>
         <CardDescription>Off by default.</CardDescription>
       </CardHeader>
       <CardContent className="flex items-center justify-between gap-4">

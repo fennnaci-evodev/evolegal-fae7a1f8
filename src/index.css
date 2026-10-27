@@ -154,6 +154,17 @@
 }
 
 @layer utilities {
+  /* Calm surfaces: solid obsidian, hairline borders, no glows */
+  .surface-bar {
+    background: hsl(var(--background) / 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  .surface-card {
+    background: hsl(var(--card) / 0.6);
+    border: 1px solid hsl(var(--border) / 0.5);
+    border-radius: 1.25rem;
+  }
   .glass {
     background: hsla(240, 12%, 100%, 0.06);
     backdrop-filter: blur(16px) saturate(1.4);
@@ -357,19 +368,13 @@
 
   /* --- Primary CTA pill (Dashboard / Get Started) --- */
   .cyber-cta {
-    /* Dark mode: cyan → purple gradient with ambient aura */
-    background: linear-gradient(135deg, #00F2FE 0%, #7A5CFF 100%);
-    color: #0a0f1e;
-    border: 1px solid hsla(186, 100%, 70%, 0.35);
-    box-shadow:
-      0 0 15px rgba(0, 242, 254, 0.28),
-      inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    /* Solid monochrome CTA: no gradients, no glow */
+    background: hsl(var(--foreground));
+    color: hsl(var(--background));
+    border: 1px solid hsl(var(--foreground) / 0.1);
+    box-shadow: none;
   }
-  .cyber-cta:hover {
-    box-shadow:
-      0 0 22px rgba(0, 242, 254, 0.38),
-      inset 0 1px 0 rgba(255, 255, 255, 0.3);
-  }
+  .cyber-cta:hover { background: hsl(var(--foreground) / 0.9); box-shadow: none; }
   html.light .cyber-cta {
     /* Light mode: deep slate/navy solid with crisp micro-shadow */
     background: linear-gradient(180deg, hsl(222 47% 14%) 0%, hsl(222 47% 10%) 100%);

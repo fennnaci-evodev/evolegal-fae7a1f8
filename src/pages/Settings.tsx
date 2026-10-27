@@ -119,39 +119,39 @@ export default function Settings() {
     toast.error("Account deletion requires admin assistance. Please contact support@evolegal.com");
   };
 
-  const glassCard = "glass-card border border-border/20";
+  const glassCard = "surface-card shadow-none";
 
   return (
     <DashboardLayout>
-      <div className="max-w-3xl mx-auto space-y-6 pb-12">
+      <div className="max-w-2xl mx-auto space-y-10 pb-16 pt-2">
         <div>
-          <h1 className="text-2xl font-display font-bold text-foreground">Settings</h1>
+          <h1 className="text-[22px] font-display font-semibold tracking-tight text-foreground">Settings</h1>
           <p className="text-muted-foreground text-sm mt-1">Profile, preferences, privacy, and security.</p>
         </div>
 
-        <div role="tablist" aria-label="Settings sections" className="grid grid-cols-2 gap-1 rounded-2xl border border-border/30 p-1 sm:grid-cols-4 sm:rounded-full">
+        <div role="tablist" aria-label="Settings sections" className="grid grid-cols-2 gap-1 rounded-2xl border border-border/50 bg-card/40 p-1 sm:grid-cols-4 sm:rounded-full">
           {SETTINGS_TABS.map((t) => (
             <button
               key={t.key}
               role="tab"
               aria-selected={tab === t.key}
               onClick={() => selectTab(t.key)}
-              className={`flex h-11 items-center justify-center gap-2 rounded-xl text-xs font-medium transition-colors sm:rounded-full ${tab === t.key ? "bg-primary/12 text-primary" : "text-muted-foreground hover:text-foreground"}`}
+              className={`flex h-11 items-center justify-center gap-2 rounded-xl text-xs font-medium transition-colors sm:rounded-full ${tab === t.key ? "bg-foreground/[0.08] text-foreground" : "text-muted-foreground hover:text-foreground"}`}
             >
               <t.icon className="h-4 w-4" />{t.label}
             </button>
           ))}
         </div>
 
-        {tab === "general" && (<>
+        {tab === "general" && (<div className="space-y-6">
         {/* Admin Tools */}
         {isAdmin && (
           <motion.div {...fadeUp} transition={{ delay: 0.05 }}>
             <Card className={`${glassCard} border-primary/30`}>
               <CardHeader className="pb-3">
                 <div className="flex items-center gap-2">
-                  <LayoutDashboard className="h-5 w-5 text-primary" />
-                  <CardTitle className="text-lg">Admin Tools</CardTitle>
+                  <LayoutDashboard className="h-4 w-4 text-muted-foreground" />
+                  <CardTitle className="text-[15px] font-semibold tracking-tight">Admin Tools</CardTitle>
                   <Badge variant="outline" className="ml-auto border-primary/40 text-primary text-[10px]">Admin</Badge>
                 </div>
               </CardHeader>
@@ -169,8 +169,8 @@ export default function Settings() {
           <Card className={glassCard}>
             <CardHeader>
               <div className="flex items-center gap-2">
-                <User className="h-5 w-5 text-primary" />
-                <CardTitle className="text-lg">Profile Information</CardTitle>
+                <User className="h-4 w-4 text-muted-foreground" />
+                <CardTitle className="text-[15px] font-semibold tracking-tight">Profile Information</CardTitle>
               </div>
               <CardDescription>Update your personal details.</CardDescription>
             </CardHeader>
@@ -235,16 +235,16 @@ export default function Settings() {
             </CardContent>
           </Card>
         </motion.div>
-        </>)}
+        </div>)}
 
-        {tab === "security" && (<>
+        {tab === "security" && (<div className="space-y-6">
         {/* Security */}
         <motion.div {...fadeUp} transition={{ delay: 0.15 }}>
           <Card className={glassCard}>
             <CardHeader>
               <div className="flex items-center gap-2">
-                <Shield className="h-5 w-5 text-primary" />
-                <CardTitle className="text-lg">Security</CardTitle>
+                <Shield className="h-4 w-4 text-muted-foreground" />
+                <CardTitle className="text-[15px] font-semibold tracking-tight">Security</CardTitle>
               </div>
               <CardDescription>Manage your password and sessions.</CardDescription>
             </CardHeader>
@@ -319,8 +319,8 @@ export default function Settings() {
           <Card className={glassCard}>
             <CardHeader>
               <div className="flex items-center gap-2">
-                <CreditCard className="h-5 w-5 text-primary" />
-                <CardTitle className="text-lg">Subscription & Billing</CardTitle>
+                <CreditCard className="h-4 w-4 text-muted-foreground" />
+                <CardTitle className="text-[15px] font-semibold tracking-tight">Subscription & Billing</CardTitle>
               </div>
             </CardHeader>
             <CardContent className="space-y-5">
@@ -345,17 +345,17 @@ export default function Settings() {
             </CardContent>
           </Card>
         </motion.div>
-        </>)}
+        </div>)}
 
-        {tab === "preferences" && (<>
+        {tab === "preferences" && (<div className="space-y-6">
         <motion.div {...fadeUp} transition={{ delay: 0.05 }}><SoundSettingsCard /></motion.div>
         {/* Notifications */}
         <motion.div {...fadeUp} transition={{ delay: 0.25 }}>
           <Card className={glassCard}>
             <CardHeader>
               <div className="flex items-center gap-2">
-                <Bell className="h-5 w-5 text-primary" />
-                <CardTitle className="text-lg">Notifications</CardTitle>
+                <Bell className="h-4 w-4 text-muted-foreground" />
+                <CardTitle className="text-[15px] font-semibold tracking-tight">Notifications</CardTitle>
               </div>
               <CardDescription>Choose what you want to be notified about.</CardDescription>
             </CardHeader>
@@ -389,17 +389,17 @@ export default function Settings() {
             </CardContent>
           </Card>
         </motion.div>
-        </>)}
+        </div>)}
 
-        {tab === "privacy" && (<>
+        {tab === "privacy" && (<div className="space-y-6">
         {user && <motion.div {...fadeUp} transition={{ delay: 0.05 }}><TrainingConsentCard userId={user.id} /></motion.div>}
         {/* Privacy & Data */}
         <motion.div {...fadeUp} transition={{ delay: 0.3 }}>
           <Card className={glassCard}>
             <CardHeader>
               <div className="flex items-center gap-2">
-                <Lock className="h-5 w-5 text-primary" />
-                <CardTitle className="text-lg">Privacy & Data</CardTitle>
+                <Lock className="h-4 w-4 text-muted-foreground" />
+                <CardTitle className="text-[15px] font-semibold tracking-tight">Privacy & Data</CardTitle>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -437,7 +437,7 @@ export default function Settings() {
             </CardContent>
           </Card>
         </motion.div>
-        </>)}
+        </div>)}
       </div>
     </DashboardLayout>
   );
