@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { useSearchParams, useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { DashboardLayout } from "@/components/DashboardLayout";
@@ -43,6 +44,7 @@ const ExpertChat = () => {
 
   const {
     messages,
+    setMessages,
     streaming,
     responseError,
     historyLoading,
@@ -135,17 +137,31 @@ const ExpertChat = () => {
     if (attachment || looksLikeContract(input)) {
       setAttaching(true);
       const contract = attachment ?? { name: "Pasted contract.txt", text: input };
+      const savedInput = input, savedAttachment = attachment;
+      const createdChat = !currentChatId;
+      let cId: string | null = null, messageId: string | null = null;
       try {
         const text = normalizeAuditText(contract.text);
-        const cId = currentChatId ?? await createChat();
+        cId = currentChatId ?? await createChat();
         if (!cId) throw new Error("Could not start a contract conversation.");
-        const messageId = await saveMessage(cId, "user", `Contract attached: ${contract.name}. Please review the saved clause-level audit.`);
+        messageId = await saveMessage(cId, "user", `Contract attached: ${contract.name}. Please review the saved clause-level audit.`);
         if (!messageId) throw new Error("Could not save the contract message.");
         await loadMessages(cId);
         await attachAudit(text, contract.name, cId, messageId);
         setInput(""); setAttachment(null);
         if (!paramChatId) navigate(`/dashboard/hugo/${cId}`, { replace: true });
-      } catch (err) { toast.error(err instanceof Error ? err.message : "Could not attach this contract."); }
+      } catch (err) {
+        // Roll back the temporary "Contract attached…" message (and an empty new chat).
+        if (messageId) {
+          const mid = messageId;
+          setMessages(prev => prev.filter(m => m.id !== mid));
+          await supabase.from("hugo_messages" as any).delete().eq("id", mid);
+        }
+        if (createdChat && cId) { await supabase.from("hugo_chats" as any).delete().eq("id", cId); startNewChat(); }
+        setInput(savedInput); setAttachment(savedAttachment);
+        const detail = err instanceof Error ? err.message : "";
+        toast.error("Could not process contract attachment. Please try again.", detail && !/Could not process contract attachment/.test(detail) ? { description: detail } : undefined);
+      }
       finally { setAttaching(false); }
       return;
     }

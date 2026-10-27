@@ -31,21 +31,24 @@ export function useContractAudits(chatId: string | null) {
     });
     return () => { versionRef.current++; controllerRef.current?.abort(); };
   }, [chatId, user?.id]);
-  const run = useCallback(async (id: string, clauseIndex?: number) => {
-    if (controllerRef.current) return;
+  const run = useCallback(async (id: string, clauseIndex?: number, opts?: { silent?: boolean }): Promise<boolean> => {
+    if (controllerRef.current) return false;
     const version = versionRef.current;
     const controller = new AbortController(); controllerRef.current = controller; setBusy(id);
     try {
       const saved = await runContractAudit(id, clauseIndex, controller.signal);
       if (version === versionRef.current) setAudits(prev => prev.map(a => a.id === id ? saved : a));
+      return true;
     } catch (err) {
+      const raw = err instanceof Error ? err.message : "Audit failed.";
+      const limited = raw === "Audit Limit Reached";
+      const message = limited ? "Monthly audit limit reached. Your 3 free audits renew on the 1st of next month." : raw;
+      if (opts?.silent) throw new Error(controller.signal.aborted ? "Contract processing was stopped." : message);
       if (!controller.signal.aborted && version === versionRef.current) {
-        const raw = err instanceof Error ? err.message : "Audit failed.";
-        const limited = raw === "Audit Limit Reached";
-        const message = limited ? "Monthly audit limit reached. Your 3 free audits renew on the 1st of next month." : raw;
         if (limited) toast.error("Audit Limit Reached", { description: message }); else toast.error(message);
         if (clauseIndex === undefined) setAudits(prev => prev.map(a => a.id === id ? { ...a, status: "error", error_message: message } : a));
       }
+      return false;
     } finally { if (controllerRef.current === controller) { controllerRef.current = null; setBusy(null); } void refreshQuota(); }
   }, [refreshQuota]);
   const attach = useCallback(async (text: string, name: string, cId: string, messageId: string) => {
@@ -53,11 +56,20 @@ export function useContractAudits(chatId: string | null) {
     if (remaining === 0) throw new Error("Audit Limit Reached: your 3 free monthly audits are used. They renew on the 1st of next month.");
     const normalized = normalizeAuditText(text), id = crypto.randomUUID(), path = `${user.id}/${cId}/${id}.txt`;
     const { error: uploadError } = await supabase.storage.from("contract-audits").upload(path, new Blob([normalized], { type: "text/plain" }), { upsert: false });
-    if (uploadError) throw new Error("Could not save the contract attachment. Try again.");
+    if (uploadError) throw new Error("Could not process contract attachment. Please try again.");
     const { data, error } = await supabase.from("hugo_contract_audits").insert({ id, chat_id: cId, user_id: user.id, message_id: messageId, file_name: name.slice(0, 255), file_path: path }).select().single();
-    if (error) { await supabase.storage.from("contract-audits").remove([path]); throw new Error("Could not save the audit record. Try again."); }
+    if (error) { await supabase.storage.from("contract-audits").remove([path]); throw new Error("Could not process contract attachment. Please try again."); }
     setAudits(prev => prev.some(a => a.id === id) ? prev : [...prev, data as unknown as ChatContractAudit]);
-    await run(id);
+    try {
+      const ok = await run(id, undefined, { silent: true });
+      if (!ok) throw new Error("Another audit is still running. Please try again.");
+    } catch (err) {
+      // Roll back: no orphaned card, record, or stored file remains.
+      setAudits(prev => prev.filter(a => a.id !== id));
+      await supabase.from("hugo_contract_audits").delete().eq("id", id).eq("user_id", user.id);
+      await supabase.storage.from("contract-audits").remove([path]);
+      throw err;
+    }
   }, [user, run, remaining]);
   return { quota, remaining, audits, busy, attach, run, stop: () => controllerRef.current?.abort() };
 }
