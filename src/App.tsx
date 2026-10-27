@@ -33,6 +33,7 @@ import AdminSources from "./pages/AdminSources";
 import ContractAnalysis from "./pages/ContractAnalysis";
 import WorkflowGuides from "./pages/WorkflowGuides";
 import SettingsPage from "./pages/Settings";
+import AdminCuration from "./pages/AdminCuration";
 import NotFound from "./pages/NotFound";
 import { CookieConsent } from "@/components/CookieConsent";
 
@@ -75,6 +76,7 @@ const App = () => {
                 <Route path="/dashboard/admin/requests" element={<AdminRequests />} />
                 <Route path="/dashboard/admin/workdesk" element={<ExpertDashboard />} />
                 <Route path="/dashboard/admin/sources" element={<AdminSources />} />
+                <Route path="/dashboard/admin/curation" element={<AdminCuration />} />
                 <Route path="/dashboard/admin/contracts" element={<ContractAnalysis />} />
                 <Route path="/dashboard/workflows" element={<WorkflowGuides />} />
                 <Route path="/dashboard/saved" element={<Library />} />

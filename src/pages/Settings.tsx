@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { TrainingConsentCard } from "@/components/TrainingConsentCard";
 import { Separator } from "@/components/ui/separator";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -205,6 +206,8 @@ export default function Settings() {
             </CardContent>
           </Card>
         </motion.div>
+
+        {user && <motion.div {...fadeUp} transition={{ delay: 0.12 }}><TrainingConsentCard userId={user.id} /></motion.div>}
 
         {/* Security */}
         <motion.div {...fadeUp} transition={{ delay: 0.15 }}>
