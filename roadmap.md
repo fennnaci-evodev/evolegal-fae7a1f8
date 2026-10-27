@@ -45,3 +45,4 @@
 - [x] Administrator verification workflow at /dashboard/admin/sources: saved text diff, five legal attestations, atomic version-checked approval/rejection, immutable review history. Signed-in admin approved and rejected a test-only source, then it was retired; no real law approved. Fixed auth-resolution redirect race and official XML extraction. Manual checks from this panel do not use paid analysis. Hugo retrieval remains disabled pending actual expert approval.
 - [ ] Discover new related English provisions/judgments daily and add them as drafts (needs a daily schedule, not available yet; run manually meanwhile).
 - [ ] First English sources approved by the administrator in the panel (waiting on the administrator's own review).
+- Contract audits: 3 free per calendar month (UTC), counted per audit and refunded on failure; admins unlimited; follow-ups use stored essence artifact.
