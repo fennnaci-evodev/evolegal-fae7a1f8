@@ -111,14 +111,14 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
                   className={`flex items-center gap-3 rounded-lg text-sm font-medium transition-all relative ${
                     collapsed ? "justify-center px-2 py-2.5" : "px-3 py-2.5"
                   } ${
-                    isActive ? "text-primary" : "text-muted-foreground hover:text-foreground hover:bg-muted/30"
+                    isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted/30"
                   }`}
                 >
                   {isActive && (
                     <motion.div
                       layoutId="sidebar-active"
                       className="absolute inset-0 bg-primary/8 rounded-lg"
-                      style={{ background: "hsla(186, 100%, 50%, 0.08)" }}
+                      style={{ background: "hsl(var(--foreground) / 0.06)" }}
                       transition={{ type: "spring", duration: 0.4 }}
                     />
                   )}
