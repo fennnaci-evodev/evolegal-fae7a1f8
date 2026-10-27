@@ -15,6 +15,7 @@ export function detectKind(file: File): DocumentKind {
   if (/\.(txt|md)$/.test(name) && TEXT_TYPES.includes(file.type)) return "text";
   if (name.endsWith(".pdf") && PDF_TYPES.includes(file.type)) return "pdf";
   if (name.endsWith(".docx") && DOCX_TYPES.includes(file.type)) return "docx";
+  if (/\.(txt|md|pdf|docx)$/.test(name)) throw new DocumentParseError("This file's content type does not match its extension.", "unsupported");
   throw new DocumentParseError("Choose a .pdf, .docx, .txt or .md contract.", "unsupported");
 }
 
@@ -94,7 +95,7 @@ async function readDocx(bytes: ArrayBuffer) {
   catch { throw new DocumentParseError("This Word document could not be read. It may be corrupt; save it again as .docx and retry.", "corrupt"); }
 }
 
-export async function extractDocumentText(file: File, maxBytes = DOCUMENT_MAX_BYTES): Promise<{ text: string; kind: DocumentKind }> {
+export async function extractDocumentText(file: File, maxBytes = DOCUMENT_MAX_BYTES, opts: { literalText?: boolean } = {}): Promise<{ text: string; kind: DocumentKind }> {
   const kind = detectKind(file);
   if (!file.size) throw new DocumentParseError("This document is empty.", "empty");
   if (file.size > maxBytes) throw new DocumentParseError(`Choose a document no larger than ${Math.round(maxBytes / 1048576)} MiB.`, "too_large");
@@ -102,8 +103,9 @@ export async function extractDocumentText(file: File, maxBytes = DOCUMENT_MAX_BY
   try {
     const raw = await withTimeout(kind === "pdf" ? readPdf(bytes) : kind === "docx" ? readDocx(bytes) : readText(bytes), 60_000);
     if (kind === "text" && /[\u0000-\u0008\u000B\u000E-\u001F\u007F]/u.test(raw.replace(/\u000C/g, ""))) throw new DocumentParseError("This file contains binary characters. Choose a readable contract.", "corrupt");
-    const text = sanitizeExtracted(raw);
-    if (!text) throw new DocumentParseError("No readable text was found in this document.", "empty");
+    // Plain-text viewing keeps literal wording; binary formats are always sanitized.
+    const text = kind === "text" && opts.literalText ? raw.replace(/^\uFEFF/, "").replace(/\r\n?/g, "\n").replace(/\u000C/g, "\n\n") : sanitizeExtracted(raw);
+    if (!text.trim()) throw new DocumentParseError("This document is empty.", "empty");
     return { text, kind };
   } finally { bytes = null; }
 }

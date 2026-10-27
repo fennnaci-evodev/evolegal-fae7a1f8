@@ -23,8 +23,8 @@ describe("Document input regression safeguards", () => {
     await expect(readContractViewerFile(textFile(text))).resolves.toBe(text);
   });
   it("allows text viewing at the 22 MiB boundary but rejects larger files", async () => {
-    const text = "x".repeat(20 * 1024 * 1024);
-    await expect(readContractViewerFile(textFile(text))).resolves.toHaveLength(20 * 1024 * 1024);
+    const text = "x".repeat(22 * 1024 * 1024);
+    await expect(readContractViewerFile(textFile(text))).resolves.toHaveLength(22 * 1024 * 1024);
     await expect(readContractViewerFile(textFile(text + "x"))).rejects.toThrow("22 MiB");
   });
   it("normalizes exported page breaks without rejecting a contract", async () => {
@@ -39,8 +39,8 @@ describe("Document input regression safeguards", () => {
   it("rejects binary, blank and unsupported local files", async () => {
     await expect(readContractViewerFile(textFile("a\0b"))).rejects.toThrow("binary");
     await expect(readContractViewerFile(textFile(" \f\n"))).rejects.toThrow("empty");
-    await expect(readContractViewerFile(fileFrom(new Uint8Array([65]), "a.exe"))).rejects.toThrow(".txt");
-    await expect(readContractViewerFile(fileFrom(new Uint8Array([65]), "a.txt", "application/pdf"))).rejects.toThrow("content type");
+    await expect(readContractViewerFile(fileFrom(new Uint8Array([65]), "a.exe"))).rejects.toThrow(".pdf, .docx");
+    await expect(readContractViewerFile(fileFrom(new Uint8Array([65]), "a.txt", "application/pdf"))).rejects.toThrow("content type does not match");
   });
   it("retains the separate 30,000-character Hugo chat limit", () => {
     expect(() => normalizeHugoText("x".repeat(30_000))).not.toThrow();
