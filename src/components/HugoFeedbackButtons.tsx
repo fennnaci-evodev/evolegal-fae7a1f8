@@ -21,7 +21,6 @@ export function HugoFeedbackButtons({ messageId, chatId, auditId, userId, existi
   const [reasons, setReasons] = useState<FeedbackReason[]>([]);
   const [comment, setComment] = useState("");
   const [saving, setSaving] = useState(false);
-  const table = auditId ? "hugo_audit_feedback" : "hugo_feedback";
 
   useEffect(() => {
     if (existingRating !== undefined) return;
@@ -44,7 +43,6 @@ export function HugoFeedbackButtons({ messageId, chatId, auditId, userId, existi
     setRating(next); setOpen(false); setReasons([]); setComment("");
     toast.success("Feedback recorded.");
   };
-  void table;
 
   const toggle = (r: FeedbackReason) => setReasons(cur => cur.includes(r) ? cur.filter(x => x !== r) : [...cur, r]);
 

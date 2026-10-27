@@ -464,7 +464,7 @@ const ExpertChat = () => {
                         <HugoCitationChips content={msg.content} />
                       )}
                     </div>
-                    {audits.filter(a => a.message_id === msg.id).map(a => <ContractRiskSummaryCard key={a.id} audit={a} busy={auditBusy === a.id} onRun={i => { void runAudit(a.id, i); }} onStop={stopAudit} />)}
+                    {audits.filter(a => a.message_id === msg.id).map(a => <ContractRiskSummaryCard key={a.id} audit={a} busy={auditBusy === a.id} onRun={i => { void runAudit(a.id, i); }} onStop={stopAudit} userId={user?.id} />)}
                     {msg.role === "user" && looksLikeContract(msg.content) && !audits.some(a => a.message_id === msg.id) && <HugoContractCard text={msg.content} />}
                     {msg.role === "user" && isLastUserMsg && !streaming && (
                       <button
@@ -496,7 +496,7 @@ const ExpertChat = () => {
               })}
             </AnimatePresence>
 
-            {audits.filter(a => !messages.some(m => m.id === a.message_id)).map(a => <ContractRiskSummaryCard key={a.id} audit={a} busy={auditBusy === a.id} onRun={i => { void runAudit(a.id, i); }} onStop={stopAudit} />)}
+            {audits.filter(a => !messages.some(m => m.id === a.message_id)).map(a => <ContractRiskSummaryCard key={a.id} audit={a} busy={auditBusy === a.id} onRun={i => { void runAudit(a.id, i); }} onStop={stopAudit} userId={user?.id} />)}
 
             {streaming && messages[messages.length - 1]?.role === "user" && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex gap-3 items-start">
