@@ -1,4 +1,5 @@
 import { contractDocumentText } from "./hugoContractInput";
+export { buildContractEssence, extractEntities, MONTHLY_FREE_AUDITS, type ContractEssence } from "../../supabase/functions/_shared/contractEssence";
 
 export type ClauseSeverity = "Green" | "Amber" | "Red";
 
