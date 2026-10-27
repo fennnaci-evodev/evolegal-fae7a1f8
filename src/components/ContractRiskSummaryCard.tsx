@@ -1,4 +1,7 @@
 import { useState } from "react";
+
+/** Audit cards already shown this session; their entrance motion never replays on chat switches or remounts. */
+const revealedAudits = new Set<string>();
 import { diffWordsWithSpace } from "diff";
 import { FileSearch, ArrowUpRight, LoaderCircle, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -25,10 +28,11 @@ function Pill({ level, count }: { level: Level; count: number }) {
 export function ContractRiskSummaryCard({ audit, busy, onRun, onStop, userId }: { audit: ChatContractAudit; userId?: string; busy: boolean; onRun: (clauseIndex?: number) => void; onStop: () => void }) {
   const [open, setOpen] = useState(false);
   const [more, setMore] = useState(false);
+  const [animate] = useState(() => { const first = !revealedAudits.has(audit.id); revealedAudits.add(audit.id); return first; });
   const a = audit.analysis, counts = a ? exposureCounts(a.clauses) : null;
   const level = a ? levelOf(a.overall_risk_score) : "Low";
   return <>
-    <article className="evo-reveal mt-2 w-full max-w-xl rounded-xl border border-primary/25 bg-card p-4 text-left text-foreground" aria-label="Contract risk summary">
+    <article className={`${animate ? "evo-reveal " : ""}mt-2 w-full max-w-xl rounded-xl border border-primary/25 bg-card p-4 text-left text-foreground`} aria-label="Contract risk summary">
       <header className="flex items-center gap-2"><FileSearch className="h-4 w-4 shrink-0 text-primary" /><h4 className="text-sm font-semibold">Contract Risk Summary</h4></header>
       <p className="mt-0.5 truncate text-xs text-muted-foreground">{audit.file_name}</p>
       {a ? <>
@@ -39,7 +43,7 @@ export function ContractRiskSummaryCard({ audit, busy, onRun, onStop, userId }: 
             <span className={`ml-auto text-xs font-medium ${tone[level].text}`}>{a.partial ? "Partial audit · " : ""}{exposureLabel(a.overall_risk_score)}</span>
           </div>
           <div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-muted" role="meter" aria-valuemin={0} aria-valuemax={100} aria-valuenow={a.overall_risk_score} aria-label="Exposure estimate">
-            <div className={`evo-meter h-full rounded-full ${tone[level].bar}`} style={{ width: `${a.overall_risk_score}%` }} />
+            <div className={`${animate ? "evo-meter " : ""}h-full rounded-full ${tone[level].bar}`} style={{ width: `${a.overall_risk_score}%` }} />
           </div>
           <div className="mt-3 flex flex-wrap gap-1.5">
             <Pill level="High" count={counts?.High ?? 0} /><Pill level="Medium" count={counts?.Medium ?? 0} /><Pill level="Low" count={counts?.Low ?? 0} />
