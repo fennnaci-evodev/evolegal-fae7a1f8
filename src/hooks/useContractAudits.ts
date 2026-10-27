@@ -12,6 +12,15 @@ export function useContractAudits(chatId: string | null) {
   const [busy, setBusy] = useState<string | null>(null);
   const controllerRef = useRef<AbortController | null>(null);
   const versionRef = useRef(0);
+  const [quota, setQuota] = useState<{ used: number; limit: number; unlimited: boolean } | null>(null);
+  const refreshQuota = useCallback(async () => {
+    if (!user) { setQuota(null); return; }
+    const { data } = await supabase.rpc("audit_quota_status");
+    const row = Array.isArray(data) ? data[0] : null;
+    if (row) setQuota({ used: row.used, limit: row.monthly_limit, unlimited: row.unlimited });
+  }, [user?.id]);
+  useEffect(() => { void refreshQuota(); }, [refreshQuota]);
+  const remaining = quota ? (quota.unlimited ? Infinity : Math.max(0, quota.limit - quota.used)) : null;
   useEffect(() => {
     const version = ++versionRef.current; setAudits([]); setBusy(null);
     controllerRef.current?.abort();
@@ -31,14 +40,17 @@ export function useContractAudits(chatId: string | null) {
       if (version === versionRef.current) setAudits(prev => prev.map(a => a.id === id ? saved : a));
     } catch (err) {
       if (!controller.signal.aborted && version === versionRef.current) {
-        const message = err instanceof Error ? err.message : "Audit failed.";
-        toast.error(message);
+        const raw = err instanceof Error ? err.message : "Audit failed.";
+        const limited = raw === "Audit Limit Reached";
+        const message = limited ? "Monthly audit limit reached. Your 3 free audits renew on the 1st of next month." : raw;
+        if (limited) toast.error("Audit Limit Reached", { description: message }); else toast.error(message);
         if (clauseIndex === undefined) setAudits(prev => prev.map(a => a.id === id ? { ...a, status: "error", error_message: message } : a));
       }
-    } finally { if (controllerRef.current === controller) { controllerRef.current = null; setBusy(null); } }
-  }, []);
+    } finally { if (controllerRef.current === controller) { controllerRef.current = null; setBusy(null); } void refreshQuota(); }
+  }, [refreshQuota]);
   const attach = useCallback(async (text: string, name: string, cId: string, messageId: string) => {
     if (!user) throw new Error("Please sign in.");
+    if (remaining === 0) throw new Error("Audit Limit Reached: your 3 free monthly audits are used. They renew on the 1st of next month.");
     const normalized = normalizeAuditText(text), id = crypto.randomUUID(), path = `${user.id}/${cId}/${id}.txt`;
     const { error: uploadError } = await supabase.storage.from("contract-audits").upload(path, new Blob([normalized], { type: "text/plain" }), { upsert: false });
     if (uploadError) throw new Error("Could not save the contract attachment. Try again.");
@@ -46,6 +58,6 @@ export function useContractAudits(chatId: string | null) {
     if (error) { await supabase.storage.from("contract-audits").remove([path]); throw new Error("Could not save the audit record. Try again."); }
     setAudits(prev => prev.some(a => a.id === id) ? prev : [...prev, data as unknown as ChatContractAudit]);
     await run(id);
-  }, [user, run]);
-  return { audits, busy, attach, run, stop: () => controllerRef.current?.abort() };
+  }, [user, run, remaining]);
+  return { quota, remaining, audits, busy, attach, run, stop: () => controllerRef.current?.abort() };
 }

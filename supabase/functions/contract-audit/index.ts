@@ -3,6 +3,7 @@ import { z } from "npm:zod@4.6.7";
 import { requireSession, readJson, SafeError } from "../_shared/safety.ts";
 import { stream, activeProvider } from "../_shared/hugoProvider.ts";
 import { hugoPersonality } from "../_shared/hugoPersonality.ts";
+import { buildContractEssence, MONTHLY_FREE_AUDITS } from "../_shared/contractEssence.ts";
 import { analysisSchema, redlineSchema, auditCoverage } from "./schema.ts";
 
 const bodySchema = z.object({ audit_id: z.uuid(), action: z.enum(["analyze", "redline"]).default("analyze"), clause_index: z.number().int().min(0).max(14).optional() }).strict();
@@ -55,6 +56,11 @@ Deno.serve(async req => {
     const coverage = auditCoverage(text);
     const clause = audit.analysis?.clauses?.[body.clause_index ?? -1];
     if (body.action === "redline" && (!clause || audit.status !== "complete")) throw new SafeError(400, "Select a completed clause finding.");
+    if (body.action === "analyze") {
+      const { data: allowed, error: quotaError } = await admin.rpc("consume_audit_credit", { p_user: user.id, p_audit: audit.id, p_limit: MONTHLY_FREE_AUDITS });
+      if (quotaError) throw new SafeError(503, "Audit quota could not be checked. Try again.");
+      if (!allowed) return new Response(JSON.stringify({ error: "Audit Limit Reached", code: "audit_limit_reached", limit: MONTHLY_FREE_AUDITS }), { status: 403, headers: jsonHeaders });
+    }
     const instruction = body.action === "analyze"
       ? 'Return JSON: {overall_risk_score: integer 0-100, risk_level: string, summary: string, clauses:[{title,risk_score:integer 0-100,severity:"Red"|"Amber"|"Green",excerpt,explanation,recommendation}]}. Assess only provided text. At most 15 material clauses. Excerpts must be exact substrings. Scores are heuristic exposure estimates, not calibrated legal accuracy. Recommendations describe options and tradeoffs using "An alternative could" rather than imperative commands. Do not claim terms are industry standard without reviewed evidence. No names, personalized advice, full rewrites or invented law.'
       : 'Return JSON {original,suggested,reasoning}. original must equal the supplied clause excerpt exactly. suggested is a generic negotiation alternative for this clause only, not a complete agreement. Explain tradeoffs; do not claim enforceability.';
@@ -68,22 +74,24 @@ Deno.serve(async req => {
       const heartbeat = setInterval(() => controller.enqueue(encoder.encode(": working\n\n")), 10000);
       try {
         const output = await providerText(upstreamBody);
-        let analysis;
+        let analysis, essence;
         if (body.action === "analyze") {
           const result = analysisSchema.parse(output);
           if (result.clauses.some(c => !coverage.text.includes(c.excerpt))) throw new SafeError(502, "The provider returned a clause not found in the assessed text. No findings were saved.");
           analysis = { ...result, ...coverage, text: undefined, provider: activeProvider(), redlines: {}, authority_status: "unverified" };
+          essence = buildContractEssence(result, coverage.text, coverage.partial);
         } else {
           const redline = redlineSchema.parse(output);
           if (redline.original !== clause.excerpt) throw new SafeError(502, "The redline did not match the original clause.");
           analysis = { ...audit.analysis, redlines: { ...audit.analysis.redlines, [String(body.clause_index)]: redline } };
         }
-        const { data: saved, error: saveError } = await admin.from("hugo_contract_audits").update({ status: "complete", analysis, error_message: null }).eq("id", audit.id).eq("user_id", user.id).select().single();
+        const { data: saved, error: saveError } = await admin.from("hugo_contract_audits").update({ status: "complete", analysis, error_message: null, ...(essence ? { essence } : {}) }).eq("id", audit.id).eq("user_id", user.id).select().single();
         if (saveError) throw new SafeError(503, "Could not save the audit. Findings are not complete.");
         emit({ audit: saved });
       } catch (err) {
         console.error("contract audit failed", { kind: err instanceof z.ZodError ? "schema" : err instanceof SyntaxError ? "json" : err instanceof Error ? err.name : "unknown", issues: err instanceof z.ZodError ? err.issues.map(i => ({ path: i.path, code: i.code })) : undefined });
         const message = err instanceof SafeError ? err.message : err instanceof z.ZodError ? "The provider returned incomplete audit fields. No findings were saved; start a fresh request." : err instanceof SyntaxError ? "The provider returned unreadable audit data. No findings were saved; start a fresh request." : "Could not complete this audit. Start a fresh request.";
+        if (body.action === "analyze") await admin.from("hugo_audit_usage").delete().eq("audit_id", audit.id);
         if (body.action === "analyze") await admin.from("hugo_contract_audits").update({ status: "error", error_message: message }).eq("id", audit.id).eq("user_id", user.id);
         emit({ error: message });
       } finally { clearInterval(heartbeat); controller.close(); }

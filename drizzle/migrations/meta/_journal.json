@@ -78,6 +78,13 @@
       "when": 1793043639928,
       "tag": "0010_owned_contract_audits",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1793103709995,
+      "tag": "0011_audit_quota_and_essence",
+      "breakpoints": true
     }
   ]
 }
