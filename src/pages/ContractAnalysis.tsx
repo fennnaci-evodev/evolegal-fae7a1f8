@@ -1,3 +1,4 @@
+import { DOCUMENT_ACCEPT } from "@/lib/documentParser";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowDownToLine, ArrowRight, Check, ChevronRight, FileText, LockKeyhole, Scale, Search, ShieldCheck, TriangleAlert, Upload, X } from "lucide-react";
@@ -69,7 +70,7 @@ export default function ContractAnalysis() {
     <header className="flex flex-wrap items-center justify-between gap-4">
       <div><div className="mb-2 flex items-center gap-2 text-[10px] font-medium uppercase tracking-widest text-primary"><ShieldCheck className="h-3.5 w-3.5" /> Expert workspace <span className="text-muted-foreground">/</span> Contract analysis</div><h1 className="font-display text-2xl font-bold md:text-3xl">Contract Risk Analysis</h1><p className="mt-1.5 text-sm text-muted-foreground">Clause-level insights. A clearer view of contractual exposure.</p></div>
       <div className="flex flex-wrap gap-2"><Button variant="outline" className="rounded-full" onClick={() => fileInput.current?.click()}><Upload /> Upload Contract</Button><Button variant="outline" className="rounded-full border-primary/25 text-primary" disabled={!!upload} title="Download a printable HTML report" onClick={() => exportRiskReport(sampleAnalysis, sampleSections)}><ArrowDownToLine /> Export Report</Button></div>
-      <input ref={fileInput} type="file" accept=".pdf,.txt,.md" className="hidden" onChange={e => { void handleUpload(e.target.files?.[0]); e.target.value = ""; }} />
+      <input ref={fileInput} type="file" accept={DOCUMENT_ACCEPT} className="hidden" onChange={e => { void handleUpload(e.target.files?.[0]); e.target.value = ""; }} />
     </header>
 
     <section className="risk-summary-band grid gap-6 rounded-lg border border-primary/20 p-5 md:grid-cols-[1.1fr_1fr] md:p-7" aria-label="Contract risk summary">

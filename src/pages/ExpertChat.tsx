@@ -35,6 +35,7 @@ import { CONTRACT_MESSAGE_LIMIT, normalizeHugoText } from "@/lib/hugoContractInp
 import { useContractAudits } from "@/hooks/useContractAudits";
 import { ContractRiskSummaryCard } from "@/components/ContractRiskSummaryCard";
 import { readAuditFile, normalizeAuditText } from "@/lib/contractAuditInput";
+import { DOCUMENT_ACCEPT } from "@/lib/documentParser";
 const ExpertChat = () => {
   const { chatId: paramChatId } = useParams<{ chatId?: string }>();
   const [searchParams] = useSearchParams();
@@ -82,10 +83,12 @@ const ExpertChat = () => {
   const handleContractFile = async (file?: File) => {
     if (!file) return;
     try {
+      setAttaching(true);
       setAttachment({ name: file.name, text: await readAuditFile(file) });
       textareaRef.current?.focus();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Unable to read this file. Try another text contract.");
+      toast.error("Could not read this contract", { description: error instanceof Error ? error.message : "Try another file." });
+    } finally { setAttaching(false);
     }
   };
   const recognitionRef = useRef<any>(null);
@@ -557,11 +560,11 @@ const ExpertChat = () => {
             >
               {listening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
             </Button>
-            <input ref={fileRef} type="file" accept=".txt,.md,text/plain" className="hidden"
+            <input ref={fileRef} type="file" accept={DOCUMENT_ACCEPT} className="hidden"
               onChange={(e) => { handleContractFile(e.target.files?.[0]); e.target.value = ""; }} />
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button type="button" size="icon" variant="ghost" aria-label="Attach contract text"
+                <Button type="button" size="icon" variant="ghost" aria-label="Attach contract (PDF, Word or text)"
                   onClick={() => fileRef.current?.click()} disabled={streaming || historyLoading || attaching || !!auditBusy}
                   className="shrink-0 h-8 w-8 text-muted-foreground">
                   <Paperclip className="h-4 w-4" />
