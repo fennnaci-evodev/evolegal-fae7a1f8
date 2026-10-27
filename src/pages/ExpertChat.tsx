@@ -62,7 +62,7 @@ const ExpertChat = () => {
   const [input, setInput] = useState("");
   const [attachment, setAttachment] = useState<{ name: string; text: string } | null>(null);
   const [attaching, setAttaching] = useState(false);
-  const { audits, busy: auditBusy, attach: attachAudit, run: runAudit, stop: stopAudit } = useContractAudits(currentChatId);
+  const { quota, remaining: auditsRemaining, audits, busy: auditBusy, attach: attachAudit, run: runAudit, stop: stopAudit } = useContractAudits(currentChatId);
   const [editingMode, setEditingMode] = useState(false);
   const [listening, setListening] = useState(false);
   const [chatList, setChatList] = useState<HugoChat[]>([]);
@@ -531,6 +531,7 @@ const ExpertChat = () => {
               <button onClick={() => { setEditingMode(false); setInput(""); }} className="ml-auto hover:text-foreground">Cancel</button>
             </div>
           )}
+          {quota && <div className="mb-1 px-1 text-[11px] text-muted-foreground" aria-live="polite">{quota.unlimited ? "Monthly Audits: unlimited" : `Monthly Audits Remaining: ${auditsRemaining}/${quota.limit}`}</div>}
           {attachment && <div className="mb-2 flex items-center gap-2 text-xs text-muted-foreground"><Paperclip className="h-3 w-3" /><span className="min-w-0 flex-1 truncate">{attachment.name}</span><Button variant="ghost" size="sm" disabled={attaching} onClick={() => setAttachment(null)}>Remove</Button></div>}
           <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="hugo-chat-composer glass-strong shimmer-chat-form p-2.5 flex items-end gap-2 relative">
             <Button
@@ -550,7 +551,7 @@ const ExpertChat = () => {
                   <Paperclip className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent side="top">Attach contract (.txt / .md, up to 22 MiB)</TooltipContent>
+              <TooltipContent side="top">{auditsRemaining === 0 ? "Audit Limit Reached — renews on the 1st" : `Attach contract (.txt / .md, up to 22 MiB)${quota && !quota.unlimited ? ` · ${auditsRemaining}/${quota.limit} audits left` : ""}`}</TooltipContent>
             </Tooltip>
             <textarea
               ref={textareaRef}
