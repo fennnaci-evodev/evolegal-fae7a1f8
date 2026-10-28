@@ -45,10 +45,10 @@ const Index = () => {
       <Navbar />
 
       {/* Hero */}
-      <section className="relative pt-24 pb-24 md:pt-40 md:pb-32 px-6">
+      <section className="relative pt-28 pb-20 md:pt-40 md:pb-32 px-6">
         <div className="container mx-auto text-center relative z-10 max-w-4xl">
           <motion.div
-            className="relative mb-10 hidden md:block"
+            className="relative mb-10"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1 }}
@@ -57,7 +57,7 @@ const Index = () => {
           </motion.div>
 
           <motion.h1
-            className="text-[32px] sm:text-4xl md:text-5xl lg:text-6xl font-display font-bold leading-[1.15] tracking-tight mb-5 md:mb-6 hero-headline-glow"
+            className="text-3xl md:text-5xl lg:text-6xl font-display font-bold leading-tight mb-6 hero-headline-glow"
             initial="hidden" animate="visible" variants={fadeUp} custom={1}
           >
             <span className="hero-neon-cycle hero-neon-emphasis">Precision Contract Intelligence.</span>
@@ -76,7 +76,7 @@ const Index = () => {
           </motion.div>
 
           <motion.div
-            className="flex flex-col sm:flex-row gap-3 justify-center mb-6 px-10 sm:px-0"
+            className="flex flex-col sm:flex-row gap-3 justify-center mb-6"
             initial="hidden" animate="visible" variants={fadeUp} custom={3}
           >
             <Link to="/auth">
