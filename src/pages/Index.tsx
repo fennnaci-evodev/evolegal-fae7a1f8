@@ -58,7 +58,7 @@ const Index = () => {
           </motion.div>
 
           <motion.h1
-            className="text-[26px] sm:text-4xl md:text-5xl lg:text-6xl font-display font-bold leading-tight mb-4 md:mb-6 hero-headline-glow"
+            className="text-[32px] sm:text-4xl md:text-5xl lg:text-6xl font-display font-bold leading-[1.15] tracking-tight mb-5 md:mb-6 hero-headline-glow"
             initial="hidden" animate="visible" variants={fadeUp} custom={1}
           >
             <span className="hero-neon-cycle hero-neon-emphasis">Precision Contract Intelligence.</span>
