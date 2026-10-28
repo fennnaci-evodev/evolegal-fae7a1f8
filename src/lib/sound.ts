@@ -55,21 +55,21 @@ if (typeof document !== "undefined") {
   });
 }
 
-function ready(force = false): AudioContext | null {
-  if (typeof window === "undefined" || document.hidden) return null;
-  if (!force && !isSoundEnabled()) return null;
+// Runs `play` once the context is running; a suspended context is resumed first
+// instead of silently dropping the sound.
+function withCtx(force: boolean, play: (ac: AudioContext) => void) {
+  if (typeof window === "undefined" || document.hidden) return;
+  if (!force && !isSoundEnabled()) return;
   const now = performance.now();
-  if (now - last < COOLDOWN_MS) return null;
+  if (now - last < COOLDOWN_MS) return;
   const ac = getCtx();
-  if (!ac) return null;
-  if (ac.state !== "running") { void ac.resume().catch(() => {}); if (ac.state === "suspended" && !force) return null; }
+  if (!ac) return;
   last = now;
-  return ac;
+  if (ac.state === "running") { play(ac); return; }
+  ac.resume().then(() => { if (ac.state === "running") play(ac); }, () => {});
 }
 
-/** Soft harmonic dyad for completed Hugo replies and audits. */
-export function playChime() {
-  const ac = ready(); if (!ac) return;
+function chime(ac: AudioContext) {
   const t = ac.currentTime + 0.02;
   const out = ac.createGain(); out.gain.value = MASTER;
   const lp = ac.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 2400;
@@ -85,16 +85,22 @@ export function playChime() {
   });
 }
 
+/** Soft harmonic dyad for completed Hugo replies and audits. */
+export function playChime(force = false) {
+  withCtx(force, chime);
+}
+
 /** Short damped click for switches. `force` lets the sound toggle preview itself. */
 export function playSwitch(force = false) {
-  const ac = ready(force); if (!ac) return;
-  const t = ac.currentTime + 0.02;
-  const o = ac.createOscillator(); o.type = "triangle";
-  o.frequency.setValueAtTime(1200, t);
-  o.frequency.exponentialRampToValueAtTime(600, t + 0.032);
-  const g = ac.createGain();
-  g.gain.setValueAtTime(0.18 * (MASTER / 0.25), t);
-  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.04);
-  o.connect(g); g.connect(ac.destination);
-  o.start(t); o.stop(t + 0.05);
+  withCtx(force, (ac) => {
+    const t = ac.currentTime + 0.02;
+    const o = ac.createOscillator(); o.type = "triangle";
+    o.frequency.setValueAtTime(1200, t);
+    o.frequency.exponentialRampToValueAtTime(600, t + 0.032);
+    const g = ac.createGain();
+    g.gain.setValueAtTime(0.18 * (MASTER / 0.25), t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.04);
+    o.connect(g); g.connect(ac.destination);
+    o.start(t); o.stop(t + 0.05);
+  });
 }

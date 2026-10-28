@@ -6,7 +6,7 @@ import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } f
 import { Switch } from "@/components/ui/switch";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useTheme } from "@/contexts/ThemeContext";
-import { isSoundEnabled, playSwitch, setSoundEnabled } from "@/lib/sound";
+import { isSoundEnabled, playSwitch, setSoundEnabled, unlockAudio } from "@/lib/sound";
 import { setHugoModePref, useHugoMode, type HugoMode } from "@/components/HugoModeBadge";
 
 const OPEN_EVENT = "evo-open-quick-prefs";
@@ -50,7 +50,7 @@ function PreferencesBody({ onNavigate }: { onNavigate: () => void }) {
         <Switch
           checked={sound}
           aria-label="Sound effects"
-          onCheckedChange={(v) => { setSoundEnabled(v); setSound(v); if (v) playSwitch(true); }}
+          onCheckedChange={(v) => { unlockAudio(); setSoundEnabled(v); setSound(v); if (v) playSwitch(true); }}
         />
       </div>
 
