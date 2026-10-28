@@ -368,13 +368,15 @@
 
   /* --- Primary CTA pill (Dashboard / Get Started) --- */
   .cyber-cta {
-    /* Solid monochrome CTA: no gradients, no glow */
-    background: hsl(var(--foreground));
-    color: hsl(var(--background));
-    border: 1px solid hsl(var(--foreground) / 0.1);
+    /* Obsidian glass CTA with hairline cyan rim: no white fill, no glow */
+    background: hsl(var(--card) / 0.8);
+    color: hsl(var(--foreground));
+    border: 1px solid hsl(var(--primary) / 0.3);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     box-shadow: none;
   }
-  .cyber-cta:hover { background: hsl(var(--foreground) / 0.9); box-shadow: none; }
+  .cyber-cta:hover { background: hsl(var(--card)); border-color: hsl(var(--primary) / 0.55); box-shadow: none; }
   html.light .cyber-cta {
     /* Light mode: deep slate/navy solid with crisp micro-shadow */
     background: linear-gradient(180deg, hsl(222 47% 14%) 0%, hsl(222 47% 10%) 100%);
@@ -823,7 +825,7 @@ html.light .hero-neon-emphasis {
 }
 .hugo-prism {
   position: fixed;
-  bottom: 1.75rem;
+  bottom: calc(1.75rem + env(safe-area-inset-bottom));
   right: 1.75rem;
   z-index: 50;
   width: 3.5rem;

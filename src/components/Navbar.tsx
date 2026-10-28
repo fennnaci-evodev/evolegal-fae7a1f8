@@ -91,7 +91,7 @@ export function Navbar() {
                     Sign In
                   </Button>
                 </Link>
-                <Link to="/auth">
+                <Link to="/auth" className="hidden sm:block">
                   <Button size="sm" className="cyber-button cyber-cta px-5">
                     Run Legal Audit
                   </Button>
