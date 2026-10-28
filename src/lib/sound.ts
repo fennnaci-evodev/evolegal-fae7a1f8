@@ -20,18 +20,39 @@ function getCtx(): AudioContext | null {
   return ctx;
 }
 
-// Browsers (Safari/iOS especially) only allow audio after a user gesture.
-// Unlock the context on the first tap/key so later async chimes can play.
-if (typeof window !== "undefined") {
-  const unlock = () => {
-    const ac = getCtx();
-    if (!ac) return;
-    if (ac.state !== "running") void ac.resume();
-    // A silent one-sample buffer fully unlocks iOS WebKit.
-    try { const b = ac.createBuffer(1, 1, 22050); const s = ac.createBufferSource(); s.buffer = b; s.connect(ac.destination); s.start(0); } catch { /* ignore */ }
-    if (ac.state === "running") ["pointerdown", "keydown", "touchend"].forEach((e) => window.removeEventListener(e, unlock));
+// Mobile browsers only allow audio after a direct user gesture. Listen in the
+// capture phase so components that stop propagation can't block the unlock,
+// and only detach once resume() has actually resolved to "running".
+const UNLOCK_EVENTS = ["touchstart", "touchend", "pointerdown", "click", "keydown"] as const;
+let unlocked = false;
+
+export function unlockAudio() {
+  const ac = getCtx();
+  if (!ac) return;
+  try {
+    const s = ac.createBufferSource();
+    s.buffer = ac.createBuffer(1, 1, 22050);
+    s.connect(ac.destination);
+    s.start(0);
+  } catch { /* ignore */ }
+  const done = () => {
+    if (ac.state === "running" && !unlocked) {
+      unlocked = true;
+      UNLOCK_EVENTS.forEach((e) => document.removeEventListener(e, unlockAudio, true));
+    }
   };
-  ["pointerdown", "keydown", "touchend"].forEach((e) => window.addEventListener(e, unlock, { passive: true }));
+  if (ac.state !== "running") ac.resume().then(done, () => {}); else done();
+}
+
+if (typeof document !== "undefined") {
+  UNLOCK_EVENTS.forEach((e) => document.addEventListener(e, unlockAudio, { capture: true, passive: true }));
+  // iOS suspends the context when the app is backgrounded; re-arm on return.
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden && ctx && ctx.state !== "running" && unlocked) {
+      unlocked = false;
+      UNLOCK_EVENTS.forEach((e) => document.addEventListener(e, unlockAudio, { capture: true, passive: true }));
+    }
+  });
 }
 
 function ready(force = false): AudioContext | null {
@@ -39,10 +60,10 @@ function ready(force = false): AudioContext | null {
   if (!force && !isSoundEnabled()) return null;
   const now = performance.now();
   if (now - last < COOLDOWN_MS) return null;
-  last = now;
   const ac = getCtx();
   if (!ac) return null;
-  if (ac.state !== "running") void ac.resume();
+  if (ac.state !== "running") { void ac.resume().catch(() => {}); if (ac.state === "suspended" && !force) return null; }
+  last = now;
   return ac;
 }
 
