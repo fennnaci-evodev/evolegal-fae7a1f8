@@ -48,13 +48,12 @@ const Index = () => {
       <section className="relative pt-24 pb-24 md:pt-40 md:pb-32 px-6">
         <div className="container mx-auto text-center relative z-10 max-w-4xl">
           <motion.div
-            className="relative mb-6 md:mb-10"
+            className="relative mb-10 hidden md:block"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1 }}
           >
-            <div className="md:hidden"><EvoLogo size="lg" animate showText={false} /></div>
-            <div className="hidden md:block"><EvoLogo size="hero" animate showText={false} /></div>
+            <EvoLogo size="hero" animate showText={false} />
           </motion.div>
 
           <motion.h1
@@ -77,7 +76,7 @@ const Index = () => {
           </motion.div>
 
           <motion.div
-            className="flex flex-col sm:flex-row gap-3 justify-center mb-6"
+            className="flex flex-col sm:flex-row gap-3 justify-center mb-6 px-10 sm:px-0"
             initial="hidden" animate="visible" variants={fadeUp} custom={3}
           >
             <Link to="/auth">

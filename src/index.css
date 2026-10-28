@@ -366,32 +366,31 @@
   .cyber-button:hover { transform: translate3d(0, -2px, 0); }
   .cyber-button:active { transform: translate3d(0, 0, 0); }
 
-  /* --- Primary CTA pill (Dashboard / Get Started) --- */
-  /* Tactile obsidian surface: solid fill (no blur), hairline cyan rim,
-     top-edge light refraction and a soft drop for weight. No gradients/glows. */
+  /* --- Primary CTA: cyan -> violet fluid gradient with soft glow --- */
   .cyber-cta,
   .btn-obsidian {
-    background: hsl(228 30% 9%);
-    color: hsl(var(--foreground));
-    border: 1px solid hsl(var(--primary) / 0.38);
+    background: linear-gradient(135deg, #00F2FE 0%, #4FACFE 45%, #7A5CFF 100%);
+    background-size: 160% 160%;
+    background-position: 0% 50%;
+    color: #0a0a12;
+    border: 1px solid hsla(186, 100%, 75%, 0.45);
     box-shadow:
-      inset 0 1px 0 hsl(0 0% 100% / 0.07),
-      0 1px 2px hsl(230 40% 2% / 0.6),
-      0 4px 12px -4px hsl(230 40% 2% / 0.7);
+      inset 0 1px 0 rgba(255, 255, 255, 0.35),
+      0 0 18px rgba(0, 242, 254, 0.28),
+      0 6px 20px -8px rgba(122, 92, 255, 0.55);
+    transition: background-position 0.4s ease, box-shadow 0.2s ease, transform 0.12s ease;
   }
   .cyber-cta:hover,
   .btn-obsidian:hover {
-    background: hsl(228 28% 12%);
-    border-color: hsl(var(--primary) / 0.65);
+    background-position: 100% 50%;
     box-shadow:
-      inset 0 1px 0 hsl(0 0% 100% / 0.1),
-      0 2px 4px hsl(230 40% 2% / 0.6),
-      0 8px 18px -6px hsl(230 40% 2% / 0.8);
+      inset 0 1px 0 rgba(255, 255, 255, 0.4),
+      0 0 26px rgba(0, 242, 254, 0.4),
+      0 8px 24px -8px rgba(122, 92, 255, 0.7);
   }
   .cyber-cta:active,
   .btn-obsidian:active {
-    background: hsl(228 30% 8%);
-    box-shadow: inset 0 1px 2px hsl(230 40% 2% / 0.7);
+    transform: scale(0.98);
   }
   html.light .btn-obsidian {
     background: hsl(222 47% 12%);
@@ -846,8 +845,8 @@ html.light .hero-neon-emphasis {
 }
 .hugo-prism {
   position: fixed;
-  bottom: calc(1.75rem + env(safe-area-inset-bottom));
-  right: 1.75rem;
+  bottom: calc(1.25rem + env(safe-area-inset-bottom));
+  right: 1.25rem;
   z-index: 50;
   width: 3.5rem;
   height: 3.5rem;
