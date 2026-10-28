@@ -38,25 +38,17 @@ export function EvoLogo({ size = "md", animate = true, showText = true }: EvoLog
         >
           <defs>
             <linearGradient id={`${uid}-main`} x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="hsl(186 100% 58%)" />
-              <stop offset="50%" stopColor="hsl(186 100% 50%)" />
-              <stop offset="100%" stopColor="hsl(195 100% 55%)" />
+              <stop offset="0%" stopColor="hsl(188 100% 66%)" />
+              <stop offset="55%" stopColor="hsl(186 95% 50%)" />
+              <stop offset="100%" stopColor="hsl(194 100% 40%)" />
             </linearGradient>
             <linearGradient id={`${uid}-rim`} x1="100%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="hsla(270 80% 75% / 0.35)" />
-              <stop offset="100%" stopColor="hsla(270 80% 75% / 0)" />
+              <stop offset="0%" stopColor="hsl(270 85% 72%)" stopOpacity="0.45" />
+              <stop offset="45%" stopColor="hsl(270 85% 72%)" stopOpacity="0" />
             </linearGradient>
           </defs>
-          <path d={E_PATH} fill={`url(#${uid}-main)`} />
-          <path d={E_PATH} fill={`url(#${uid}-rim)`} />
-          <path
-            d={E_PATH}
-            fill="none"
-            stroke="hsla(186, 100%, 80%, 0.35)"
-            strokeWidth={1.5}
-            strokeLinejoin="round"
-            vectorEffect="non-scaling-stroke"
-          />
+          <path d={E_PATH} fill={`url(#${uid}-main)`} shapeRendering="geometricPrecision" />
+          <path d={E_PATH} fill={`url(#${uid}-rim)`} shapeRendering="geometricPrecision" />
         </svg>
       </div>
 
