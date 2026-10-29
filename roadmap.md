@@ -1,48 +1,7 @@
-# Roadmap
-
-- [x] Implement owner-scoped in-chat text contract audits: 22 MiB input, saved provider scores/counts, expandable findings, persisted clause diffs, and saved-audit follow-up context. Live upload, redline, reload, follow-up reply, long-paste staging, phone layout and 403 gates verified; score overwrite and owner spoof denied. 96 frontend and five server tests pass. Coverage beyond 60,000 characters is explicitly partial, not a full-document audit; PDF/DOCX parsing and genuine reviewed statutory reasoning are not implemented. Legal accuracy and real-device performance remain unverified.
-
-- [x] Harden database administrator boundaries and stored-role verification. Private notes isolated; protected request mutations and expert impersonation denied; privileged edge requests return 403. Live standard/admin direct-API checks and Workdesk save/read-back passed; 90 tests, four Deno checks and preview build OK. Existing approved-source, publishing and provider blockers below remain unchanged.
-
-- [x] Verify administrator local viewing and standard-user document boundaries: admin opened 180,021 characters unscored and read an owned stored PDF; standard user redirected from admin viewer, read no foreign history rows and could not download the admin PDF. No roles changed. No stored-history UI or cross-owner admin PDF flow exists; storage remains owner-only.
-- [x] Patch npm advisories: fresh synchronized npm lock audit reports zero findings; patched Router/Vite/Vitest/Zod and compatible transitive dependencies. 84 client and seven provider/request tests pass; four functions compile and deploy. Real chat, clarification and seven-section long-context generation return 200.
-- [ ] Complete approved-source citation verification. Live reply and unverified chip/popover persisted after reload; request returned 200 in 9.2 seconds without 429/timeout or page errors. Blocked: the authenticated citation RPC returns zero eligible sources for both roles; genuine legal review is required before a verified badge can be tested.
-
-- [x] Fix monitoring findings for long-chat document generation and local text-contract viewing. Bounded browser excerpts and server normalization preserve request caps; separate local reader accepts text up to 20 MB, page breaks and Windows-1252. 29 regression tests pass; deployed generator returned a real payload for signed-in context over 30,000 characters. Live administrator viewer check unavailable for the requesting account; parser tests verify long contracts, boundary sizes and encodings. Hugo limits and unscored-upload behavior unchanged.
-
-- [x] Audit/harden Hugo streams, contract validation, secret isolation and citation/disclaimer safeguards; secure clarification and McCloder actions, owned document history and source-fetch destinations. Deployed five functions; 76 client tests and seven server tests pass. Signed-in reply, visible terminal errors, binary upload rejection, owned reload and five signed-out 401 gates verified. Remaining dependency advisories, real-device performance, approved legal citations and deep penetration testing are not verified.
-
-- [x] Verify updated Hugo signed in: text attachments, pasted contracts, saved replies, and UK/NY unverified citation popovers work. Fixed instruction contamination in clause excerpts, decoded-character limits and empty attachments, unsafe citation matching, 16px/10px chat blurs, and missing recovery-table requests. 34 regression tests pass. Headless frames varied 16.7–33.3ms median, so real-laptop 60 FPS is not established; verified-source popovers and legal accuracy remain unverified.
-
-- [x] Replace the heavy Hugo chat sphere with a custom lightweight continuous signature; full-page loaders unchanged. Isolated browser rendering verified at phone/desktop sizes, light theme and reduced motion; no sphere download. Live chat waiting state not exercised.
-
-- [x] Fix Hugo replies replaying after persistence while preserving stored IDs for edits and feedback. Normal/error regression cases pass; signed-in live reply stays visible after saving and reloads unchanged.
-
-- [x] Add Contract Risk Analysis to the Expert Dashboard, matching the supplied reference with isolated sample data, document upload, linked clause details, severity filters and printable HTML report export. Three tests pass; signed-in admin flow, downloads, unscored uploads and desktop/tablet/mobile layouts verified without runtime errors.
-- [ ] Publish the verified Contract Risk Analysis section. Blocked: the user declined publishing; changes remain in preview.
-
-- [x] Repair Hugo sending when an administrator opens another account's conversation: owner-scoped lists/loads, safe return to a new chat, unsaved-message rollback and draft restoration. Live verification: foreign chat blocked, owned chat returns 200, user and assistant persist (201) and both reload; 14 regression tests pass. Ownership restrictions unchanged.
-
-- [x] Prepare a free official-source review shortlist for New York State and England: 16 draft cards in the dated Files document, with official URLs, date evidence and reviewer checks. Eight England primary links returned 200; eight NY Senate links returned 403 and require manual text/date verification. No sources imported or approved; no paid services connected.
-- [ ] Begin voice-chat work after the source shortlist. Await the user's next instruction; no paid voice services to be connected during this source-preparation task.
-- [ ] Connect Hugo directly to Anthropic /v1/messages using protected ANTHROPIC_API_KEY, preserving the chat UI, session gates and reviewed-source policy. Deferred at the user's request: API funding is unavailable; wait for the user to resume. The secure key form was cancelled before execution; no provider code was changed and no Claude requests were sent.
-- [x] Assess Hugo's logical maturity and readiness for system-prompt personality plus grounded legal knowledge, without model fine-tuning; completed a source-level audit, not a live legal-accuracy evaluation.
-- [x] Prepare and deploy server-verified identity, chat-ownership and administrative-role gates; live checks reject missing/invalid sessions, identity substitution, foreign chats and non-admin metrics access.
-- [x] Prepare shared Hugo personality and reviewed-source eligibility without fine-tuning; unreviewed memory is never legal authority. Reviewed-source retrieval is disabled until setup is complete.
-- [x] Test authorization, source eligibility, session transport and request validation locally (25 tests passed); Deno server check and preview build pass.
-- [x] Apply the prepared reviewed-source schema, deploy session-protected Hugo, and verify a signed-in conversation plus denied access paths live. One user message and one reply persist and reload; 25 local tests pass. Restored authenticated execution of the read-only role predicate required by RLS; anonymous source privileges revoked.
-- [ ] Populate and legally review the knowledge base, establish jurisdiction/topic scope and an expert-verified evaluation set, including hosted approval/date/reapproval checks. Blocked: no reviewed legal materials or authorized reviewer process supplied. Retrieval remains disabled; the live reply disclosed the verification gap but still used specific legal propositions and directive wording, so accuracy/personality compliance is not established. Saved chat URLs and owner-scoped recovery now work without optional tables.
-
-- [x] Preserve the existing home UI and refine only the randomized neural-point background, with phone-specific density and motion.
-- [x] Replace the oversized mobile dropdown with a compact, polished navigation panel while preserving routes and page content.
-- [x] Make the neural background visibly dynamic with organic drift, breathing links, and flowing signals while retaining mobile performance controls.
-- [x] Make neural node placement, motion, connections, and signal flow smooth, stable, and logically consistent.
-- [x] Replace the Hugo chat loading animation with the user's hexagonal-sphere animation (transparent WebP + static frame for reduced motion), scoped to chat surfaces only; full-page and main-page loading keep the slanted-E animation.
-- [x] Replace the neural field's simple grid character with organic clusters, curved paths, and coordinated depth.
-- [x] England official-source monitor: 10 draft England sources loaded; admin-only checker fetches official XML, detects text and pending-amendment changes, withdraws changed approved sources from Hugo, and stores a draft impact note for reviewer approval.
-- [ ] Run the monitor daily. Blocked: automatic daily scheduling is not available for this project yet; run manually as administrator.
-- [ ] Add New York via the free NY Senate Open Legislation key. Waits on the user obtaining the key.
-- [x] Administrator verification workflow at /dashboard/admin/sources: saved text diff, five legal attestations, atomic version-checked approval/rejection, immutable review history. Signed-in admin approved and rejected a test-only source, then it was retired; no real law approved. Fixed auth-resolution redirect race and official XML extraction. Manual checks from this panel do not use paid analysis. Hugo retrieval remains disabled pending actual expert approval.
-- [ ] Discover new related English provisions/judgments daily and add them as drafts (needs a daily schedule, not available yet; run manually meanwhile).
-- [ ] First English sources approved by the administrator in the panel (waiting on the administrator's own review).
-- Contract audits: 3 free per calendar month (UTC), counted per audit and refunded on failure; admins unlimited; follow-ups use stored essence artifact.
+# Roadmap (audit cleanup)
+- [x] 1. Delete unused components (ScalesOfJustice, SphereLoader, NavLink)
+- [ ] 1b. Consolidate loaders to two (full-page E + Hugo signature)
+- [ ] 2. One surface/style system — needs user visual approval
+- [ ] 3. Bottom-corner coordinator + shared spacing + 402px overlap test — needs approval
+- [ ] 4. Sound states Off / Ready / Needs a tap + confirmation chime
+- [ ] 5. Split oversized screens, CSS for simple animations
