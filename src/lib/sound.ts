@@ -104,3 +104,17 @@ export function playSwitch(force = false) {
     o.start(t); o.stop(t + 0.05);
   });
 }
+
+/** "off" = disabled, "locked" = browser still blocks audio (needs a tap), "ready" = playable. */
+export type AudioState = "off" | "locked" | "ready";
+export function getAudioState(): AudioState {
+  if (!isSoundEnabled()) return "off";
+  return ctx && ctx.state === "running" ? "ready" : "locked";
+}
+/** Call inside a click handler: unlocks, then reports the resulting state. */
+export async function enableAudio(): Promise<AudioState> {
+  unlockAudio();
+  const ac = getCtx();
+  if (ac && ac.state !== "running") { try { await ac.resume(); } catch { /* blocked */ } }
+  return getAudioState();
+}
